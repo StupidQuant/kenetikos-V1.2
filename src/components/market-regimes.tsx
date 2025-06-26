@@ -49,7 +49,7 @@ export function MarketRegimes({ scores, isLoading }: MarketRegimesProps) {
                     {score.toFixed(1)}
                   </span>
                 </div>
-                <Progress value={score} indicatorClassName="transition-all duration-500" style={{'--indicator-color': regimeColors[regime]} as React.CSSProperties} />
+                <Progress value={score} indicatorClassName="transition-all duration-500" style={{backgroundColor: regimeColors[regime]}} />
               </div>
             ))}
           </div>
@@ -57,16 +57,4 @@ export function MarketRegimes({ scores, isLoading }: MarketRegimesProps) {
       </CardContent>
     </Card>
   );
-}
-
-// Small CSS trick to allow dynamic color for progress indicator
-// Needs to be in a global scope or handled differently. For simplicity here.
-const style = document.createElement('style');
-style.innerHTML = `
-  .progress-indicator-dynamic {
-    background-color: var(--indicator-color);
-  }
-`;
-if (typeof window !== 'undefined') {
-    document.head.appendChild(style);
 }
