@@ -36,12 +36,10 @@ export type AnalysisResult = {
 
 export default function KinetikosEntropePage() {
   const { toast } = useToast();
+  // Initialize with a state that's consistent between server and client
   const [controlState, setControlState] = React.useState<ControlState>({
     asset: 'bitcoin',
-    dateRange: {
-      from: addDays(new Date(), -30),
-      to: new Date(),
-    },
+    dateRange: {}, // Start with empty date range to prevent hydration mismatch
     sgWindow: 15,
     sgPolyOrder: 3,
   });
@@ -50,15 +48,23 @@ export default function KinetikosEntropePage() {
   const [analysisResult, setAnalysisResult] = React.useState<AnalysisResult | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isAnalysisLoading, setIsAnalysisLoading] = React.useState(false);
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  // This effect runs once on the client after the component mounts.
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const fetchDataAndCalculate = React.useCallback(async (state: ControlState) => {
+    // Ensure we have a valid date range before proceeding
+    if (!state.dateRange.from || !state.dateRange.to) {
+      return;
+    }
+
     setIsLoading(true);
     setAnalysisResult(null);
     try {
-      // In a real application, you would fetch data from an API like CoinGecko
-      // For this example, we generate mock data.
-      const to = state.dateRange.to ?? new Date();
-      const from = state.dateRange.from ?? addDays(to, -30);
+      const { from, to } = state.dateRange;
       
       const response = await fetch(`https://api.coingecko.com/api/v3/coins/${state.asset}/market_chart/range?vs_currency=usd&from=${from.getTime() / 1000}&to=${to.getTime() / 1000}`);
       if (!response.ok) {
@@ -72,8 +78,7 @@ export default function KinetikosEntropePage() {
       }));
       setMarketData(fetchedData);
 
-      // Mock calculations for market parameters. In a real application,
-      // this would involve complex physics-based financial models (e.g., Savitzky-Golay filter).
+      // Mock calculations are now safe as they only run on the client.
       const mockParams: CalculatedParameters = {
         potential: Math.random() * 100,
         momentum: Math.random() * 100,
@@ -106,10 +111,26 @@ export default function KinetikosEntropePage() {
       setIsLoading(false);
     }
   }, [toast]);
-
+  
+  // This effect sets the initial state on the client side to avoid hydration mismatch.
   React.useEffect(() => {
-    fetchDataAndCalculate(controlState);
-  }, [controlState, fetchDataAndCalculate]);
+    if (isMounted) {
+      setControlState(prevState => ({
+        ...prevState,
+        dateRange: {
+          from: addDays(new Date(), -30),
+          to: new Date(),
+        },
+      }));
+    }
+  }, [isMounted]);
+
+  // This effect fetches data when controlState changes, but only after the client has mounted.
+  React.useEffect(() => {
+    if (isMounted) {
+      fetchDataAndCalculate(controlState);
+    }
+  }, [isMounted, controlState, fetchDataAndCalculate]);
 
   const handleGenerateAnalysis = React.useCallback(async () => {
     if (!calculatedParams) return;
