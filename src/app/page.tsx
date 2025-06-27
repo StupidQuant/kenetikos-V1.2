@@ -1,9 +1,16 @@
 'use client';
 
 import * as React from 'react';
-import { addDays, format } from 'date-fns';
+import { addDays } from 'date-fns';
 import { generateMarketAnalysis } from '@/ai/flows/generate-market-analysis';
 import { useToast } from '@/hooks/use-toast';
+
+import { 
+  calculateStateVector, 
+  RegimeClassifier,
+  type StateVectorDataPoint,
+  type IndicatorOptions,
+} from '@/lib/indicator';
 
 import { Header } from '@/components/header';
 import { Controls, type ControlState } from '@/components/controls';
@@ -36,101 +43,150 @@ export type AnalysisResult = {
 
 export default function KinetikosEntropePage() {
   const { toast } = useToast();
-  // Initialize with a state that's consistent between server and client
+  
   const [controlState, setControlState] = React.useState<ControlState>({
     asset: 'bitcoin',
-    dateRange: {}, // Start with empty date range to prevent hydration mismatch
-    sgWindow: 15,
-    sgPolyOrder: 3,
+    dateRange: {},
+    sgWindow: 31,
+    sgPolyOrder: 2,
+    regressionWindow: 50,
+    equilibriumWindow: 50,
+    entropyWindow: 50,
+    numBins: 10,
+    temperatureWindow: 50,
   });
-  const [marketData, setMarketData] = React.useState<MarketDataPoint[]>([]);
+
+  // State for the raw, fetched data
+  const [rawMarketData, setRawMarketData] = React.useState<MarketDataPoint[]>([]);
   const [calculatedParams, setCalculatedParams] = React.useState<CalculatedParameters | null>(null);
   const [analysisResult, setAnalysisResult] = React.useState<AnalysisResult | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [isLoadingData, setIsLoadingData] = React.useState(true);
+  const [isCalculating, setIsCalculating] = React.useState(false);
   const [isAnalysisLoading, setIsAnalysisLoading] = React.useState(false);
   const [isMounted, setIsMounted] = React.useState(false);
 
-  // This effect runs once on the client after the component mounts.
   React.useEffect(() => {
     setIsMounted(true);
+    // Set initial date range on client-side to avoid hydration mismatch
+    setControlState(prevState => ({
+      ...prevState,
+      dateRange: {
+        from: addDays(new Date(), -90),
+        to: new Date(),
+      },
+    }));
   }, []);
 
-  const fetchDataAndCalculate = React.useCallback(async (state: ControlState) => {
-    // Ensure we have a valid date range before proceeding
-    if (!state.dateRange.from || !state.dateRange.to) {
+  // --- 1. Effect for FETCHING data ---
+  // This runs ONLY when the asset or date range changes.
+  React.useEffect(() => {
+    if (!isMounted || !controlState.dateRange.from || !controlState.dateRange.to) {
       return;
     }
 
-    setIsLoading(true);
-    setAnalysisResult(null);
-    try {
-      const { from, to } = state.dateRange;
-      
-      const response = await fetch(`https://api.coingecko.com/api/v3/coins/${state.asset}/market_chart/range?vs_currency=usd&from=${from.getTime() / 1000}&to=${to.getTime() / 1000}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch market data');
+    const fetchMarketData = async () => {
+      setIsLoadingData(true);
+      setCalculatedParams(null); // Clear old results
+      try {
+        const { from, to } = controlState.dateRange;
+        const response = await fetch(`https://api.coingecko.com/api/v3/coins/${controlState.asset}/market_chart/range?vs_currency=usd&from=${from.getTime() / 1000}&to=${to.getTime() / 1000}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch market data from CoinGecko: ${response.statusText}`);
+        }
+        const rawData = await response.json();
+        if (!rawData.prices || rawData.prices.length === 0) {
+          throw new Error("API returned no price data for the selected range.");
+        }
+        const fetchedData: MarketDataPoint[] = rawData.prices.map((p: [number, number], i: number) => ({
+          timestamp: p[0],
+          price: p[1],
+          volume: rawData.total_volumes[i]?.[1] ?? 0,
+        }));
+        setRawMarketData(fetchedData);
+      } catch (error: any) {
+        console.error(error);
+        toast({
+          variant: 'destructive',
+          title: 'Data Fetching Error',
+          description: error.message || 'Failed to fetch market data.',
+        });
+        setRawMarketData([]); // Clear data on error
+      } finally {
+        setIsLoadingData(false);
       }
-      const rawData = await response.json();
-      const fetchedData: MarketDataPoint[] = rawData.prices.map((p: [number, number], i: number) => ({
-        timestamp: p[0],
-        price: p[1],
-        volume: rawData.total_volumes[i][1],
-      }));
-      setMarketData(fetchedData);
+    };
 
-      // Mock calculations are now safe as they only run on the client.
-      const mockParams: CalculatedParameters = {
-        potential: Math.random() * 100,
-        momentum: Math.random() * 100,
-        entropy: Math.random() * 100,
-        temperature: Math.random() * 100,
-        regimeScores: {
-          'Fragile topping/reversal risk': Math.random() * 100,
-          'Chaotic indecision': Math.random() * 100,
-          'Stable bull/bear trend': Math.random() * 100,
-          'Coiling Spring (High Tension)': Math.random() * 100,
-          'Low volatility/Orderly': Math.random() * 100,
-        },
-        trajectory: Array.from({ length: 100 }, () => [
-          Math.random() * 100,
-          Math.random() * 100,
-          Math.random() * 100,
-          Math.random(),
-        ]),
-      };
-      setCalculatedParams(mockParams);
-    } catch (error) {
-      console.error(error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to fetch or process market data. Please try again.',
-      });
+    fetchMarketData();
+  }, [isMounted, controlState.asset, controlState.dateRange, toast]);
+
+  // --- 2. Effect for CALCULATING the indicator ---
+  // This runs whenever the raw data changes OR any indicator parameter changes.
+  React.useEffect(() => {
+    if (rawMarketData.length === 0) {
       setCalculatedParams(null);
-    } finally {
-      setIsLoading(false);
+      return;
     }
-  }, [toast]);
-  
-  // This effect sets the initial state on the client side to avoid hydration mismatch.
-  React.useEffect(() => {
-    if (isMounted) {
-      setControlState(prevState => ({
-        ...prevState,
-        dateRange: {
-          from: addDays(new Date(), -30),
-          to: new Date(),
-        },
-      }));
-    }
-  }, [isMounted]);
 
-  // This effect fetches data when controlState changes, but only after the client has mounted.
-  React.useEffect(() => {
-    if (isMounted) {
-      fetchDataAndCalculate(controlState);
-    }
-  }, [isMounted, controlState, fetchDataAndCalculate]);
+    const runCalculations = () => {
+      setIsCalculating(true);
+      setAnalysisResult(null);
+      try {
+        const indicatorOptions: IndicatorOptions = {
+          sgWindow: controlState.sgWindow,
+          sgPolyOrder: controlState.sgPolyOrder,
+          regressionWindow: controlState.regressionWindow,
+          equilibriumWindow: controlState.equilibriumWindow,
+          entropyWindow: controlState.entropyWindow,
+          numBins: controlState.numBins,
+          temperatureWindow: controlState.temperatureWindow
+        };
+        
+        const stateVectorData = calculateStateVector(rawMarketData, indicatorOptions);
+        
+        const validData = stateVectorData.filter(d => 
+          d.potential !== null && isFinite(d.potential) &&
+          d.momentum !== null && isFinite(d.momentum) &&
+          d.entropy !== null && isFinite(d.entropy) &&
+          d.temperature !== null && isFinite(d.temperature)
+        );
+
+        if (validData.length === 0) {
+          throw new Error("Calculation resulted in no valid data points. Try adjusting parameters or date range.");
+        }
+        
+        const classifier = new RegimeClassifier(validData);
+        const latestState = validData[validData.length - 1];
+        const regimeScores = classifier.classify(latestState);
+        
+        const realParams: CalculatedParameters = {
+          potential: classifier.getPercentileRank(latestState.potential, 'potential'),
+          momentum: classifier.getPercentileRank(latestState.momentum, 'momentum'),
+          entropy: classifier.getPercentileRank(latestState.entropy, 'entropy'),
+          temperature: classifier.getPercentileRank(latestState.temperature, 'temperature'),
+          regimeScores: regimeScores,
+          trajectory: validData.map(d => [d.potential!, d.momentum!, d.entropy!, d.temperature!]),
+        };
+
+        setCalculatedParams(realParams);
+
+      } catch (error: any) {
+        console.error(error);
+        toast({
+          variant: 'destructive',
+          title: 'Calculation Error',
+          description: error.message || 'Failed to process data.',
+        });
+        setCalculatedParams(null);
+      } finally {
+        setIsCalculating(false);
+      }
+    };
+    
+    // Use a timeout to debounce calculations while sliders are being moved
+    const debounceTimeout = setTimeout(runCalculations, 50);
+    return () => clearTimeout(debounceTimeout);
+
+  }, [rawMarketData, controlState.sgWindow, controlState.sgPolyOrder, controlState.regressionWindow, controlState.equilibriumWindow, controlState.entropyWindow, controlState.numBins, controlState.temperatureWindow, toast]);
 
   const handleGenerateAnalysis = React.useCallback(async () => {
     if (!calculatedParams) return;
@@ -154,6 +210,8 @@ export default function KinetikosEntropePage() {
       setIsAnalysisLoading(false);
     }
   }, [calculatedParams, toast]);
+  
+  const isLoading = isLoadingData || isCalculating;
 
   const parameterDials = [
     { name: 'Potential', value: calculatedParams?.potential, icon: TrendingUp, color: 'hsl(var(--primary))' },
@@ -174,7 +232,7 @@ export default function KinetikosEntropePage() {
             <Controls
               state={controlState}
               onStateChange={setControlState}
-              isLoading={isLoading}
+              isLoading={isLoadingData} // Only lock controls during data fetch
             />
           </aside>
           

@@ -1,0 +1,945 @@
+A Consultant's Guide to Implementing and Interpreting a 
+Lagrangian-Entropy Financial Indicator 
+I. Conceptual Framework: Quantifying Uncertainty in Price 
+Velocity 
+This section establishes the theoretical foundation of the Lagrangian-Entropy 
+indicator, justifying its constituent parts and meticulously detailing the necessary 
+transition from a continuous financial data stream to a discrete, information-theoretic 
+measure of market state. 
+1.1. Introduction to Information Entropy as a Measure of Market Disorder 
+At the heart of modern information theory lies the concept of Shannon Entropy, a 
+powerful metric developed by Claude Shannon to quantify the average level of 
+uncertainty, unpredictability, or "surprise" inherent in the potential outcomes of a 
+random variable.1 Mathematically, for a discrete random variable 
+X with a set of possible outcomes {x1 ,x2 ,…,xn } and corresponding probabilities p(xi ), 
+the Shannon Entropy H(X) is defined as: 
+H(X)=−i=1∑n p(xi )logb p(xi ) 
+where b is the base of the logarithm, which determines the units of entropy (typically 
+base 2 for "bits" or base e for "nats").2 A system with a highly predictable outcome 
+(e.g., a biased coin that lands on heads 99% of the time) has very low entropy, as 
+there is little surprise in the result. Conversely, a system with maximum 
+unpredictability (e.g., a fair coin toss where heads and tails are equally likely) exhibits 
+maximum entropy.3 
+In the context of financial markets, this concept provides a potent alternative to 
+traditional risk measures like standard deviation (volatility). While volatility measures 
+the magnitude of price fluctuations, entropy measures the disorder and 
+unpredictability of those fluctuations.5 It captures more detailed information about the 
+underlying data distribution, including higher-order moments that standard deviation 
+ignores, thereby providing a more comprehensive picture of market risk and state.6 
+The application of entropy to financial time series allows for the quantitative diagnosis 
+of market regimes.7 A market in a strong, clear trend, whether upward or downward, 
+can be considered an ordered, low-entropy state; its future movements are, in a 
+sense, more predictable. In contrast, a market that is choppy, directionless, and 
+chaotic represents a disordered, high-entropy state, where past movements provide 
+little information about the immediate future.9 The Lagrangian-Entropy indicator is 
+designed specifically to quantify this level of market disorder. 
+1.2. The "Lagrangian" Perspective: Why price_velocity is the Correct Input 
+The user query specifies that the input to the entropy calculation is price_velocity. 
+This choice is deliberate and conceptually significant, justifying the 
+"Lagrangian-Entropy" moniker. In classical mechanics, a Lagrangian formulation 
+describes the state of a physical system not just by its position, but by its position and 
+velocity, encapsulating its kinetic and potential energy. The dynamics of the system 
+are then derived from this state. 
+By analogy, using price_velocity—the first derivative of the price time series—as the 
+input shifts the focus of the analysis from the price level itself to the dynamics of price 
+change. We are no longer asking, "How uncertain is the next price?" but rather, "How 
+uncertain is the rate of change of the price?" This is a more profound question for 
+regime analysis. 
+Consider two distinct market regimes: 
+1. A Strong Trending Market: In a sustained uptrend, the price_velocity will be 
+consistently positive and relatively stable. While the price is constantly changing, 
+the manner in which it changes is ordered. The distribution of price_velocity 
+values over a given period will be narrow and centered in the positive domain, 
+resulting in low entropy. 
+2. A Ranging, Sideways Market: In a choppy, consolidative market, the 
+price_velocity will fluctuate erratically, rapidly flipping between positive and 
+negative values of varying magnitudes. The distribution of price_velocity values 
+will be wide and likely centered around zero, representing a state of high disorder 
+and thus, high entropy. 
+Therefore, the "Lagrangian" perspective frames the indicator as a tool that measures 
+the entropy of the market's dynamic state, not its static level. This makes it 
+fundamentally a detector of market regimes—distinguishing between periods of 
+directional conviction and periods of indecision and chaos. 
+1.3. From Continuous Signal to Discrete Probability: The Discretization Imperative 
+A fundamental challenge arises when applying Shannon's formula to financial data. 
+The formula H(X)=−∑p(xi )logp(xi ) is explicitly defined for discrete random variables, 
+where there is a finite or countably infinite set of distinct outcomes.1 However, 
+price_velocity is, for all practical purposes, a continuous signal. It can take on any 
+value within a given range, not just a set of predefined symbols. 
+The mathematical analogue for continuous variables is known as differential entropy, 
+defined by the integral: 
+h(X)=−∫−∞∞ f(x)logf(x)dx 
+where f(x) is the probability density function (PDF) of the continuous variable X.10 
+While theoretically elegant, directly computing this integral from a finite sample of 
+data is fraught with difficulty. It would require estimating the entire continuous PDF 
+f(x), a complex task that often necessitates strong assumptions about the underlying 
+distribution (e.g., assuming it is Gaussian) or employing sophisticated non-parametric 
+methods like kernel density estimation, which have their own complexities and 
+parameter sensitivities.13 
+To leverage the more practical and computationally tractable Shannon formula, a 
+crucial intermediate step is required: discretization. This process involves 
+transforming the continuous price_velocity signal into a finite set of discrete symbols 
+or states.15 The most common method for this is 
+binning, where the continuous range of price_velocity values is partitioned into a set 
+of contiguous, non-overlapping intervals, or "bins." Each continuous value is then 
+mapped to the specific bin it falls into. These bins become the discrete "symbols" or 
+"outcomes" for our entropy calculation. The probability p(xi ) for a given bin i is then 
+simply the frequency of price_velocity values that fall into that bin, divided by the total 
+number of values in the observation window. This discretization step is the most 
+critical, assumption-laden part of the entire indicator calculation, as the choice of 
+binning strategy directly shapes the resulting entropy value. 
+1.4. Bridging the Gap: The Relationship Between Binned and Differential Entropy 
+The process of discretization forms a bridge between the continuous reality of the 
+data and the discrete requirement of the Shannon formula. This bridge is defined by a 
+formal mathematical relationship. For a continuous distribution discretized into bins of 
+a uniform width Δ, the resulting discrete Shannon entropy (H) is approximately related 
+to the underlying differential entropy (h) by the following equation 12: 
+H≈h−log(Δ) 
+This relationship carries profound implications for the interpretation of the 
+Lagrangian-Entropy indicator. It reveals that the calculated entropy value is not an 
+absolute measure of the "true" underlying uncertainty of the price_velocity 
+distribution. Instead, it is a relative measure, whose value is explicitly dependent on 
+the chosen bin width, Δ. As the bin width approaches zero (Δ→0), the term −log(Δ) 
+approaches infinity, causing the discrete entropy H to diverge.12 
+This might initially seem like a fatal flaw, but it is not. The objective of a financial 
+indicator is not necessarily to measure a physically absolute quantity, but to create a 
+consistent and comparable metric for decision-making. By fixing a specific, 
+well-justified binning strategy (i.e., fixing Δ), the term log(Δ) becomes a constant 
+offset. While the absolute value of H is shifted by this constant, the changes in H over 
+time will directly reflect the changes in the underlying differential entropy h. 
+In other words, if the market transitions from a trending state to a ranging state, the 
+shape of the price_velocity distribution will change, causing h to increase. This 
+increase will be reflected by a corresponding increase in our calculated discrete 
+entropy H. Therefore, the goal is not to find the "true" absolute entropy, which is an 
+ill-posed problem in this context. The goal is to define a robust and consistent 
+discretization scheme that allows us to reliably track the relative changes in entropy, 
+thereby detecting shifts in market regimes. This understanding liberates the 
+practitioner from the search for a "perfect" bin width and focuses attention on the 
+more pragmatic task of selecting a meaningful and consistent one. 
+II. The Impact of Savitzky-Golay Pre-Processing 
+The user's specification that the input price_velocity data has already been smoothed 
+by a Savitzky-Golay (SG) filter is a critical detail that profoundly influences the 
+indicator's behavior and interpretation. The SG filter is not a passive "denoising" step; 
+it is an active, regime-defining component of the indicator that fundamentally alters 
+the statistical properties of the signal before the entropy calculation begins. 
+2.1. A Primer on Savitzky-Golay (SG) Filtering 
+The Savitzky-Golay filter is a sophisticated digital filter that smooths a signal by 
+applying a polynomial least-squares regression to a moving window of data points.19 
+For each point in the time series, the filter takes a window of surrounding points, fits a 
+polynomial of a specified order to them, and then uses the value of that polynomial at 
+the center of the window as the new, smoothed data point.20 The filter's behavior is 
+governed by two key parameters: the window length (or frame size) and the 
+polynomial order.21 
+The primary advantage of the SG filter over simpler methods like a standard moving 
+average is its superior ability to preserve the essential features of the original signal. 
+While a moving average tends to flatten and shift peaks, the SG filter is explicitly 
+designed to minimize distortion of signal shape, width, and the relative height of 
+maxima and minima.19 This property makes it an excellent choice for pre-processing 
+f
+ inancial time series, as it can effectively reduce high-frequency noise—a major 
+source of spurious entropy—without excessively blurring the underlying market 
+patterns and turning points that are of analytical interest.23 
+2.2. The Inevitable Consequence: Reduced Variance and Altered Distributions 
+As a low-pass filter, the fundamental action of the SG filter is to attenuate or remove 
+high-frequency components from the signal.24 In the context of financial data, this 
+"noise" often corresponds to rapid, small-scale price jitters. By smoothing these 
+f
+ luctuations, the SG filter effectively acts as a trend-line determination technique, 
+revealing a cleaner underlying trajectory of the data.23 
+This smoothing action has a direct and unavoidable impact on the statistical 
+distribution of the price_velocity signal. The filtered series will exhibit: 
+● Reduced Range: The minimum and maximum values will be less extreme. 
+● Lower Variance: The standard deviation of the values within any given window 
+will be smaller. 
+● Fewer Outliers: The magnitude of the most extreme velocity readings will be 
+diminished. 
+This compression of the data's distribution mechanically reduces the calculated 
+Shannon Entropy. A distribution that is less spread out and has fewer unique states is, 
+by definition, more "ordered" and contains less uncertainty. Therefore, the very act of 
+applying the SG filter pre-conditions the data to have a lower baseline entropy value 
+compared to the raw, unfiltered signal. The degree of this entropy reduction is directly 
+controlled by the aggressiveness of the filter's parameters (a larger window and lower 
+polynomial order will result in more smoothing and a greater reduction in entropy). 
+2.3. The Hidden Side-Effect: Induced Temporal Autocorrelation 
+Beyond the obvious effect on the signal's amplitude distribution, SG filtering 
+introduces a more subtle but equally important artifact: temporal autocorrelation. 
+This phenomenon, where a value in a time series becomes correlated with its 
+preceding values, is a well-documented side-effect of nearly all low-pass filtering 
+methods.7 
+The mechanism is intuitive: each smoothed data point is a weighted average of its 
+neighbors in the original signal. This process intrinsically links adjacent points in the 
+f
+ iltered series, creating a "memory" or dependency that may not have been present, 
+or was weaker, in the raw data. An increase in autocorrelation means that the value at 
+time t becomes more predictive of the value at time t+1. 
+This induced structure represents a reduction in the signal's randomness. 
+Consequently, the SG filter reduces the signal's entropy through two distinct 
+mechanisms: 
+1. Amplitude Effect: It compresses the probability distribution of the signal's 
+values, reducing the diversity of states. 
+2. Correlation Effect: It introduces temporal patterns and dependencies, reducing 
+the unpredictability of the sequence of states. 
+This second effect is a crucial consideration for the practitioner. It implies that a 
+portion of the "order" or "predictability" measured by the Lagrangian-Entropy 
+indicator is an artifact of the smoothing process itself. While the standard Shannon 
+Entropy calculation on a binned histogram does not strictly require the data points 
+within the window to be independent and identically distributed (IID), its interpretation 
+as a measure of pure, underlying market randomness is compromised. The resulting 
+entropy value is a composite measure, reflecting both the intrinsic dynamics of the 
+market and the artificial structure imposed by the filter. This can lead an analyst to 
+perceive the market as being more orderly or predictable than it truly is, a caveat that 
+must be borne in mind when interpreting the indicator's absolute level. The key, as 
+always, is to focus on the relative changes in the indicator as a signal of shifting 
+market regimes. 
+III. Production-Ready Implementation in JavaScript 
+This section presents the core technical deliverable: a robust, efficient, and 
+well-documented JavaScript function for calculating the Lagrangian-Entropy 
+indicator. The implementation prioritizes performance and clarity, making it suitable 
+for both backtesting and potential real-time production environments. 
+3.1. Architectural Approach: The Sliding Window for Optimal Performance 
+A naive implementation of a rolling indicator would involve recalculating the metric 
+from scratch for each window. For rolling entropy, this would mean constructing a new 
+histogram and computing the entropy over the entire window at every single time 
+step. This approach leads to a computational complexity of O(N * W), where N is the 
+total number of data points in the series and W is the size of the rolling window.30 For 
+large datasets or real-time applications, this is unacceptably slow. 
+To achieve the necessary performance, the implementation must use the sliding 
+window technique. This powerful algorithmic pattern reduces the complexity to O(N) 
+by intelligently updating the calculation at each step instead of recomputing it.31 For a 
+simple rolling sum, this involves adding the new element that enters the window and 
+subtracting the element that leaves. For rolling entropy, the concept is similar but 
+more complex. The "state" that needs to be updated is not a single number but the 
+entire probability distribution within the window, represented by the histogram's 
+frequency counts. 
+The efficient process is as follows: 
+1. Calculate the full histogram for the initial window. 
+2. For each subsequent step, as the window slides forward by one data point: 
+a. Identify the bin of the old data point that is leaving the window and decrement 
+its frequency count. 
+b. Identify the bin of the new data point that is entering the window and 
+increment its frequency count. 
+3. Recalculate the Shannon Entropy using the newly updated frequency counts. 
+Since the entropy recalculation iterates over the number of bins (numBins), which is 
+typically much smaller than the window size (entropyWindow), this update step is 
+extremely fast. This O(N) approach is not merely a "nice-to-have"; it is essential for a 
+production-grade implementation. 
+3.2. The calculateRollingLagrangianEntropy Function 
+The following JavaScript function encapsulates the logic for computing the rolling 
+entropy indicator. It is designed to be self-contained, commented, and robust. 
+JavaScript 
+ 
+ 
+/** 
+ * Calculates the rolling Shannon Entropy for a continuous time series. 
+ * This implementation is designed for financial indicators like 'Lagrangian-Entropy' 
+ * where the input is a smoothed series such as price_velocity. 
+ * 
+ * @param {number} series - The input time series of continuous data (e.g., SG-smoothed price 
+velocity). 
+ * @param {object} options - Configuration options for the calculation. 
+ * @param {number} options.entropyWindow - The size of the rolling window to calculate entropy over. 
+ * @param {number} options.numBins - The number of discrete bins to partition the data into. 
+ * @param {string} - The base of the logarithm to use ('2' for bits, 'e' for nats). 
+ * @returns {number} An array of entropy values of the same length as the input series, 
+ *                     with initial values padded with null until the window is full. 
+ */ 
+function calculateRollingLagrangianEntropy(series, { entropyWindow, numBins, logBase = '2' }) { 
+    // --- 1. Input Validation and Parameter Setup --- 
+    if (!series | 
+| series.length < entropyWindow) { 
+        // Not enough data to compute even one window. 
+        return new Array(series.length).fill(null); 
+    } 
+ 
+    // Determine the logarithm function based on the specified base. 
+    const log = logBase === 'e'? Math.log : Math.log2; 
+    const LOG_ZERO_VAL = 0; // Per convention, 0 * log(0) = 0 in entropy calculations. 
+ 
+    // --- 2. Establish Global, Static Bin Range --- 
+    // For a stable and comparable indicator, the min/max for binning should be 
+    // calculated once on the entire series and held constant. This ensures that 
+    // 'bin #5' means the same thing at every point in time. 
+    let globalMin = Infinity; 
+    let globalMax = -Infinity; 
+    for (let i = 0; i < series.length; i++) { 
+        if (series[i] < globalMin) globalMin = series[i]; 
+        if (series[i] > globalMax) globalMax = series[i]; 
+    } 
+     
+    // Handle the edge case of a flat series (no range). 
+    if (globalMin === globalMax) { 
+        // A series with no variation has zero entropy. 
+        return new Array(series.length).fill(0); 
+    } 
+ 
+    const binWidth = (globalMax - globalMin) / numBins; 
+ 
+    // --- 3. Helper Functions --- 
+ 
+    /** 
+     * Discretizes a continuous value into a specific bin index. 
+     * @param {number} value - The continuous value to discretize. 
+     * @returns {number} The integer index of the bin. 
+     */ 
+    const discretizeValue = (value) => { 
+        if (value === globalMax) { 
+            // Include the max value in the last bin. 
+            return numBins - 1; 
+        } 
+        // Clamp values to the global range before binning 
+        const clampedValue = Math.max(globalMin, Math.min(value, globalMax - 1e-9)); 
+        return Math.floor((clampedValue - globalMin) / binWidth); 
+    }; 
+ 
+    /** 
+     * Calculates Shannon Entropy from a map of frequency counts. 
+     * @param {Map<number, number>} counts - A map of {binIndex: frequency}. 
+     * @param {number} windowSize - The current size of the window. 
+     * @returns {number} The calculated Shannon Entropy. 
+     */ 
+    const calculateEntropyFromCounts = (counts, windowSize) => { 
+        let entropy = 0; 
+        for (const count of counts.values()) { 
+            if (count > 0) { 
+                const probability = count / windowSize; 
+                entropy -= probability * log(probability); 
+            } 
+        } 
+        // The check for logBase === 'e' is already handled by using the correct 'log' function. 
+        // If another base was needed, we would divide by log(base), but log2 is native. 
+        return entropy; 
+    }; 
+     
+    // --- 4. Initialization and First Window Calculation --- 
+    const results = new Array(series.length).fill(null); 
+    const counts = new Map(); // Using a Map for {binIndex -> count} 
+ 
+    // Initialize the counts map with all possible bins to handle sparse data 
+    for (let i = 0; i < numBins; i++) { 
+        counts.set(i, 0); 
+    } 
+ 
+    // Process the first full window to establish the initial state. 
+    for (let i = 0; i < entropyWindow; i++) { 
+        const bin = discretizeValue(series[i]); 
+        counts.set(bin, counts.get(bin) + 1); 
+    } 
+ 
+    results[entropyWindow - 1] = calculateEntropyFromCounts(counts, 
+entropyWindow); 
+ 
+    // --- 5. Sliding Window Loop for Efficient Calculation --- 
+    for (let i = entropyWindow; i < series.length; i++) { 
+        // Get the values for the point entering and leaving the window. 
+        const newPoint = series[i]; 
+        const oldPoint = series[i - entropyWindow]; 
+ 
+        // Get the corresponding bin indices. 
+        const newBin = discretizeValue(newPoint); 
+        const oldBin = discretizeValue(oldPoint); 
+ 
+        // Update the frequency counts map. 
+        // No need to check if oldBin is in the map, it must be. 
+        counts.set(oldBin, counts.get(oldBin) - 1); 
+        counts.set(newBin, counts.get(newBin) + 1); 
+ 
+        // Calculate the entropy for the new window and store it. 
+        results[i] = calculateEntropyFromCounts(counts, entropyWindow); 
+    } 
+ 
+    return results; 
+} 
+3.3. Justification of Design Choices 
+● Helper Functions: The logic is broken down into discretizeValue and 
+calculateEntropyFromCounts. This improves readability and isolates the core 
+mathematical operations, making the code easier to maintain and debug. The 
+entropy formula itself, H=−∑pi logpi , is cleanly encapsulated within 
+calculateEntropyFromCounts.35 
+● Data Structure: A JavaScript Map is used for counts. While a simple array of size 
+numBins would also work, a Map is conceptually clean for representing a 
+frequency distribution and performs efficiently for this use case. It also gracefully 
+handles cases where some bins might have zero counts. 
+● Global Binning: A critical design choice is the establishment of a global, static 
+bin range by finding the minimum and maximum of the entire input series before 
+the rolling calculation begins. If the bin range were recalculated for each window 
+dynamically, the meaning of each discrete "symbol" (bin) would shift at every time 
+step. An entropy value of 2.1 at time t would not be comparable to a value of 2.1 at 
+time t+k, as the underlying measurement scale would have changed. This would 
+render the indicator useless for comparing market regimes over time. A static 
+range ensures that the indicator's values are consistent and comparable 
+throughout the entire series. 
+● Edge Case Handling: 
+○ The function checks for insufficient data and returns a padded array. 
+○ It handles the case of a flat input series (where globalMin === globalMax), 
+correctly returning an entropy of 0 for all points, as there is no uncertainty. 
+○ The calculateEntropyFromCounts function explicitly checks if (count > 0) 
+before calculating the probability, correctly implementing the convention that 
+the term plogp is treated as 0 when the probability p is 0.2 
+This implementation provides a solid, performant, and theoretically sound foundation 
+for the Lagrangian-Entropy indicator. 
+IV. Practical Walkthrough: From Data to Insight 
+To demonstrate the Lagrangian-Entropy indicator in action, this section provides a 
+practical walkthrough using a synthetic dataset. By constructing a price series with 
+known, distinct regimes, we can clearly illustrate how the indicator responds to 
+changes in market dynamics and validate its utility for regime detection. 
+4.1. Generating and Preparing Sample Data 
+First, we create a synthetic price series designed to exhibit three different market 
+regimes: 
+1. Regime 1 (Periods 0-49): Strong Uptrend. A period of low-disorder, directional 
+movement. 
+2. Regime 2 (Periods 50-149): Volatile Sideways Market. A period of 
+high-disorder, chaotic, and directionless movement. 
+3. Regime 3 (Periods 150-199): Stable Downtrend. Another period of 
+low-disorder, directional movement. 
+Next, we perform the necessary pre-processing steps: 
+● Calculate price_velocity: This is the first difference of the price series, 
+representing the rate of change. 
+● Apply Savitzky-Golay Filter: The raw price_velocity is smoothed using an SG 
+f
+ ilter to reduce high-frequency noise, as specified in the problem statement. This 
+smoothed series is the final input for our entropy calculation. 
+A conceptual representation of this data preparation is as follows: 
+JavaScript 
+// --- Sample Data Generation (Conceptual) --- 
+// 1. Create a synthetic price series with distinct regimes. 
+const priceSeries = [ 
+/*... 50 points of a smooth uptrend... */, 
+/*... 100 points of volatile, random sideways movement... */, 
+/*... 50 points of a smooth downtrend... */ 
+]; 
+// 2. Calculate raw price velocity (first difference). 
+const rawVelocity =; 
+for (let i = 1; i < priceSeries.length; i++) { 
+rawVelocity.push(priceSeries[i] - priceSeries[i-1]); 
+} 
+// Prepend a 0 to maintain length. 
+rawVelocity.unshift(0); 
+// 3. Apply a Savitzky-Golay filter to the raw velocity. 
+// (Assuming a library function `savitzkyGolay` exists for this purpose) 
+const smoothedVelocity = savitzkyGolay(rawVelocity, { windowSize: 11, polynomial: 2 }); 
+The smoothedVelocity array is now the prepared input for our indicator. 
+4.2. Applying the Indicator: Step-by-Step Execution 
+With the prepared data, we can now apply the calculateRollingLagrangianEntropy 
+function. We will choose a set of representative hyperparameters for this 
+demonstration. A window of 50 periods is chosen to be long enough to capture the 
+character of a regime, and 10 bins is a common starting point for discretization. 
+JavaScript 
+// --- Applying the Indicator --- 
+const entropyHyperparameters = { 
+}; 
+entropyWindow: 50, 
+numBins: 10, 
+logBase: '2' // Calculate entropy in 'bits' 
+const lagrangianEntropySeries = calculateRollingLagrangianEntropy( 
+smoothedVelocity, 
+entropyHyperparameters 
+); 
+// `lagrangianEntropySeries` now contains the calculated indicator values. 
+// The first 49 elements will be `null` as the window was not yet full. 
+The output, lagrangianEntropySeries, is an array of the same length as the input, 
+containing the rolling entropy values. 
+4.3. Interpreting the Output: Visual Analysis 
+The most effective way to understand the indicator's behavior is through visualization. 
+A multi-panel chart provides a clear, intuitive demonstration of the relationship 
+between price action, price velocity, and the resulting entropy measure. 
+Panel 1: Synthetic Price Series 
+This panel would show the price chart, clearly delineating the three regimes: the initial 
+uptrend, the central period of chaotic consolidation, and the final downtrend. 
+Panel 2: Smoothed price_velocity 
+This panel would display the input to our function, the smoothedVelocity. 
+● During the uptrend (Regime 1), the velocity would be consistently positive and 
+relatively stable, hovering around a constant positive value. 
+● During the sideways market (Regime 2), the velocity would oscillate wildly 
+around zero, with frequent and sharp changes in direction. 
+● During the downtrend (Regime 3), the velocity would be consistently negative 
+and stable, mirroring the behavior of the uptrend but in the opposite direction. 
+Panel 3: Lagrangian-Entropy Indicator 
+This panel shows the final output, lagrangianEntropySeries. The behavior of the indicator 
+directly corresponds to the regimes observed in the other panels: 
+● In Regime 1 (Uptrend), after the initial fill period, the entropy would be at a low 
+and stable level. This reflects the ordered, predictable nature of the 
+price_velocity during a strong trend. The distribution of velocity values within the 
+rolling window is narrow, leading to low uncertainty. 
+● As the market transitions into the Regime 2 (Sideways Market), the entropy 
+indicator would rise sharply. This is the direct result of the price_velocity 
+becoming chaotic. The rolling window now captures a wide and diverse range of 
+positive and negative velocity values, representing a state of high uncertainty and 
+disorder. The entropy peaks and remains elevated throughout this regime. 
+● As the market transitions out of the sideways chop and into the Regime 3 
+(Downtrend), the entropy indicator would fall back down to a low and stable 
+level, similar to that seen in the uptrend. Once again, the price_velocity becomes 
+ordered and predictable (consistently negative), and the entropy reflects this 
+return to a low-disorder state. 
+This walkthrough demonstrates the core utility of the Lagrangian-Entropy indicator. Its 
+value is not in its absolute level (e.g., an entropy of 2.5 bits is not intrinsically "high" or 
+"low" without context), but in its relative changes and its level compared to its own 
+recent history.7 A trader or analyst would use these changes to diagnose market 
+states: a sustained period of low entropy signals a trending environment suitable for 
+trend-following strategies, while a sharp rise and sustained period of high entropy 
+signals a ranging or consolidative environment, where mean-reversion or breakout 
+strategies might be more appropriate. The indicator effectively translates the complex 
+dynamics of price movement into a single, interpretable measure of market character. 
+V. Mastering the Hyperparameters: A Deep Dive into 
+entropyWindow and numBins 
+The practical utility of the Lagrangian-Entropy indicator is critically dependent on the 
+intelligent selection of its two primary hyperparameters: entropyWindow (the lookback 
+period) and numBins (the number of discretization intervals). These parameters are 
+not independent; they exist in a complex interplay with each other and, most 
+importantly, with the parameters of the Savitzky-Golay filter used for pre-smoothing. 
+This section provides a detailed analysis of these parameters to guide the practitioner 
+in making robust and theoretically sound choices. 
+5.1. The Lookback Period (entropyWindow) 
+The entropyWindow defines the length of the lookback period over which the 
+probability distribution of price_velocity is estimated. This parameter governs the 
+trade-off between the indicator's responsiveness and its statistical stability, a classic 
+dilemma in the design of technical indicators.38 
+● Short Window: A smaller entropyWindow makes the indicator highly sensitive 
+and responsive to recent changes in market character. It will quickly detect a shift 
+from a trending to a ranging state. However, this responsiveness comes at the 
+cost of statistical reliability. The entropy calculation will be based on fewer data 
+points, making the indicator itself noisy and prone to generating false signals.39 
+● Long Window: A larger entropyWindow provides a more stable and statistically 
+robust estimate of entropy. The indicator will be smoother and less susceptible to 
+short-term noise. The trade-off is a significant lag; the indicator will be slower to 
+recognize a fundamental change in the market regime. 
+For the purpose of regime detection, the entropyWindow should be chosen to align 
+with the characteristic duration of the market states one wishes to identify. For 
+instance, if a typical consolidation phase on an hourly chart lasts for approximately 48 
+hours, an entropyWindow of around 50-60 would be a reasonable starting point, as it 
+is long enough to capture a representative sample of the velocity distribution within 
+that regime. The choice is ultimately domain-specific and depends on the asset's 
+volatility and the trading timeframe. 
+5.2. The Discretization Challenge (numBins) 
+The numBins parameter is arguably the more complex and critical of the two. It 
+controls how the continuous price_velocity signal is converted into a discrete set of 
+symbols. The choice of numBins directly determines the granularity of the probability 
+distribution from which entropy is calculated. 
+● Under-binning (Too Few Bins): If numBins is too small, distinct features of the 
+velocity distribution are merged. This over-smoothing results in a loss of 
+information and will artificially and systematically depress the calculated entropy 
+value. The indicator may fail to distinguish between subtly different market 
+states.40 
+● Over-binning (Too Many Bins): If numBins is too large, the histogram becomes 
+sparse. Many bins will contain only one or zero data points, purely due to random 
+sampling fluctuations within the window. This "broken comb" effect introduces 
+noise into the probability estimate and can artificially inflate the calculated 
+entropy, making the indicator erratic and unreliable.40 
+Given the non-Gaussian, often fat-tailed nature of financial returns distributions 6, 
+simple rules of thumb can be misleading. Several data-driven methods have been 
+developed to provide a more principled starting point for selecting the number of 
+bins. The table below compares the most prominent rules. 
+Binning Rule Formula Core 
+Assumption 
+Robustness Suitability for 
+SG-Smoothed 
+Financial Data 
+Sturges' Rule k=1+log2 (n) Data is 
+approximately 
+normally 
+distributed. 
+Low. Very 
+sensitive to 
+non-normality 
+and outliers. 
+Poor. Financial 
+data is rarely 
+normal, and this 
+rule often 
+underestimates 
+the required 
+bins for large 
+datasets.42 
+Square Root 
+Choice 
+k=n  Simple heuristic, 
+no strong 
+theoretical 
+assumption. 
+Low. Does not 
+account for the 
+spread or shape 
+of the data. 
+Moderate. 
+Often used as a 
+quick, simple 
+starting point, 
+but lacks 
+statistical 
+rigor.41 
+Scott's Rule Bin Width 
+h=n1/33.5⋅σ  
+Data is 
+approximately 
+normally 
+distributed. 
+Moderate. Uses 
+standard 
+deviation (σ), 
+which is 
+sensitive to 
+outliers. 
+Moderate. 
+Better than 
+Sturges' but its 
+reliance on 
+standard 
+deviation is a 
+weakness for 
+fat-tailed 
+distributions.42 
+Freedman-Diac
+ onis Rule 
+Bin Width 
+h=n1/32⋅IQR  
+No assumption 
+of normality. 
+High. Uses the 
+Interquartile 
+Range (IQR), 
+which is robust 
+to outliers and 
+non-normality. 
+Excellent. This 
+is the most 
+theoretically 
+sound choice 
+for financial 
+data due to its 
+robustness.42 
+In these formulas, k is the number of bins, n is the number of data points (i.e., 
+entropyWindow), σ is the standard deviation, and IQR is the Interquartile Range (the 
+difference between the 75th and 25th percentiles). Given the characteristics of 
+f
+ inancial data, the Freedman-Diaconis Rule is the recommended starting point. 
+5.3. The Critical Interplay: How Pre-Smoothing Informs Bin Selection 
+The most nuanced aspect of hyperparameter tuning for this indicator is 
+understanding the deep coupling between the SG pre-smoothing and the entropy 
+calculation. The parameters for these two stages cannot be optimized in isolation. The 
+SG filter sets the stage, and the entropy parameters must be adapted to the 
+characteristics of that stage. 
+The causal chain is as follows: 
+1. The SG filter's parameters (window size, polynomial order) determine the degree 
+of smoothing applied to the raw price_velocity.21 
+2. The degree of smoothing directly alters the shape of the price_velocity 
+distribution. Specifically, it reduces the variance and standard deviation (σ) of the 
+signal.23 
+3. The optimal number of bins (numBins) is a direct function of the shape of this 
+smoothed distribution.40 
+This chain of dependency leads to a critical conclusion: a more aggressive SG filter 
+(e.g., a larger window) will produce a smoother, less dispersed distribution that can be 
+accurately represented with fewer bins. Conversely, a light SG filter will leave more 
+detail in the signal, requiring more bins to capture its shape without information loss. 
+This interplay also reinforces the superiority of the Freedman-Diaconis rule for this 
+specific application. The SG filter is explicitly designed to preserve the larger-scale 
+features of a signal, such as the shape of peaks and troughs, while smoothing out 
+high-frequency noise.19 The Interquartile Range (IQR), which measures the spread of 
+the central 50% of the data, is a robust statistic that primarily reflects these 
+larger-scale features. The standard deviation, in contrast, is highly sensitive to the 
+very high-frequency noise that the SG filter is designed to remove. 
+Therefore, the IQR of the smoothed data is a more stable and representative measure 
+of the signal's underlying dispersion than its standard deviation. Since the 
+Freedman-Diaconis rule relies on the IQR, its estimate for the optimal bin width will be 
+more robust and less sensitive to changes in the SG filter's smoothing intensity 
+compared to Scott's rule. 
+5.4. A Recommended Heuristic for Parameter Selection 
+Given this complexity, a practical, step-by-step heuristic for parameter selection is 
+essential: 
+1. Step 1: Configure the Savitzky-Golay Filter. First, determine the appropriate SG 
+f
+ ilter parameters (windowSize, polynomialOrder) for the specific asset and 
+timeframe being analyzed. This choice is typically based on domain knowledge 
+and visual inspection, aiming to remove unwanted noise while preserving 
+significant market movements.21 This step defines the fundamental characteristics 
+of the signal to be analyzed. 
+2. Step 2: Set the entropyWindow. Choose a lookback period for the entropy 
+calculation that aligns with the strategic objective. This should be based on the 
+typical duration of the market regimes (e.g., trends, consolidations) that the 
+indicator is intended to identify. 
+3. Step 3: Calculate an Initial numBins. Take a large, representative sample of the 
+SG-smoothed price_velocity data. Apply the Freedman-Diaconis rule to this 
+sample to calculate an initial, data-driven estimate for the optimal bin width, and 
+from that, the number of bins. This provides a robust, theoretically sound starting 
+point. 
+4. Step 4: Observe and Fine-Tune. With this initial set of parameters, compute the 
+Lagrangian-Entropy indicator over a historical period containing known examples 
+of the desired regimes. Visually inspect the indicator's output. The goal is to 
+f
+ ine-tune entropyWindow and numBins to maximize the separation between the 
+indicator's values during trending periods versus ranging periods. This empirical 
+tuning, guided by a strong theoretical starting point, will yield the most effective 
+configuration for a given application.38 
+By following this structured approach, the practitioner can navigate the complex 
+parameter space and configure an indicator that is both statistically robust and 
+strategically effective. 
+VI. Advanced Considerations and Strategic Application 
+Beyond the core implementation and parameterization, the true value of the 
+Lagrangian-Entropy indicator is realized through its intelligent integration into broader 
+analytical and trading frameworks. This final section explores strategic applications 
+and outlines promising avenues for future research and enhancement. 
+6.1. Integrating the Lagrangian-Entropy Indicator into a Trading Framework 
+The indicator's primary function is to act as a robust classifier of market regimes. Its 
+output can be used in several sophisticated ways to enhance existing strategies or 
+form the basis of new ones. 
+● As a Regime Filter: This is the most direct and powerful application. Many 
+trading strategies are designed to perform well only under specific market 
+conditions. For example, trend-following systems (e.g., based on moving average 
+crossovers) excel in low-entropy environments but suffer significant losses during 
+high-entropy, ranging markets. Conversely, mean-reversion strategies (e.g., 
+trading based on oscillators like RSI) are profitable in choppy markets but perform 
+poorly in strong trends. The Lagrangian-Entropy indicator can act as a master 
+switch: 
+○ Condition: IF entropy < threshold_low THEN Enable Trend_Following_Strategy 
+○ Condition: IF entropy > threshold_high THEN Enable Mean_Reversion_Strategy 
+The thresholds would be determined empirically, for instance, based on 
+historical quartiles of the entropy indicator's values. This approach prevents 
+the application of strategies in unfavorable market conditions, potentially 
+improving overall portfolio performance and reducing drawdowns. 
+● As a Novel Volatility and Complexity Proxy: The indicator provides a more 
+nuanced measure of market state than simple historical volatility. It quantifies the 
+disorder or complexity of price action. This value can be a powerful feature input 
+for advanced machine learning models.49 For example, a predictive model for 
+short-term returns could use the Lagrangian-Entropy value as one of its inputs, 
+allowing it to learn the different dynamics associated with high- and 
+low-complexity regimes. This is particularly relevant for models that need to 
+adapt to changing market conditions.52 
+● In Portfolio Construction and Asset Pricing: The principles of entropy are 
+widely applied in modern finance for portfolio selection and asset pricing.53 A 
+high-entropy reading for a particular asset could be interpreted as a higher level 
+of uncertainty or risk, potentially leading to a lower allocation within a 
+risk-managed portfolio. It could also be used to detect periods of "confusion" or 
+stress in specific markets, as high entropy has been correlated with financial 
+crises.9 
+6.2. Potential for Further Research and Enhancement 
+While the binned Shannon Entropy approach detailed in this report is robust and 
+effective, the field of information theory offers a rich landscape of alternative 
+techniques that could lead to further improvements. These represent exciting avenues 
+for future research. 
+● Alternative Entropy Measures for Time Series: Several entropy variants have 
+been developed specifically to address the challenges of time series data. 
+○ Approximate Entropy (ApEn) and Sample Entropy (SampEn): These are 
+measures of regularity that are designed to work with relatively short and 
+noisy time series. They quantify the likelihood that runs of patterns that are 
+close for a certain number of observations will remain close on subsequent 
+incremental observations.3 They are inherently less sensitive to the length of 
+the time series. 
+○ Permutation Entropy (PE): This method converts a time series into a 
+sequence of ordinal patterns (e.g., which of the 3!=6 permutations describes 
+the ordering of three consecutive values). The entropy is then calculated over 
+the distribution of these symbolic patterns.49 Because it is based on ranks 
+rather than absolute values, PE is robust to outliers and does not require the 
+same type of amplitude-based binning, which might make it an interesting 
+alternative to use on the SG-smoothed signal. 
+○ Rényi Entropy: A generalization of Shannon Entropy that includes a 
+parameter, α, which can be tuned to emphasize different parts of the 
+probability distribution. It can be used to analyze multiscale properties of 
+market randomness.56 
+● Binless Entropy Estimators: To circumvent the challenges and assumptions 
+associated with histogram binning, several "binless" estimation methods exist. 
+○ k-Nearest Neighbors (kNN) Estimators: These methods estimate entropy 
+based on the average distance to the k-nearest neighbors for each point in 
+the dataset. The Kozachenko-Leonenko estimator is a well-known example.40 
+This approach adapts locally to the density of the data, avoiding the issue of 
+f
+ ixed bin widths. 
+○ Autoregressive (AR) Model-Based Estimators: Another sophisticated 
+approach involves fitting a parametric model, such as an Autoregressive (AR) 
+model, to the data. The entropy of the signal can then be calculated 
+analytically from the parameters of the fitted model.13 This method implicitly 
+handles the temporal correlation in the signal, which could be particularly 
+advantageous given the autocorrelation induced by the SG filter. 
+Exploring these advanced measures could yield an indicator that is more robust, 
+requires less parameter tuning, or captures different and complementary aspects of 
+market complexity. The framework presented in this report provides a solid and 
+extensible foundation upon which such future innovations can be built. 
+Works cited 
+1. Mastering Shannon Entropy: The Essential Theory for Data Scientists - Number 
+Analytics, accessed on June 26, 2025, 
+https://www.numberanalytics.com/blog/mastering-shannon-entropy-essential-th
+ eory-for-data-scientists 
+2. Entropy (information theory) - Wikipedia, accessed on June 26, 2025, 
+https://en.wikipedia.org/wiki/Entropy_(information_theory) 
+3. Approximate Entropy and Sample Entropy: A Comprehensive Tutorial - PMC, 
+accessed on June 26, 2025, https://pmc.ncbi.nlm.nih.gov/articles/PMC7515030/ 
+4. Time Series Complexity analysis using Entropy - Towards Data Science, accessed 
+on June 26, 2025, 
+https://towardsdatascience.com/time-series-complexity-analysis-using-entropy
+ec49a4aaff11/ 
+5. Entropy: A new measure of stock market volatility? - ResearchGate, accessed on 
+June 26, 2025, 
+https://www.researchgate.net/publication/258668557_Entropy_A_new_measure_
+ of_stock_market_volatility 
+6. Entropy-Based Volatility Analysis of Financial Log-Returns Using Gaussian Mixture 
+Models, accessed on June 26, 2025, https://www.mdpi.com/1099-4300/26/11/907 
+7. Entropy of financial time series due to the shock of war, accessed on June 26, 
+2025, https://arxiv.org/pdf/2303.16155 
+8. Applications of entropy in financial markets - RI UFPE, accessed on June 26, 2025, 
+https://repositorio.ufpe.br/bitstream/123456789/17360/1/Darko%20Stosic%20-%2
+ 0dissertacao%20de%20mestrado.pdf 
+9. Fast Trading and the Virtue of Entropy: Evidence from the Foreign Exchange 
+Market - LSE, accessed on June 26, 2025, 
+https://www.lse.ac.uk/CFM/assets/pdf/CFM-Discussion-Papers-2019/CFMDP2019-14-Paper.pdf 
+10. 3. a) The Shannon entropy of a continuous distribution can be written as \[ S - 
+Chegg, accessed on June 26, 2025, 
+https://www.chegg.com/homework-help/questions-and-answers/3-shannon-entr
+ opy-continuous-distribution-written-s-k-int-d-x-rho-x-ln-left-frac-rho-x-rho-q11
+ 5124901 
+11. continuous_entropy: Shannon entropy for a continuous pdf in ForeCA: 
+Forecastable Component Analysis - rdrr.io, accessed on June 26, 2025, 
+https://rdrr.io/cran/ForeCA/man/continuous_entropy.html 
+12. Introduction to Continuous Entropy, accessed on June 26, 2025, 
+https://www.crmarsh.com/pdf/Charles_Marsh_Continuous_Entropy.pdf 
+13. Estimating the entropy of a signal with applications, accessed on June 26, 2025, 
+http://www-syscom.univ-mlv.fr/~vignat/Signal/icassp99.pdf 
+14. Estimating the entropy of a signal with applications - ResearchGate, accessed on 
+June 26, 2025, 
+https://www.researchgate.net/publication/3317687_Estimating_the_entropy_of_a_
+ signal_with_applications 
+15. scholarworks.utrgv.edu, accessed on June 26, 2025, 
+https://scholarworks.utrgv.edu/cgi/viewcontent.cgi?article=1048&context=etd#:~:
+ text=Typica ly%2C%20the%20process%20involves%20four,point%20based%20o
+ n%20some%20criterion. 
+16. (PDF) Entropy-based Algorithm for Discretization - ResearchGate, accessed on 
+June 26, 2025, 
+https://www.researchgate.net/publication/309014187_Entropy-based_Algorithm_
+ for_Discretization 
+17. Discretization: An Enabling Technique - Soft Computing and Inteligent 
+Information Systems, accessed on June 26, 2025, 
+https://sci2s.ugr.es/keel/pdf/algorithm/articulo/liu1-2.pdf 
+18. Analyzing the Effect of Bin-width on the Computed Entropy - RGN Publications | 
+Journals, accessed on June 26, 2025, 
+https://www.journals.rgnpublications.com/index.php/jims/article/download/1023/7
+ 85/3774 
+19. Savitzky Golay Filter - DSPRelated.com, accessed on June 26, 2025, 
+https://www.dsprelated.com/blogimages/JosefHoffmann/sav_golay_Filter.pdf 
+20. Savitzky-Golay Filter - 공돌이의 수학정리노트 (Angelo's Math Notes), accessed 
+on June 26, 2025, https://angeloyeo.github.io/2020/10/21/Savitzky_Golay_en.html 
+21. The parameters optimization selection of Savitzky-Golay filter and its application 
+in smoothing pretreatment for FTIR spectra - ResearchGate, accessed on June 
+26, 2025, 
+https://www.researchgate.net/publication/286575612_The_parameters_optimizati
+ on_selection_of_Savitzky-Golay_filter_and_its_application_in_smoothing_pretreat
+ ment_for_FTIR_spectra 
+22. Systemic risk prediction based on Savitzky-Golay smoothing and temporal 
+convolutional networks - AIMS Press, accessed on June 26, 2025, 
+https://www.aimspress.com/aimspress-data/era/2023/5/PDF/era-31-05-135.pdf 
+23. Direct Use of the Savitzky–Golay Filter to Develop an Output-Only Trend 
+Line-Based Damage Detection Method - MDPI, accessed on June 26, 2025, 
+https://www.mdpi.com/1424-8220/20/7/1983 
+24. Adaptive Savitzky–Golay Filters for Analysis of Copy Number Variation Peaks 
+from Whole-Exome Sequencing Data - MDPI, accessed on June 26, 2025, 
+https://www.mdpi.com/2078-2489/14/2/128 
+25. New Insights on the Information Content of the Normalized Difference Vegetation 
+Index Sentinel-2 Time Series for Assessing Vegetation Dynamics - MDPI, 
+accessed on June 26, 2025, https://www.mdpi.com/2072-4292/16/16/2980 
+26. The effect of Savitzky-Golay smoothing filter on the performance of a vehicular 
+dynamic spectrum access method - ResearchGate, accessed on June 26, 2025, 
+https://www.researchgate.net/publication/265783806_The_effect_of_Savitzky-Gol
+ ay_smoothing_filter_on_the_performance_of_a_vehicular_dynamic_spectrum_ac
+ cess_method 
+27. (PDF) Filtering Eye-Tracking Data From an EyeLink 1000 ..., accessed on June 26, 
+2025, 
+https://www.researchgate.net/publication/374853132_Filtering_eye-tracking_data
+ _from_an_EyeLink_1000_Comparing_heuristic_savitzky-golay_IIR_and_FIR_digital
+ _filters 
+28. Filtering Eye-Tracking Data From an EyeLink 1000: Comparing ..., accessed on 
+June 26, 2025, https://arxiv.org/pdf/2303.02134 
+29. Filtering Eye-Tracking Data From an EyeLink 1000: Comparing Heuristic, 
+Savitzky-Golay, IIR and FIR Digital Filters - PMC - PubMed Central, accessed on 
+June 26, 2025, https://pmc.ncbi.nlm.nih.gov/articles/PMC11219126/ 
+30. CUDA Calculation of Shannon Entropy for a Sliding Window System - Repository 
+of UKIM, accessed on June 26, 2025, 
+https://repository.ukim.mk/bitstream/20.500.12188/32232/1/CUDA%20Calculation
+ %20of%20Shannon%20Entropy%20for%20a%20Sliding%20Window%20System
+ %20-%20accepted%20version.pdf 
+31. Sliding Window Pattern in JavaScript: A Beginner-Friendly Guide - DEV 
+Community, accessed on June 26, 2025, 
+https://dev.to/biswasprasana001/sliding-window-pattern-in-javascript-a-beginne
+ r-friendly-guide-2kpo 
+32. A Beginner's Guide to the Sliding Window Algorithm with JavaScript | 
+HackerNoon, accessed on June 26, 2025, 
+https://hackernoon.com/a-beginners-guide-to-the-sliding-window-algorithm-wit
+ h-javascript 
+33. Mastering the Sliding Window Technique in Programming - Paul Serban, accessed 
+on June 26, 2025, 
+https://www.paulserban.eu/blog/snippet/mastering-the-sliding-window-techniqu
+ e-in-programming/ 
+34. Sliding Window Technique - GeeksforGeeks, accessed on June 26, 2025, 
+https://www.geeksforgeeks.org/window-sliding-technique/ 
+35. Usage of Information Entropy in Solving the World Game - Informatica, An 
+International Journal of Computing and Informatics, accessed on June 26, 2025, 
+https://www.informatica.si/index.php/informatica/article/download/6301/3746 
+36. Shannon Entropy of an array in Typescript - Stack Overflow, accessed on June 26, 
+2025, 
+https://stackoverflow.com/questions/51105055/shannon-entropy-of-an-array-in-t
+ ypescript 
+37. Check if my time series is forecastable using Shannon entropy - Stats 
+Stackexchange, accessed on June 26, 2025, 
+https://stats.stackexchange.com/questions/643523/check-if-my-time-series-is-fo
+ recastable-using-shannon-entropy 
+38. What is the role of hyperparameter tuning in time series models? - Milvus, 
+accessed on June 26, 2025, 
+https://milvus.io/ai-quick-reference/what-is-the-role-of-hyperparameter-tuning-i
+ n-time-series-models 
+39. Effect of window size (m) on entropy estimators - International ..., accessed on 
+June 26, 2025, 
+https://www.mathsjournal.com/pdf/2021/vol6issue6/PartB/6-6-9-686.pdf 
+40. The Shannon Entropy of a Histogram - SciSpace, accessed on June 26, 2025, 
+https://scispace.com/pdf/the-shannon-entropy-of-a-histogram-qsxaharj.pdf 
+41. Calculating optimal number of bins in a histogram - Cross Validated - Stack 
+Exchange, accessed on June 26, 2025, 
+https://stats.stackexchange.com/questions/798/calculating-optimal-number-of-bi
+ ns-in-a-histogram 
+42. On the Accurate Estimation of Information-Theoretic Quantities from ..., 
+accessed on June 26, 2025, https://pmc.ncbi.nlm.nih.gov/articles/PMC11119730/ 
+43. The Ultimate Guide to Histogram Techniques - Number Analytics, accessed on 
+June 26, 2025, https://www.numberanalytics.com/blog/ultimate-histogram-guide 
+44. On Optimal and Data-Based Histograms, accessed on June 26, 2025, 
+https://www.stat.cmu.edu/~rnugent/PCMI2016/papers/ScottBandwidth.pdf 
+45. How Histogram Density Estimation Drives Modern Statistical Insights - Number 
+Analytics, accessed on June 26, 2025, 
+https://www.numberanalytics.com/blog/histogram-density-estimation-statistical
+insights 
+46. Optimal number of bins in histogram by the Freedman–Diaconis rule: difference 
+between theoretical rate and actual number - Cross Validated, accessed on June 
+26, 2025, 
+https://stats.stackexchange.com/questions/143438/optimal-number-of-bins-in-hi
+ stogram-by-the-freedman-diaconis-rule-difference-be 
+47. Adaptive hyperparameter updating for training restricted Boltzmann machines on 
+quantum annealers - OSTI, accessed on June 26, 2025, 
+https://www.osti.gov/servlets/purl/1816563 
+48. Financial Applications of Gaussian Processes and Bayesian Optimization∗ - 
+Roncali, Thierry, accessed on June 26, 2025, 
+http://thierry-ronca li.com/download/Bayesian_Optimization.pdf 
+49. Entropy Approximation by Machine Learning Regression: Application for 
+Irregularity Evaluation of Images in Remote Sensing - MDPI, accessed on June 26, 
+2025, https://www.mdpi.com/2072-4292/14/23/5983 
+50. 10 Unbelievable Entropy Trends: Analyzing 5 Modern Cases - Number Analytics, 
+accessed on June 26, 2025, 
+https://www.numberanalytics.com/blog/10-unbelievable-entropy-trends-modern-cases 
+51. Entropy: A Fundamental Concept in Data Science - Alooba, accessed on June 26, 
+2025, https://www.alooba.com/ski ls/concepts/data-science/entropy/ 
+52. 7 Ways Shannon Entropy Transforms Modern Data Analysis Today - Number 
+Analytics, accessed on June 26, 2025, 
+https://www.numberanalytics.com/blog/shannon-entropy-data-analysis-today 
+53. (PDF) Applications of Entropy in Finance: A Review - ResearchGate, accessed on 
+June 26, 2025, 
+https://www.researchgate.net/publication/272648341_Applications_of_Entropy_in
+ _Finance_A_Review 
+54. Applications of Entropy in Finance: A Review - MDPI, accessed on June 26, 2025, 
+https://www.mdpi.com/1099-4300/15/11/4909 
+55. arXiv:2406.05011v3 [cs.SE] 6 Mar 2025, accessed on June 26, 2025, 
+https://arxiv.org/pdf/2406.05011 
+56. Renyi entropy and mutual information measurement of market expectations and 
+investor fear during the COVID-19 pandemic | Request PDF - ResearchGate, 
+accessed on June 26, 2025, 
+https://www.researchgate.net/publication/342849954_Renyi_entropy_and_mutual
+ _information_measurement_of_market_expectations_and_investor_fear_during_t
+ he_COVID-19_pandemic 
+57. Convergence of Smoothed Empirical Measures with Applications to Entropy 
+Estimation, accessed on June 26, 2025, 
+https://research.ibm.com/publications/convergence-of-smoothed-empirical-mea
+ sures-with-applications-to-entropy-estimation 
+58. Estimation of Autoregressive Parameters from Noisy Observations Using Iterated 
+Covariance Updates - DigitalCommons@USU, accessed on June 26, 2025, 
+https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1232&context=ece_fa
+ cpub 

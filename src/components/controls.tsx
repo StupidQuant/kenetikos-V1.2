@@ -13,12 +13,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { IndicatorOptions } from '@/lib/indicator';
 
-export interface ControlState {
+export interface ControlState extends IndicatorOptions {
   asset: string;
   dateRange: DateRange;
-  sgWindow: number;
-  sgPolyOrder: number;
 }
 
 interface ControlsProps {
@@ -38,6 +37,10 @@ export function Controls({ state, onStateChange, isLoading }: ControlsProps) {
   const handleValueChange = <K extends keyof ControlState>(key: K, value: ControlState[K]) => {
     onStateChange({ ...state, [key]: value });
   };
+
+  const handleSliderChange = (key: keyof ControlState, value: number[]) => {
+    onStateChange({ ...state, [key]: value[0] });
+  }
 
   return (
     <Card className="bg-glass sticky top-4">
@@ -107,41 +110,47 @@ export function Controls({ state, onStateChange, isLoading }: ControlsProps) {
         </div>
         
         <div className="space-y-2">
-            <h3 className="text-sm font-medium">Savitzky-Golay Filter</h3>
+            <h3 className="text-sm font-medium">Indicator Parameters</h3>
             <div className="space-y-4 pt-2">
-                <div className="space-y-2">
-                    <div className="flex justify-between">
-                        <Label htmlFor="sg-window">Window Size</Label>
-                        <span className="text-sm text-muted-foreground">{state.sgWindow}</span>
-                    </div>
-                    <Slider
-                        id="sg-window"
-                        min={5}
-                        max={51}
-                        step={2}
-                        value={[state.sgWindow]}
-                        onValueChange={([value]) => handleValueChange('sgWindow', value)}
-                        disabled={isLoading}
-                    />
-                </div>
-                <div className="space-y-2">
-                    <div className="flex justify-between">
-                        <Label htmlFor="sg-poly-order">Polynomial Order</Label>
-                        <span className="text-sm text-muted-foreground">{state.sgPolyOrder}</span>
-                    </div>
-                    <Slider
-                        id="sg-poly-order"
-                        min={2}
-                        max={6}
-                        step={1}
-                        value={[state.sgPolyOrder]}
-                        onValueChange={([value]) => handleValueChange('sgPolyOrder', value)}
-                        disabled={isLoading}
-                    />
-                </div>
+                <ParameterSlider label="SG Window" value={state.sgWindow} onValueChange={(val) => handleSliderChange('sgWindow', val)} min={5} max={151} step={2} disabled={isLoading} />
+                <ParameterSlider label="SG Poly Order" value={state.sgPolyOrder} onValueChange={(val) => handleSliderChange('sgPolyOrder', val)} min={2} max={6} step={1} disabled={isLoading} />
+                <ParameterSlider label="Regression Window" value={state.regressionWindow} onValueChange={(val) => handleSliderChange('regressionWindow', val)} min={10} max={200} step={5} disabled={isLoading} />
+                <ParameterSlider label="Equilibrium Window" value={state.equilibriumWindow} onValueChange={(val) => handleSliderChange('equilibriumWindow', val)} min={10} max={200} step={5} disabled={isLoading} />
+                <ParameterSlider label="Entropy Window" value={state.entropyWindow} onValueChange={(val) => handleSliderChange('entropyWindow', val)} min={10} max={200} step={5} disabled={isLoading} />
+                <ParameterSlider label="Entropy Bins" value={state.numBins} onValueChange={(val) => handleSliderChange('numBins', val)} min={5} max={50} step={1} disabled={isLoading} />
+                <ParameterSlider label="Temperature Window" value={state.temperatureWindow} onValueChange={(val) => handleSliderChange('temperatureWindow', val)} min={10} max={200} step={5} disabled={isLoading} />
             </div>
         </div>
       </CardContent>
     </Card>
   );
+}
+
+interface ParameterSliderProps {
+    label: string;
+    value: number;
+    onValueChange: (value: number[]) => void;
+    min: number;
+    max: number;
+    step: number;
+    disabled: boolean;
+}
+
+function ParameterSlider({ label, value, onValueChange, min, max, step, disabled}: ParameterSliderProps) {
+    return (
+        <div className="space-y-2">
+            <div className="flex justify-between">
+                <Label>{label}</Label>
+                <span className="text-sm text-muted-foreground">{value}</span>
+            </div>
+            <Slider
+                min={min}
+                max={max}
+                step={step}
+                value={[value]}
+                onValueChange={onValueChange}
+                disabled={disabled}
+            />
+        </div>
+    )
 }

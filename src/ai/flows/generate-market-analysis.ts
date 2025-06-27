@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -12,15 +13,15 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const MarketAnalysisInputSchema = z.object({
-  potential: z.number().describe('The potential energy of the asset.'),
-  momentum: z.number().describe('The momentum of the asset.'),
-  entropy: z.number().describe('The economic entropy of the asset.'),
-  temperature: z.number().describe('The temperature of the asset.'),
+  potential: z.number().describe('The percentile rank of the Potential (P) of the asset.'),
+  momentum: z.number().describe('The percentile rank of the Momentum (M) of the asset.'),
+  entropy: z.number().describe('The percentile rank of the Entropy (E) of the asset.'),
+  temperature: z.number().describe('The percentile rank of the Temperature (Θ) of the asset.'),
 });
 export type MarketAnalysisInput = z.infer<typeof MarketAnalysisInputSchema>;
 
 const MarketAnalysisOutputSchema = z.object({
-  analysis: z.string().describe('A plain-English analysis of the market regime.'),
+  analysis: z.string().describe('A plain-English analysis of the market regime based on the principles of the Lagrangian-Entropy model.'),
   summary: z.string().describe('A TLDR summary of the market analysis.'),
 });
 export type MarketAnalysisOutput = z.infer<typeof MarketAnalysisOutputSchema>;
@@ -29,59 +30,27 @@ export async function generateMarketAnalysis(input: MarketAnalysisInput): Promis
   return generateMarketAnalysisFlow(input);
 }
 
-const identifyPercentileRanges = ai.defineTool({
-  name: 'identifyPercentileRanges',
-  description: 'Identifies the percentile ranges (low, medium, high) for potential, momentum, entropy, and temperature based on historical data.',
-  inputSchema: z.object({
-    potential: z.number().describe('The potential energy of the asset.'),
-    momentum: z.number().describe('The momentum of the asset.'),
-    entropy: z.number().describe('The economic entropy of the asset.'),
-    temperature: z.number().describe('The temperature of the asset.'),
-  }),
-  outputSchema: z.object({
-    potentialRange: z.string().describe('The percentile range for potential (low, medium, high).'),
-    momentumRange: z.string().describe('The percentile range for momentum (low, medium, high).'),
-    entropyRange: z.string().describe('The percentile range for entropy (low, medium, high).'),
-    temperatureRange: z.string().describe('The percentile range for temperature (low, medium, high).'),
-  }),
-},
-async (input) => {
-    // Mock implementation for percentile ranges.  A real implementation would
-    // calculate these based on historical data.
-    const getRange = (value: number): string => {
-      if (value < 25) return 'low';
-      if (value < 75) return 'medium';
-      return 'high';
-    };
-
-    return {
-      potentialRange: getRange(input.potential),
-      momentumRange: getRange(input.momentum),
-      entropyRange: getRange(input.entropy),
-      temperatureRange: getRange(input.temperature),
-    };
-  }
-);
-
 const generateMarketAnalysisPrompt = ai.definePrompt({
   name: 'generateMarketAnalysisPrompt',
   input: {schema: MarketAnalysisInputSchema},
   output: {schema: MarketAnalysisOutputSchema},
-  tools: [identifyPercentileRanges],
-  prompt: `You are an expert financial analyst.  Based on the provided market data, generate a concise, plain-English analysis of the current market regime.
+  prompt: `You are an expert financial analyst and physicist, specializing in the Lagrangian-Entropy state-space model of market dynamics. Your analysis is grounded in the following core principles:
 
-  Potential: {{{potential}}}
-  Momentum: {{{momentum}}}
-  Entropy: {{{entropy}}}
-  Temperature: {{{temperature}}}
+- **Potential (P):** This measures the stored energy or "tension" in the market. High Potential means the price is stretched far from its equilibrium, like a taut spring, suggesting a high probability of a corrective move. Low Potential means the market is relaxed and near its equilibrium.
+- **Momentum (M):** This is the kinetic energy of the trend. High Momentum signifies a strong, high-velocity trend with significant conviction. Low Momentum indicates consolidation, a weak trend, or a potential reversal point.
+- **Entropy (E):** This measures the system's disorder and unpredictability. High Entropy signifies a chaotic, random, and unpredictable market (an "efficient" market). Low Entropy signifies an ordered, patterned, and more predictable market, often seen in strong trends.
+- **Temperature (Θ):** This measures the system's fragility and sensitivity to new capital. High Temperature indicates a "hot," fragile market where small events can trigger large volatility spikes (phase transitions). Low Temperature indicates a stable, robust, and complacent market.
 
-  Consider the percentile ranges of potential, momentum, entropy, and temperature to provide context to the analysis.  Use the identifyPercentileRanges tool to determine these ranges, if necessary.
+You have been provided with the following market state readings, presented as percentile ranks based on recent historical data:
 
-  Specifically:
-  - Explain the current market dynamics.
-  - Identify potential risks and opportunities.
-  - Summarize the analysis in a TLDR format that is easy to understand.
-  `,
+- Potential (P): {{{potential}}}th percentile
+- Momentum (M): {{{momentum}}}th percentile
+- Entropy (E): {{{entropy}}}th percentile
+- Temperature (Θ): {{{temperature}}}th percentile
+
+Based *only* on these four values and the principles above, provide a concise, professional, one-paragraph analysis of the current market regime. Identify the dominant forces at play. Is the market trending with conviction, consolidating, showing signs of fragility, or transitioning to a new state? What is the potential outlook and what are the key risks?
+
+Following the detailed analysis, provide a "TLDR" summary that captures the absolute bottom line in 1-2 simple sentences.`,
 });
 
 const generateMarketAnalysisFlow = ai.defineFlow(
