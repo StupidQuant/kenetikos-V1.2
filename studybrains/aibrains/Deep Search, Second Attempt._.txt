@@ -1,0 +1,738 @@
+﻿The AI Nexus: Reshaping the Landscape of Scientific Discovery
+
+
+
+
+Part I: The AI-Driven Transformation of the Scientific Method
+
+
+The integration of artificial intelligence (AI), particularly large language models (LLMs), into the scientific ecosystem represents a paradigm shift not seen since the advent of computation itself. These technologies are no longer peripheral tools but are becoming deeply embedded in the core fabric of the scientific method, fundamentally altering the pace, scale, and even the nature of inquiry. This transformation extends across the entire research lifecycle, from the initial spark of an idea to the final publication and dissemination of knowledge. AI is acting as a profound force multiplier, automating laborious tasks, augmenting human intellect, and enabling entirely new forms of discovery.1 This initial part of the report will examine this foundational impact, detailing how AI is reshaping the daily workflows of researchers and redefining the strategic landscape of scientific progress. It will explore the transition from AI as a mere assistant for efficiency to its emerging role as an intellectual collaborator, a shift that brings with it both unprecedented opportunity and profound challenges to the established norms of scientific practice.
+
+
+Section 1: A New Paradigm for Scientific Inquiry: AI as a Force Multiplier
+
+
+The most immediate and widespread impact of AI on the scientific community has been its role as a powerful "force multiplier," dramatically enhancing the efficiency and productivity of researchers across a multitude of disciplines.1 By automating and streamlining some of the most time-consuming and labor-intensive aspects of the research process, these tools are freeing up valuable human capital, allowing scientists and engineers to focus on higher-level tasks such as experimental design, creative problem-solving, and the interpretation of results.2 This enhancement of productivity is not merely an incremental improvement; it is fundamentally changing the economics of research and opening avenues for greater equity and participation in the global scientific enterprise.
+
+
+Automating Literature Reviews and Knowledge Synthesis
+
+
+One of the most formidable and perennial challenges in any scientific endeavor is the comprehensive literature review. The exponential growth of published research makes it nearly impossible for any individual or team to stay fully abreast of all relevant developments. LLMs are proving to be a transformative solution to this problem.4 These models can be tasked with scanning vast digital libraries of scientific literature—encompassing thousands or even millions of articles—in a fraction of the time it would take a human researcher.4
+The application goes far beyond simple keyword searching. LLMs can summarize key findings, identify the prevailing trends within a field, and, crucially, pinpoint gaps in the existing body of knowledge, thereby providing clear direction for future research efforts.4 For example, a climate scientist can deploy an LLM to systematically review thousands of papers, extracting and collating pertinent data on temperature trends, greenhouse gas emissions, and proposed mitigation strategies.4 This capability not only ensures that researchers do not overlook critical information but also accelerates the very foundation upon which new hypotheses are built.
+Furthermore, LLMs can be integrated into the pipelines for systematic reviews and meta-analyses. They can assist in the narrative synthesis of included studies and support the extraction of data from complex documents like clinical trial reports.5 This opens the door to the creation of "living synthesis" systems, which could provide continuously updated, evidence-based summaries to inform clinical practice guidelines and policy decisions.5 Commercial tools such as Elicit and Consensus are already providing researchers with these capabilities, demonstrating the practical demand for AI-powered literature synthesis.6 However, this automation is not without its limitations. Current models may not always access the most recent publications and can sometimes miss niche or domain-specific literature that is not well-represented in their training data. Therefore, for the foreseeable future, a hybrid approach that supplements LLM-supported searches with conventional library and database searches remains a necessary best practice to ensure comprehensive and rigorous coverage.7
+
+
+Enhancing Scientific Writing and Communication
+
+
+Perhaps the most obvious and widely adopted use of LLMs in science is as a sophisticated writing assistant.8 The preparation of manuscripts, grant proposals, and other scholarly documents is a critical but often arduous task. LLMs can significantly reduce the time and effort spent on language editing and proofreading, offering suggestions to improve the clarity, coherence, and linguistic precision of a text.5 This is particularly transformative for researchers who are non-native English speakers, helping to level the playing field in the Anglophone-dominated world of international scientific publishing.2 By improving the readability of drafts, these tools can accelerate the entire submission and publication process.5
+The utility of LLMs in scientific communication extends beyond manuscript preparation. They can provide valuable starting points for a wide range of scientific documents, such as drafting letters of recommendation, evaluation reports, or the initial text for grant applications.8 Researchers can use them to brainstorm and organize ideas, or to generate potential titles for a paper.5 By handling these more formulaic writing tasks, LLMs allow scientists to remain focused on the core intellectual content of their work.3
+
+
+Accelerating Prototyping with AI-Assisted Coding
+
+
+In the increasingly computational landscape of modern science, programming has become a fundamental skill. LLMs are serving as powerful coding assistants, significantly accelerating the development and prototyping of software and analysis scripts.8 These models can generate code snippets in a wide array of programming languages, including those most commonly used in scientific computing like Python, R, and Stata.5
+This capability is multifaceted. Researchers can use LLMs to translate code from one language to another, to explain complex code in a step-by-step manner, to debug errors, and to optimize existing code for better efficiency and readability.10 This is especially valuable for researchers who may be working in a new programming environment or attempting to replicate a study conducted in an unfamiliar language.10 The ability to ask "how-to" questions in natural language and receive functional code in response lowers the barrier to entry for complex computational analyses.10 By offloading the cognitive burden of remembering specific syntax or library functions, LLMs help researchers maintain their focus on the overarching scientific question rather than getting mired in the minutiae of programming.3 This reduction in distraction and context-switching can lead to significant gains in research productivity.3 Nevertheless, it is a critical and universally acknowledged caveat that all code generated by an LLM must be meticulously verified and tested by a human expert. The models can and do produce incorrect or inefficient code, and blind trust in their output can lead to flawed analyses and erroneous scientific conclusions.5
+
+
+Streamlining Data Analysis and Interpretation
+
+
+The utility of LLMs extends into the core analytical tasks of research. A significant challenge in many scientific fields is the prevalence of unstructured data—information that does not fit neatly into a spreadsheet, such as raw text from experimental notes, patient records, or ethnographic field observations.4 LLMs excel at processing this type of data, capable of parsing it and converting it into structured formats that are more amenable to quantitative analysis and interpretation.4 This is proving particularly valuable in data-rich fields like genomics, where LLMs can analyze vast datasets of genetic sequences to identify patterns, and in medicine, where they can analyze unstructured electronic health records to identify potential risk factors for disease.4
+Beyond data structuring, LLMs can also assist in the initial phases of data exploration. They can be prompted to perform exploratory data analysis (EDA) tasks, such as reading a dataset, describing its basic properties, summarizing key variables, and even generating the code to create visualizations and plots.10 This allows researchers to quickly gain an initial understanding of their data, guiding more focused and sophisticated subsequent analyses.
+The efficiency gains across these fundamental research tasks—literature review, writing, coding, and data analysis—are not merely a matter of convenience. They represent a significant shift in the allocation of the most precious resource in science: the researcher's time and intellectual energy. This shift has a direct and powerful secondary effect on the structure of the scientific community itself. Many of the tasks that AI automates are precisely those that have historically represented structural barriers to entry and participation for certain groups. For instance, the demand for flawless academic English can be a major hurdle for non-native speakers, a barrier that high-quality AI editing tools can substantially lower.2 Similarly, researchers at less-resourced institutions may lack access to specialized programming support or expensive journal subscriptions, disadvantages that can be partially mitigated by open-source AI coding assistants and literature synthesis tools.
+This connection is not theoretical; it is borne out by empirical evidence. A large-scale survey of the scientific community found that 81% of researchers have already incorporated LLMs into their workflow.11 Crucially, the same study revealed that researchers from traditionally disadvantaged groups—defined as non-White, non-native English speaking, and junior researchers—report both higher frequency of LLM usage and higher perceived benefits from these tools.11 This strongly suggests that the initial, first-order benefit of enhanced efficiency is directly translating into a powerful second-order benefit: the potential for greater research equity. By democratizing access to tools that overcome common hurdles, LLMs are not just making science faster; they are making it potentially more inclusive.
+
+
+Section 2: From Assistant to Collaborator: Redefining the Research Lifecycle
+
+
+While the role of AI as a productivity-enhancing assistant is already well-established, a more profound transformation is underway. AI systems, particularly advanced LLMs, are beginning to transcend the execution of predefined tasks and are emerging as active partners in the creative and intellectual core of the scientific process.1 This evolution from assistant to collaborator is reshaping the entire research lifecycle, from the genesis of a new hypothesis to the critical evaluation of a finished manuscript. This shift promises to accelerate the pace of discovery but also introduces complex new challenges to the traditional structures of authorship, accountability, and peer review.
+
+
+Hypothesis Generation and Ideation
+
+
+The generation of novel, testable hypotheses is the creative engine of scientific progress. Increasingly, AI is contributing directly to this engine. LLMs are moving beyond simply summarizing existing knowledge to actively formulating new theories and research questions.1 By analyzing the vast corpus of scientific literature they are trained on, these models can identify subtle patterns, uncover unexplored connections between disparate concepts, and highlight critical gaps in current understanding.4 This synthesis can lead to the generation of genuinely novel hypotheses that a human researcher might have overlooked.4
+This capability is not confined to a single domain. Evidence of AI-driven hypothesis generation is emerging across a wide range of fields. In biomedicine, AI has analyzed molecular structures to propose new antibiotic candidates.13 In physics, generative models are suggesting new theories in cosmology and proposing new materials with desirable properties.13 This represents a fundamental change in the human-AI interaction, where the model is not just answering a question but is proposing the next question to be asked.
+
+
+Designing and Planning Experiments
+
+
+Once a hypothesis is formulated, the next step is to design a rigorous experiment to test it. Here too, AI is becoming a valuable collaborator. AI-powered tools can analyze a stated research goal and suggest appropriate methodologies, or even help optimize the selection of a sample population for a study.14 These systems can automate aspects of experimental planning by identifying the most critical variables to test and designing experiments that are maximally efficient in terms of time and resources.13
+In fields that rely on survey-based research, for example, LLMs can be prompted to generate the inputs for advanced statistical methods like Maximum Difference Scaling (MaxDiff) or Conjoint analysis. A researcher could ask the model to generate a comprehensive list of potential features for a new product to be tested, providing a rich starting point for the study design.15 In more complex domains, AI models can simulate the behavior of intricate systems—such as biochemical pathways or climate models—allowing researchers to test hypotheses and visualize potential outcomes before committing to expensive and time-consuming physical experiments.13
+
+
+The Evolving Role of the Human Scientist
+
+
+As AI takes on a more active and creative role in the discovery process, the role of the human scientist is necessarily evolving.1 The emphasis is shifting away from manual execution and toward strategic oversight, critical evaluation, and the definition of scientifically meaningful questions.1 The "human-in-the-loop" model has become the central paradigm for the responsible and effective use of AI in science.8 In this model, the human researcher acts as a director or co-pilot, guiding the AI's exploration, correcting its inevitable errors, and making the final judgment on which ideas and results warrant further pursuit.8
+The goal of this partnership is explicitly to augment, not to automate away, human creativity and intuition.16 The AI can generate a thousand possibilities, but it is the human expert, with their deep contextual understanding and experiential wisdom, who can discern which of those possibilities is truly promising.18 This collaborative synergy, where the AI provides scale and speed and the human provides direction and judgment, is seen as the most powerful model for accelerating scientific progress.19
+
+
+The Peer Review Process Under Strain
+
+
+The integration of AI is creating significant new pressures on the peer review system, the cornerstone of scientific quality control. The use of LLMs in this context is highly contentious. On one hand, some reviewers report using tools like ChatGPT to polish the language of their comments before submission.20 On the other hand, major publishers like
+Science and Nature have established policies that either ban or strictly regulate the use of LLMs by reviewers, primarily due to concerns about confidentiality.20 Uploading a confidential manuscript to a third-party AI platform represents a fundamental breach of trust.
+Beyond confidentiality, there are deep concerns about the quality and integrity of AI-assisted reviews. Critics argue that lazy reviewers might simply ask an LLM to generate a review, resulting in a superficial summary rather than a thorough and critical analysis of the work.20 There is anecdotal evidence of this already occurring, leaving authors demoralized and questioning whether their work was rejected by a human intellect or a bot's flawed algorithm.21 This threatens to erode trust in the entire peer review process, which relies on the good-faith intellectual engagement of human experts.
+The shift of AI from a simple tool to an active intellectual contributor creates a significant tension within the established norms of science. As AI's role expands from mechanical tasks like grammar correction to conceptual contributions like hypothesis generation or manuscript evaluation, it forces a confrontation with the fundamental principles of scientific accountability. An AI cannot be held responsible for its ideas; it cannot defend its reasoning under questioning or agree to be accountable for the content of a manuscript.5 This is why publishers' guidelines almost universally forbid listing an AI as a co-author.23 This leads to a paradox: the more successful AI becomes at performing the high-level intellectual work of a scientist, the more it strains the system of authorship and accountability that underpins scientific credibility. A machine can suggest an idea, but who gets the credit?8 If an AI's flawed critique leads to the rejection of a valid paper, who is responsible? This automation-accountability paradox is a central challenge that the scientific community must address, likely through the development of new, explicit, and universally adopted standards for the disclosure and characterization of AI's contribution to a piece of work.24
+To provide a structured overview of this evolving landscape, the following table maps the diverse applications of AI across the research lifecycle, connecting them to the enabling technologies, documented benefits, and associated risks.
+Table 1: A Taxonomy of AI Applications Across the Research Lifecycle
+Research Stage
+	Specific AI Application
+	Enabling AI Technology/Method
+	Documented Benefits
+	Associated Risks & Challenges
+	Key Sources
+	Ideation & Hypothesis Generation
+	Literature synthesis & gap analysis
+	LLM Summarization, Natural Language Processing (NLP)
+	Efficiency, Comprehensive coverage
+	Hallucinations, Missing recent/niche literature
+	4
+	
+
+	Suggesting novel connections
+	Analysis of large text corpora, Pattern recognition
+	Novelty, Interdisciplinary insights, Creativity
+	Entrenching existing narratives, Bias amplification
+	4
+	Experiment Planning
+	Designing survey instruments
+	Few-shot prompting, Generative AI
+	Speed, Complexity in design
+	Generation of biased or leading questions
+	15
+	
+
+	Optimizing experimental parameters
+	Reinforcement learning, Simulation
+	Efficiency, Cost reduction
+	Requires accurate simulation environment
+	13
+	Data Collection & Analysis
+	Converting unstructured to structured data
+	NLP, Text extraction
+	Enables analysis of new data types
+	Inaccuracy in extraction, Context loss
+	4
+	
+
+	Generating analysis code
+	Code generation models (e.g., GPT-4)
+	Speed, Accessibility for non-coders, Prototyping
+	Incorrect or inefficient code, Requires human validation
+	5
+	Scientific Writing & Communication
+	Drafting & editing manuscript sections
+	Generative LLMs
+	Improved readability, Time savings, Equity for non-native speakers
+	AI-assisted plagiarism, Factual errors, Homogenization of style
+	5
+	
+
+	Generating titles, abstracts, summaries
+	LLM Summarization & Generation
+	Efficiency, Clarity
+	Misrepresentation of core findings
+	5
+	Peer Review & Publication
+	Polishing reviewer comments
+	Language editing tools
+	Clarity, Professionalism
+	Hides underlying lack of substance
+	20
+	
+
+	Generating reviews (misuse)
+	Generative LLMs
+	(For lazy reviewer) Speed
+	Confidentiality breach, Superficial analysis, Erosion of trust
+	20
+	
+
+	Checking for AI-generated text
+	AI detection tools
+	Upholding integrity
+	Lack of reliability, Evasion by new LLMs
+	5
+	
+
+Part II: The Technological Vanguard: Architectures and Methodologies
+
+
+To fully grasp the transformative potential and inherent risks of AI in science, it is essential to understand the underlying technologies that power this revolution. The current wave of AI is built upon a specific class of models and a set of evolving methodologies designed to harness their power. This part of the report provides the necessary technical foundation, moving from the general-purpose "foundation models" that have captured public attention to the specialized and hybrid systems being developed to meet the rigorous demands of scientific inquiry. A critical distinction emerges between the broad capabilities of generalist AI and the precision of specialist AI, a theme that is central to navigating the future of AI-driven research.
+
+
+Section 3: Foundation Models as the Bedrock of AI in Science
+
+
+The recent explosion in AI capabilities is largely attributable to the development of what are known as "foundation models".25 These are large-scale, general-purpose models that are not designed to solve one specific problem but instead serve as a flexible base that can be adapted to a vast array of downstream tasks.25
+
+
+Defining Foundation Models
+
+
+Foundation models are characterized by their immense scale. They are typically deep neural networks with millions, billions, or even trillions of adjustable parameters, trained on massive, heterogeneous datasets that often encompass a significant portion of the public internet, including text, images, and code.4 Prominent examples that have become household names include OpenAI's Generative Pre-trained Transformer (GPT) series, Google's Gemini, and Anthropic's Claude.22 Their defining feature is versatility; a single pre-trained foundation model can be prompted or fine-tuned to perform tasks as diverse as language translation, text summarization, content generation, and question-answering.5
+
+
+The Transformer Architecture
+
+
+The technological breakthrough that enabled the rise of foundation models is the transformer architecture, first introduced in a seminal 2017 paper from Google titled "Attention Is All You Need".28 Prior to the transformer, processing long sequences of text was a major challenge for AI. The transformer's key innovation is the
+self-attention mechanism, which allows the model to dynamically weigh the importance of different words in the input sequence when processing any given word.3 This ability to "pay attention" to the most relevant parts of the context enables a deep and nuanced understanding of language that was previously unattainable.3 This core architecture is the basis for the main families of LLMs, including encoder-only models like BERT (Bidirectional Encoder Representations from Transformers), which are excellent at understanding context and are often used for classification tasks, and decoder-only models like GPT, which excel at generating text in an auto-regressive fashion (predicting the next word).29
+
+
+Emergent Capabilities and Scaling Laws
+
+
+One of the most remarkable and studied properties of foundation models is the phenomenon of emergent capabilities.30 These are abilities, such as performing arithmetic, translating languages, or demonstrating step-by-step reasoning, that are not explicitly programmed into the model but appear to emerge spontaneously as the model size, dataset size, and training compute are increased.31 This principle, often referred to as "scaling laws," suggests that simply making models bigger can lead to qualitative leaps in performance. The latest models consistently achieve higher scores on a wide range of benchmarks, including those with PhD-level questions.32 However, the practical relevance of some of these benchmarks is a subject of ongoing debate, with experts questioning whether high scores reflect true understanding or simply the model's ability to recall information from its vast training data, which may have included the test questions themselves.32
+
+
+The Generalist's Dilemma
+
+
+The very source of a foundation model's power—its training on vast, diverse, and unfiltered internet-scale data—is also the source of its greatest weakness in a scientific context.33 The internet is a repository of human knowledge, but it is also rife with errors, opinions, biases, and outright fabrications.2 Foundation models learn from all of it. Their fundamental design objective is not to be truthful, but to be plausible; they are optimized to predict the next word in a sequence in a way that is statistically consistent with their training data.33
+This leads directly to the most significant risks associated with their use in science. The phenomenon of hallucination, where a model generates confident-sounding but factually incorrect information, is a direct consequence of this design.11 Similarly, because the training data reflects the world as it is, the models learn and can replicate and amplify existing societal and scientific biases.2 This creates a fundamental dilemma for scientific application: the generalist nature of foundation models makes them broadly capable, but their unvetted training data makes them inherently untrustworthy without stringent oversight. The generation of convincing, well-written text without any guarantee of factual accuracy poses a direct threat to the integrity of science.33 This causal chain—from the architectural decision to use unvetted web data, to the objective function of plausibility over truth, to the resulting risks of hallucination and bias—is the central challenge that the scientific community must confront. It is not a bug to be fixed, but a fundamental characteristic of the technology that necessitates the development of alternative, more rigorous approaches for high-stakes scientific use cases.
+
+
+Section 4: The Rise of the Specialist: Domain-Specific and Multimodal Models
+
+
+In response to the inherent limitations of general-purpose foundation models, the scientific and AI communities are increasingly focusing on the development of specialized models. These systems are tailored to the unique data, language, and rigorous standards of specific scientific domains. This trend towards specialization is not merely an incremental improvement; it represents a direct strategic effort to mitigate the core risks of hallucination, bias, and lack of domain expertise that plague the generalist models.
+
+
+Domain-Specific LLMs
+
+
+A domain-specific LLM is an AI model that has been specialized for a particular industry or field of study.36 This specialization is typically achieved in one of two ways: training a model from scratch on a massive, curated corpus of domain-specific data, or, more commonly and efficiently, taking a pre-existing foundation model and
+fine-tuning it on a smaller, targeted dataset.37 The resulting models, such as Med-PaLM 2 for medicine, ClimateBERT for climate science, and the finance-focused BloombergGPT, demonstrate a deeper understanding of the specific jargon, context, and nuances of their respective fields.36 This specialization leads to significantly higher precision and accuracy on domain-specific tasks compared to their general-purpose counterparts.36
+
+
+Methodologies for Specialization
+
+
+Several key techniques are employed to create these specialist models:
+* Fine-Tuning: This is the core process of adapting a pre-trained model. It involves continuing the training process using a custom, domain-specific dataset.38 Because the model has already learned the fundamental patterns of language from its initial pre-training, it can adapt to a new domain with a fraction of the data and computational resources required to train a model from the ground up.39 A powerful variant of this is
+instruction-tuning, where the model is fine-tuned on examples of specific commands and their desired outputs, teaching it to follow instructions more reliably.38
+* Retrieval-Augmented Generation (RAG): RAG is a powerful and increasingly popular technique that directly addresses the hallucination and outdated-knowledge problems of LLMs.41 Instead of relying solely on the static, internal knowledge baked into its parameters during training, a RAG system connects the LLM to an external, trusted knowledge base (e.g., a database of recent, peer-reviewed articles or internal experimental data).42 When a user poses a query, the system first retrieves relevant documents from this trusted source. It then provides these documents to the LLM as context along with the original query, instructing the model to formulate its answer based on the provided information.41 This grounds the LLM's response in verifiable, up-to-date facts and often allows the system to provide direct citations, fundamentally enhancing its trustworthiness.31
+
+
+Multimodal and Hybrid Models
+
+
+A significant frontier in scientific AI is the development of models that can understand and reason about more than just text. Science is inherently multimodal, involving images, spectra, 3D structures, and other complex data types.31 To address this, researchers are building hybrid models that combine the strengths of different AI architectures.
+A prominent example is the integration of LLMs with Graph Neural Networks (GNNs). In fields like chemistry, materials science, and drug discovery, molecules and materials are naturally represented as graphs of atoms and bonds. GNNs are specifically designed to analyze such graph-structured data. By creating hybrid models that fuse the powerful reasoning and language capabilities of LLMs with the structural analysis prowess of GNNs, researchers are achieving significant performance gains in tasks like predicting molecular properties or drug-disease associations.45
+
+
+Case Study: The OmniScience Model
+
+
+The development of the OmniScience model serves as a clear case study for the specialization process.39 Researchers began with a powerful, general-purpose foundation model, LLaMA 3.1.49 They then subjected it to a rigorous, three-stage specialization pipeline:
+   1. Domain Adaptive Pre-training (DAPT): The model was first pre-trained further on a massive, curated corpus of scientific literature, including peer-reviewed articles, journals, and textbooks. This step imbued the model with a deep foundational understanding of scientific language and concepts.39
+   2. Instruction Tuning: Next, the model was fine-tuned using a large, synthetically generated dataset of instructions specific to scientific tasks (e.g., "Summarize this paper," "Explain this concept").39 This taught the model to follow commands and generate responses in a manner useful to researchers.
+   3. Reasoning-Based Knowledge Distillation: Finally, to enhance its ability to perform complex, multi-step reasoning, the model was fine-tuned on the outputs of more powerful "teacher" models, distilling their reasoning processes into its own parameters.39
+The result is a model that is highly specialized for scientific inquiry. Ablation studies confirmed that each stage of this process was critical; the final OmniScience model significantly outperformed its generalist base model on a range of difficult scientific reasoning benchmarks.39
+
+
+The Infrastructure Gap
+
+
+A major impediment to the widespread development and use of these specialized models in academia is the "infrastructure gap".1 The computational resources required to train, fine-tune, and deploy large-scale AI models are immense and are currently concentrated within a handful of large technology corporations. This creates a significant disparity between what is possible in industrial research labs versus academic ones.1 To address this and democratize access to these powerful tools, government-led initiatives like the National Artificial Intelligence Research Resource (NAIRR) in the United States are being established to provide academic researchers with the necessary computational infrastructure.1
+The strategic shift towards specialization—through domain-specific fine-tuning, RAG, and multimodal architectures—is a direct and logical response to the identified weaknesses of general-purpose foundation models. Where generalist models risk hallucination due to their reliance on unvetted internal knowledge, RAG mitigates this by grounding them in external, verifiable facts. Where text-only models fail to capture the structural reality of a scientific domain, hybrid models like LLM-GNNs allow them to speak the native language of molecules and materials. This evolution represents a maturation of the field, moving from a paradigm of "ask the all-knowing oracle" to one of "use this powerful reasoning engine on my trusted data." It is a move from seeking answers from the machine to building systems that help scientists find answers themselves, a crucial step towards the responsible integration of AI into the fabric of science.
+To clarify the trade-offs involved in selecting an AI approach, the following table provides a comparative analysis of general-purpose and various specialized model types.
+Table 2: Comparative Analysis of General-Purpose vs. Domain-Specific AI Models
+Model Type
+	Training Paradigm
+	Key Characteristics
+	Strengths for Science
+	Weaknesses/Risks
+	Example Models/Systems
+	Key Sources
+	General-Purpose Foundation Model
+	Pre-trained on broad, unfiltered web data.
+	Versatile, broad knowledge base, high contextual understanding.
+	Accessibility, rapid prototyping, good for general writing and coding tasks.
+	High risk of hallucination, bias, outdated knowledge, lack of domain-specific nuance.
+	GPT-4, Claude 3.5, LLaMA 3
+	22
+	Domain-Specific Fine-Tuned Model
+	Foundation model further trained on a curated, domain-specific corpus.
+	Deep domain knowledge, understands specialized jargon and concepts.
+	High accuracy and precision on in-domain tasks, reduced irrelevant hallucinations.
+	High development cost/effort, risk of overfitting, potential to perpetuate domain-specific biases.
+	Med-PaLM 2, ClimateBERT, OmniScience
+	36
+	RAG-Enhanced Model
+	LLM coupled with a real-time retrieval system from a trusted knowledge base.
+	Grounded in verifiable facts, can provide citations, knowledge is up-to-date.
+	Significantly mitigates hallucination, increases trustworthiness, provides transparency.
+	Performance depends on the quality of the retrieval system and knowledge base.
+	Custom systems using LLMs + Vector DBs
+	31
+	Hybrid/Multimodal Model
+	Integrates LLMs with other AI architectures (e.g., GNNs, CNNs) to process non-text data.
+	Can understand and reason about complex data structures like molecules, images, or spectra.
+	Enables analysis of scientific data in its native format, leading to more accurate insights.
+	Increased architectural complexity, requires diverse and well-curated multimodal datasets.
+	STELLA, Hybrid-LLM-GNN
+	45
+	
+
+Part III: Case Studies from the Frontiers of AI-Powered Discovery
+
+
+Having established the theoretical and technical foundations of AI's role in science, this report now turns to the practical, real-world impact of these technologies. The abstract promise of AI is being realized in concrete, often spectacular, breakthroughs across a multitude of scientific disciplines. This part will present a series of case studies from the frontiers of research, showcasing how AI is not only accelerating progress but also enabling discoveries that were previously considered intractable. From decoding the fundamental building blocks of life to designing the materials of the future and forecasting the behavior of our planet, these examples provide tangible evidence for the transformative claims made in the preceding sections.
+
+
+Section 5: Decoding Biology: AI in Genomics, Proteomics, and Medicine
+
+
+The life sciences have been among the earliest and most fertile grounds for the application of advanced AI, due in large part to the field's inherently data-rich and sequential nature. From the linear code of DNA to the complex folding of proteins, biological systems present challenges that are uniquely suited to the pattern-recognition and modeling capabilities of modern AI.
+
+
+The AlphaFold Revolution and Beyond
+
+
+Arguably the most iconic AI-driven scientific breakthrough to date is the development of AlphaFold by Google's DeepMind.53 For half a century, predicting the three-dimensional structure of a protein from its one-dimensional amino acid sequence—the "protein folding problem"—stood as a grand challenge in biology.53 Solving these structures experimentally using methods like X-ray crystallography could take years of painstaking lab work for a single protein. AlphaFold, a deep learning system, shattered this bottleneck. It can now predict protein structures with remarkable accuracy in a matter of minutes.53
+The impact of this achievement has been monumental. In a move that has catalyzed research globally, DeepMind has made the predicted structures of over 200 million proteins—from across virtually all known life—freely available in a public database.53 This resource has massively accelerated progress in countless areas, enabling scientists to develop new medicines, design novel enzymes to combat plastic pollution, and better understand the mechanisms of antibiotic resistance.53 The latest iteration, AlphaFold 3, expands this capability even further, predicting the structure and interactions of a wide range of biological molecules, including DNA, RNA, and small molecules, offering a more holistic view of cellular machinery.53
+
+
+From Structure to Function with Multimodal LLMs
+
+
+While knowing a protein's structure is a critical first step, the ultimate goal is to understand its function. This is the next frontier for AI in biology, and it requires moving beyond single-modality models to systems that can integrate diverse types of information. The principle that "sequence determines structure, and structure determines function" highlights the need for models that can bridge these different data types.52
+A prime example of this new wave is the STELLA model.52 STELLA (Sequence-structure To Explain Language-based Learning and Annotation) is a multimodal LLM designed specifically for protein function prediction.52 It works by integrating two distinct types of AI. First, it uses a specialized protein language model (pLM) like ESM-2, which has been trained on millions of protein sequences and structures, to generate a rich, machine-readable representation of the protein.52 Second, it feeds this representation into a general-purpose LLM, which has been trained on vast amounts of text and can understand the context of biological functions described in natural language.52 Through a process of multimodal instruction tuning, STELLA learns to map the structural and sequential features of a protein to its corresponding functional description.55 This innovative approach has achieved state-of-the-art performance in predicting both high-level functional descriptions and the specific chemical reactions catalyzed by enzymes, showcasing the power of combining specialized biological models with the broad reasoning capabilities of LLMs.55
+
+
+LLMs in Genomics and Transcriptomics
+
+
+The language of life, encoded in the sequences of DNA and RNA, is a natural fit for the analytical power of LLMs.58 Researchers are now developing "genomic foundation models," which are LLMs trained on enormous datasets of genetic sequences rather than human language.58 Models with names like DNABERT, GROVER, and MegaDNA are learning the "grammar" of the genome.59 These models are being applied to a wide range of critical tasks, including predicting the functional impact of genetic mutations, identifying key regulatory elements like promoters and enhancers that control gene activity, and generating novel, biologically functional gene sequences for applications in synthetic biology and gene therapy.58
+In the field of transcriptomics, which studies RNA, AI models like RhoFold+ are achieving new levels of accuracy in predicting the complex 3D structures of RNA molecules.29 In single-cell analysis, LLMs are being used to interpret the vast datasets generated by single-cell sequencing, helping to classify cell types, annotate their functions, and trace their developmental trajectories.29 Together, these applications are driving a new wave of innovation in bioinformatics and are paving the way for a future of precision medicine, where treatments can be tailored to an individual's unique genetic makeup.28
+
+
+Accelerating Drug Discovery
+
+
+The entire drug discovery and development pipeline is being reshaped by AI. LLMs can rapidly screen the vast medical literature and genomic databases to identify and validate promising new drug targets.28 Once a target is identified, hybrid AI models that combine LLMs with GNNs can be used to predict the interactions between the target protein and potential drug compounds, or even to design novel molecules from scratch.46 This AI-driven approach has the potential to dramatically reduce the time and cost associated with bringing new therapies to market.
+The trajectory of AI in the life sciences reveals a clear and logical progression up the ladder of scientific inquiry. The initial breakthroughs, exemplified by AlphaFold, were primarily descriptive, answering the fundamental question, "What is the structure?".53 This provided an unprecedented, static map of the biological world. The next generation of models, such as STELLA, builds upon this foundation to become predictive, asking, "What does this structure do?" by integrating structural information with functional knowledge from text.52 The most recent developments, particularly in genomics with models like MegaDNA, are moving into the realm of the generative, asking, "How can we build a new one?" by designing novel, functional sequences.59 This evolution from description to prediction to generation demonstrates that AI is not merely a tool for analyzing data; it is becoming an integrated engine for driving the entire scientific cycle of observation, explanation, and creation. This deepening integration signals a fundamental maturation of AI's role in biological discovery.
+
+
+Section 6: Engineering the Future: AI in Materials Science and Chemistry
+
+
+The fields of materials science and chemistry are undergoing a profound transformation, driven by AI's ability to navigate the vast and complex space of possible chemical compounds and material structures. This is enabling a paradigm shift away from the traditional, slow, and often serendipitous process of discovery towards a new model of rapid, targeted, and AI-guided design. The impact is being felt across the entire research lifecycle, from fundamental property prediction to the complete automation of the experimental process.
+
+
+A Survey of Applications
+
+
+The breadth of AI's utility in these fields is remarkable. A single hackathon event focused on the topic generated 34 distinct projects applying LLMs to materials science and chemistry.62 These applications spanned seven key research areas, illustrating the technology's versatility:
+   1. Molecular and Material Property Prediction: Forecasting the physical and chemical properties of compounds.62
+   2. Molecular and Material Design: Generating and optimizing novel molecules and materials with desired characteristics.62
+   3. Automation and Novel Interfaces: Creating natural language interfaces for complex scientific software and automated workflows.62
+   4. Scientific Communication and Education: Enhancing the creation of educational content and academic communication.62
+   5. Research Data Management: Streamlining the organization and processing of complex scientific data.62
+   6. Hypothesis Generation and Evaluation: Using AI agents to formulate and assess new scientific hypotheses.62
+   7. Knowledge Extraction and Reasoning: Pulling structured information from unstructured scientific literature.62
+
+
+Predicting and Designing Novel Materials
+
+
+At the core of this transformation is the use of AI to predict material properties and design new ones. LLMs are proving adept at forecasting chemical and physical properties, particularly in low-data environments where traditional machine learning models struggle, by effectively integrating both structured numerical data and unstructured textual descriptions from scientific papers.62
+Beyond prediction, AI is being used for generative design. Models are being developed to create and optimize novel materials tailored for specific applications, such as new peptides for therapeutic use, advanced metal-organic frameworks (MOFs) for carbon capture, or more sustainable construction materials.62 The scale of this AI-driven discovery is staggering. The GNoME (Graph Networks for Materials Exploration) project, for instance, has already used a combination of graph neural networks and active learning to computationally discover over 2.2 million new, stable crystalline materials—a feat that would be impossible through physical experimentation alone.30
+
+
+The Rise of the Automated Scientist: "Science Factories" and "Self-Driving Labs"
+
+
+Perhaps the most futuristic and impactful development in this domain is the creation of fully automated laboratories where AI is integrated with robotics to execute the entire scientific discovery process from end to end. These platforms, variously described as "Science Factories" or "Self-Driving Labs" (SDLs), represent a closed-loop system for discovery.16
+The concept is straightforward but powerful: an AI model generates hypotheses about new materials and designs a series of experiments to test them. Robotic systems then carry out the physical tasks of material synthesis and characterization. The results from these experiments are fed back into the AI model, which analyzes the data, updates its understanding, and intelligently designs the next set of experiments to perform.66 This cycle of AI-driven design, robotic execution, and intelligent analysis can run continuously with minimal human intervention, enabling a massive acceleration in the pace of exploration.16
+The results from these pioneering labs are already impressive. Lila Sciences, a company building such a "Science Factory," reported the discovery of novel, non-platinum-based catalysts for green hydrogen production in just four months. Experts had estimated that the same discovery would have taken a decade using conventional research methods.16 At Argonne National Laboratory, a tool called "Polybot" combines AI with a mobile robotic scientist to speed up the discovery of materials for applications like wearable biomedical devices and next-generation batteries.67 By automating the laborious and time-consuming aspects of wet lab work, these SDLs dramatically improve the productivity of human researchers, freeing them from menial tasks to focus on higher-level creative thinking, theory development, and interpreting the novel insights generated by the autonomous systems.66
+
+
+Agentic Systems and Interfaces
+
+
+On a smaller scale, LLM-based "agents" are being developed to automate specific scientific workflows and make complex tools more accessible. For example, the LangSim project provides a natural language interface for running complex atomistic simulations, allowing researchers to set up experiments by simply describing what they want to do in plain English.64 Another project, LLMicroscopilot, uses an LLM to assist in the operation of sophisticated scanning transmission electron microscopes.64 More comprehensive agentic systems like MatAgent and MatPilot are being designed to handle a suite of tasks, from conducting literature reviews and generating hypotheses to designing experimental schemes and analyzing the resulting data.30
+The field of materials science is rapidly emerging as the premier proving ground for the concept of fully autonomous, closed-loop scientific discovery. This is due to a confluence of factors that make the domain particularly amenable to this approach. The scientific method itself is a cycle: hypothesis, experiment, analysis, and refinement. In materials science, AI is now capable of handling the cognitive steps of hypothesis generation, experimental design, and data analysis.30 The missing piece for full automation has always been the physical execution of the experiments. The increasing sophistication and affordability of laboratory robotics provides this final piece, allowing the loop to be closed.66
+Materials science is uniquely suited for this AI-robotics integration because, while the experimental search space is vast (i.e., all possible combinations of elements and synthesis conditions), it is also well-defined and the outcomes—the physical properties of the resulting material—are quantitatively measurable. This makes the process more tractable for an AI to control and optimize compared to, for example, a complex experiment in the social sciences with many uncontrollable human variables. Consequently, the "Self-Driving Labs" of materials science are not just a novel application of AI; they are the first concrete, large-scale realization of the long-held vision of an "automated scientist." The successes in this field provide a powerful blueprint for how other structured, experimental scientific domains might be automated in the future, heralding a new era of accelerated discovery.
+
+
+Section 7: Unveiling the Cosmos and the Climate: AI in Physics and Earth Sciences
+
+
+While AI is automating physical laboratories in materials science, its role in disciplines like physics, astronomy, and the Earth sciences is different but no less transformative. In these fields, which are often characterized by massive observational datasets and complex, large-scale simulations rather than benchtop experiments, AI serves primarily as an unparalleled analytical powerhouse and a sophisticated simulator of natural phenomena.
+
+
+Advanced Forecasting and Simulation
+
+
+One of the most significant impacts of AI has been in the prediction of complex natural systems, where it is consistently outperforming traditional, physics-based simulation methods.
+   * Weather and Climate: Google DeepMind's GraphCast model represents a landmark achievement in meteorology. Trained on decades of historical weather data, this AI system can predict global weather conditions up to 10 days in advance with greater accuracy and at a fraction of the computational cost of the industry-gold-standard simulation systems.53 It has also demonstrated superior skill in predicting extreme weather events, such as accurately forecasting the track of cyclones days earlier than conventional models.53 On a longer timescale, AI is enabling more precise modeling of complex climate systems, helping scientists to better predict long-term climate trends and the future frequency and intensity of extreme weather.13
+   * Flood and Wildfire Prediction: The predictive power of AI is being deployed to save lives and property. Google's flood forecasting initiative uses AI to provide flood warnings with up to a seven-day lead time for over 700 million people worldwide, even in regions that lack traditional river gauges.53 In parallel, the FireSat system, a collaboration between Google and the U.S. Forest Service, uses AI to analyze satellite imagery and detect the outbreak of wildfires within minutes of their ignition. This rapid detection enables faster response from firefighting authorities, which is critical for containing blazes before they grow out of control.53
+
+
+Hypothesis Generation in Fundamental Physics
+
+
+In the realm of fundamental physics and cosmology, the "automated scientist" model is less directly applicable. However, AI is still emerging as a powerful tool for ideation and hypothesis generation. By analyzing the vast and complex datasets generated by modern physics experiments, generative AI models can identify subtle patterns and correlations that might suggest new physical theories or mathematical conjectures.13 These AI-generated hypotheses can then be subjected to further theoretical scrutiny and experimental testing by human physicists.13
+Despite this potential, there is considerable skepticism within the physics community about whether the current generation of AI can produce the kind of profound conceptual breakthroughs that define the field's history.68 Current AI excels at optimization, pattern recognition, and interpolation within known data. It is less clear whether these systems, which lack a true understanding of physical principles, can perform the kind of imaginative, "out-of-the-box" thinking required to formulate a truly novel law of nature.32
+
+
+Data Analysis at Scale
+
+
+Perhaps the most indispensable role for AI in these fields is as a tool for managing and analyzing data at an unprecedented scale. Modern scientific instruments like the Large Hadron Collider at CERN or large-scale astronomical sky surveys generate petabytes of data, far more than can be stored or analyzed by traditional means.12 AI, and particularly machine learning, is essential for sifting through this data deluge. AI-enabled real-time analysis systems can be deployed directly at the source, rapidly filtering the torrent of data to identify and save only the most scientifically interesting events with a dramatically higher accuracy than was previously possible.69 This ability to find the "needle in the haystack" is critical for making discoveries in particle physics, astronomy, and other data-intensive domains.
+A comparative analysis across the scientific disciplines discussed reveals a crucial pattern: there is no single, one-size-fits-all model for the integration of AI into science. The specific nature of a field—its primary data sources, its experimental methodologies, and its core scientific questions—fundamentally dictates the mode in which AI can be most effectively applied. In materials science, a field defined by controlled synthesis and characterization, the path leads to closed-loop robotic automation in "Self-Driving Labs".66 In biology, the immense complexity of living systems means that while some laboratory tasks are automated, AI's most profound impact currently lies in analyzing and modeling the vast archives of existing biological data (genomic, proteomic) to predict structure and function.52 In fundamental physics and the Earth sciences, where experiments are often observational or occur at planetary scales, AI's primary role is that of a super-powered analyst, a pattern-recognition engine, and a simulator of complex systems.12 The vision of "AI for science" is therefore not a monolith. It is a diverse spectrum of applications, ranging from "AI as an automated lab partner" in highly structured, experimental domains to "AI as a peerless analyst and simulator" in complex, observational ones. Understanding this distinction is essential for setting realistic expectations, guiding research funding, and developing effective strategies for AI adoption across the scientific enterprise.
+To ground these observations in concrete achievements, the following table summarizes some of the most significant AI-driven scientific breakthroughs and links them to the specific technologies that made them possible.
+Table 3: Major AI-Driven Scientific Breakthroughs and Their Enabling Technologies
+Scientific Domain
+	Key Breakthrough / Application
+	Enabling AI Model / Technique
+	Impact on Discovery Process
+	Key Sources
+	Protein Biology
+	Highly accurate protein structure prediction
+	AlphaFold 2/3 (Deep Learning, Attention)
+	Solved a 50-year "grand challenge"; reduced prediction time from years to minutes, accelerating drug discovery.
+	53
+	Materials Science
+	Discovery of 2.2 million new stable materials
+	GNoME (Graph Neural Network, Active Learning)
+	Massively expanded the known space of stable materials for technologies like batteries and solar cells.
+	30
+	Materials Science
+	Discovery of novel green hydrogen catalysts
+	"Science Factory" (AI-guided robotic automation)
+	Compressed a discovery timeline estimated at a decade into just four months.
+	16
+	Meteorology
+	Highly accurate 10-day global weather forecasting
+	GraphCast (Machine Learning on Graphs)
+	Surpassed the accuracy and speed of traditional, gold-standard weather simulation systems.
+	53
+	Earth Science
+	Global flood and wildfire detection
+	AI models on satellite imagery (e.g., FireSat)
+	Provides life-saving early warnings with days of lead time (floods) or minutes (wildfires).
+	53
+	Mathematics
+	Solving complex geometry problems at Olympiad level
+	AlphaGeometry (Neuro-symbolic AI)
+	Achieved superhuman performance in a domain of complex mathematical reasoning, solving 83% of recent problems.
+	53
+	Neuroscience
+	Mapping a portion of the human brain in detail
+	Connectomics AI (AI-assisted image segmentation)
+	Revealed never-before-seen structures and created a public dataset to accelerate brain research.
+	53
+	
+
+Part IV: The Specter in the Machine: Risks, Integrity, and Ethical Imperatives
+
+
+While the potential of AI to accelerate scientific discovery is immense, its integration into the research ecosystem is accompanied by a host of profound risks and ethical challenges. These are not minor technical hurdles but fundamental threats that, if left unaddressed, could undermine the very integrity and trustworthiness of the scientific enterprise. The same properties that make LLMs powerful—their ability to generate fluent, convincing text based on vast and unvetted data—also make them potent vectors for misinformation, bias, and academic misconduct. This part of the report provides a critical counterbalance to the preceding optimism, conducting a sober analysis of the specter in the machine and outlining the ethical imperatives facing the scientific community.
+
+
+Section 8: The Hallucination Problem: Navigating AI-Generated Falsehoods
+
+
+The single most widely cited and potentially dangerous flaw of the current generation of LLMs is their propensity to "hallucinate".11 A hallucination, in this context, refers to a response generated by the model that is fluent, plausible, and delivered with a tone of confidence, yet is factually incorrect, nonsensical, or entirely fabricated.33 This phenomenon poses a direct and severe threat to the practice of science, which is predicated on a foundation of factual accuracy and verifiable evidence.33
+The risk is not merely theoretical. The Galactica model, an LLM trained specifically on a large corpus of scientific papers, was a high-profile example. It was publicly released but had to be quickly taken down after it began generating highly convincing but completely false scientific articles, complete with fabricated citations.11 This demonstrated in stark terms how easily these tools can pollute the information ecosystem they are meant to help navigate.
+
+
+The Root Cause of Hallucinations
+
+
+It is critical to understand that hallucinations are not a "bug" that can be easily patched. They are an inherent feature of the current design philosophy of most large-scale LLMs.33 These models are trained on vast, unvetted datasets scraped from the internet and are optimized through a process of self-supervised learning to achieve one primary goal: predicting the next word in a sequence in a statistically likely manner.33 Their objective function prioritizes coherence and plausibility over factual accuracy. There is no built-in "truth checker" or overriding mechanism to ensure their outputs align with reality.2 This design, combined with the confident and authoritative tone of their output, creates what researchers have called a "cognitive mirage".70 Users, particularly those who anthropomorphize the technology, are easily convinced that the generated text is accurate, even when it has no basis in fact.2
+
+
+Detection and Mitigation Strategies
+
+
+Given that hallucinations are an intrinsic risk, the scientific community is actively developing a multi-layered defense to detect and mitigate them.
+   * Human Oversight and Critical Evaluation: The first and most important line of defense is the diligent and critical oversight of a human expert. It is an absolute imperative that all outputs from an LLM—whether text, data, or code—are thoroughly proofread, fact-checked, and validated against reliable sources before being incorporated into any scientific work.24
+   * Uncertainty Estimation: A more technical approach involves developing methods to gauge the LLM's own "confidence" in its generations. By analyzing the model's internal logit values (the raw scores it assigns to potential next words), it is possible to identify tokens or phrases that were generated with low confidence, flagging them as potential hallucinations that require closer scrutiny.71 Another technique involves querying the model multiple times with slight variations of the same prompt and measuring the semantic consistency of the answers; high variance can indicate uncertainty and a higher likelihood of fabrication.72
+   * Active Validation and Correction: Building on uncertainty estimation, researchers have proposed an active intervention loop to correct hallucinations during the generation process.71 This multi-step approach involves: 1) identifying a low-confidence or potentially hallucinatory statement as it is generated; 2) pausing the generation and using the statement as a query for an external validation tool, such as a web search engine, to check its factuality; and 3) if a hallucination is confirmed, feeding the model a corrective prompt to get it back on a factually accurate track before allowing it to continue generating.71 Experiments have shown that this active validation process can dramatically reduce the rate of hallucination in LLM outputs.71
+   * The "Zero-Shot Translator" Paradigm: A crucial best practice for researchers is to fundamentally shift how they interact with LLMs. Instead of treating the LLM as a knowledge base to be queried (e.g., "What are the effects of this drug?"), which invites hallucination, they should use it as a "zero-shot translator".33 In this paradigm, the researcher first gathers the factual information from vetted sources. They then provide this information to the LLM and ask it to perform a language task on it, such as rewriting a set of factual bullet points into a coherent paragraph or summarizing a provided abstract.33 This approach keeps the human expert in firm control of the factual basis of the work.
+This last point represents a profound and necessary inversion of the typical human-information interaction. The default, and riskiest, way to use an LLM is to treat it as an oracle or a search engine, relying on its internal, opaque, and potentially flawed knowledge base.33 This is the direct pathway by which hallucinations can enter and corrupt scientific work. The most effective mitigation strategies, such as the zero-shot translator model and Retrieval-Augmented Generation (RAG), flip this dynamic on its head. The human researcher becomes the arbiter of truth, responsible for finding and vetting the factual information through reliable, traditional methods. This vetted information is then provided to the LLM, which is relegated to the role of a powerful language and reasoning tool tasked with operating
+only on the trusted data it has been given.33 This inversion—where the human provides knowledge to the machine, rather than asking the machine for knowledge—is a fundamental shift in mindset that is essential for the safe and responsible use of LLMs in high-stakes domains like science.
+
+
+Section 9: Bias, Equity, and Accessibility
+
+
+The integration of AI into science presents a complex and often paradoxical set of social implications. While these technologies hold the promise of democratizing research and leveling the playing field, they also carry the significant risk of amplifying existing biases and creating new forms of inequality. Navigating this double-edged sword requires careful consideration and proactive governance.
+
+
+The Double-Edged Sword of Bias
+
+
+LLMs learn from the data they are trained on, and that data is a reflection of our world, with all its inherent biases and prejudices.4 As a result, AI models can inadvertently learn, replicate, and even amplify harmful societal biases related to race, gender, socioeconomic status, and geography.2 In a scientific context, this risk extends beyond social prejudice. The training data, drawn heavily from the existing scientific literature, also contains its own set of biases. Models may learn to entrench dominant scientific theories and narratives, systematically downplaying or ignoring conflicting evidence or novel, unconventional ideas.24 This could have a chilling effect on scientific creativity and progress, inadvertently narrowing the scope of inquiry rather than expanding it.34
+
+
+The Paradox of Equity
+
+
+In a striking paradox, the same tools that risk amplifying bias also show significant potential to enhance research equity. As detailed previously, a comprehensive survey revealed that researchers from traditionally underrepresented and disadvantaged groups are not only using LLMs at a higher rate but are also perceiving greater benefits from them.11 For a junior researcher at a small university, a non-native English speaker, or a scientist from a developing nation, free or low-cost AI tools that can help with writing, coding, and accessing the breadth of scientific literature can be powerful equalizers, helping to lower long-standing structural barriers to participation in the global scientific conversation.11
+
+
+The New Digital Divide
+
+
+This potential for democratization is threatened, however, by the emergence of a new and growing digital divide. The development and deployment of the most powerful, frontier AI models require immense computational power and financial investment.1 These resources are heavily concentrated in a few large technology companies and the wealthiest nations, creating a significant disparity between what is available to industrial R&D labs and what is accessible to the average academic researcher.1 This resource gap risks creating a two-tiered system of scientific research. If access to the most advanced AI becomes a prerequisite for cutting-edge discovery, it could dramatically widen the existing gap between the world's elite, well-funded research institutions and everyone else, exacerbating global inequalities in scientific capacity.24
+Addressing this challenge requires deliberate, coordinated action. The open-sourcing of powerful models by companies like Meta is a crucial step towards broader access.22 Equally important are government-led initiatives, such as the National AI Research Resource (NAIRR) in the U.S., which aim to build public computational infrastructure and provide academic researchers with the resources they need to stay at the forefront of AI-driven science.1
+The complex interplay of these forces reveals that AI is not an independent actor for good or ill; it is a powerful amplifier of pre-existing societal and structural conditions. It acts upon the existing landscape of inequality in two opposing directions simultaneously. At the individual level, accessible AI tools can act as a democratizing force, lowering barriers for those facing specific disadvantages like language proficiency.11 At the institutional and national level, however, the immense resource requirements for developing frontier AI threaten to amplify the existing chasm between the "haves" and the "have-nots".1 Without deliberate and sustained interventions—such as the promotion of open-source models, the construction of public research infrastructure, and the development of policies to ensure equitable access—the risk is that the amplification of large-scale resource gaps will ultimately overwhelm the democratizing benefits for individuals, leading to a net increase in scientific inequality. The final outcome is not predetermined by the technology itself, but will be a consequence of the policy and governance choices made by the scientific community and society at large.
+
+
+Section 10: The Crisis of Trust: Plagiarism, Authorship, and Peer Review
+
+
+Beyond the technical challenges of hallucinations and bias, the integration of AI poses a direct threat to the social structures, norms, and ethical principles that form the bedrock of scientific trust. The ability of LLMs to generate sophisticated text and data obscures the lines of intellectual provenance, creating a potential crisis for the systems of authorship, originality, and peer review that underpin the credibility of the entire scientific enterprise.
+
+
+AI-Assisted Plagiarism and Authorship
+
+
+The concept of authorship in science is inextricably linked to responsibility and accountability. To be an author is to take credit for the intellectual contribution and to be accountable for the integrity of the work. The use of LLMs fundamentally complicates this paradigm. When a researcher uses an LLM to generate significant portions of a manuscript's text and presents it as their own without proper attribution, it constitutes a new and insidious form of plagiarism.5 The text did not originate from the author's own intellect, yet they are claiming credit for it.
+This leads to a profound authorship dilemma. While an LLM's contribution to a paper can be substantial, it cannot be listed as an author.8 An AI is not a legal entity; it cannot hold copyright, it cannot agree to the terms of a license, and most importantly, it cannot be held accountable for the content it produces.5 This creates a vacuum of responsibility. If an AI generates a novel idea, who gets the credit? If it generates a flawed analysis that leads to a retraction, who bears the blame?8
+
+
+Publisher and Journal Responses
+
+
+The scientific publishing community is scrambling to establish norms and policies to address this crisis. The response has been varied and is still evolving. Initially, some prominent journals like Science took a hardline stance, effectively banning the use of generative AI in submitted manuscripts.20 More recently, the consensus has shifted towards a model of managed use with mandatory transparency. Journals such as
+Nature and the Journal of the American Medical Association (JAMA) now permit the use of LLMs as writing assistance tools, but with the strict requirement that their use be clearly and explicitly disclosed in the manuscript.20
+A major fear for publishers is the potential for this technology to be weaponized by "paper mills"—fraudulent operations that produce and sell fake scientific papers and authorships.20 LLMs make it easier than ever to generate plausible-sounding but entirely fabricated research reports, complete with fake data and analysis. This could lead to a deluge of fraudulent papers, forcing publishers into the unenviable and resource-intensive position of having to investigate the very existence of the authors and institutions listed on a submission to verify its legitimacy.20
+
+
+The Corruption of Peer Review
+
+
+The peer review process, which relies on a delicate balance of expertise, confidentiality, and good faith, is particularly vulnerable to disruption by AI. Confidentiality is a sacred norm in peer review; a manuscript under review is a privileged document. The act of a reviewer uploading that confidential manuscript to a public, third-party LLM platform for assistance is a profound breach of that trust and is explicitly prohibited by many major publishers.20
+Even when confidentiality is not breached (e.g., through the use of a local, secure LLM), the use of AI in review poses a threat to quality. There is a significant risk that reviewers will use AI as a shortcut, substituting the deep intellectual engagement required for a rigorous critique with a superficial, automated summary generated by the model.20 This devalues the entire process, erodes trust between authors and journals, and ultimately fails in its primary mission of ensuring the quality and validity of the scientific record.
+At its core, the crisis of trust precipitated by AI stems from the technology's ability to obscure, or in some cases completely sever, the chain of intellectual provenance. Science operates as a system of trust built upon a foundation of verifiability. An idea, a result, or a piece of text can be traced back to an accountable human author and a research process that is, in principle, verifiable and reproducible. AI, especially when its use is not transparently disclosed, shatters this chain of provenance. It introduces an unaccountable, non-human, and often opaque agent into the process, making it difficult or impossible for a reader, an editor, or a fellow scientist to know who did what, where an idea truly originated, and whether the work is legitimate. The undisclosed use of an LLM for writing is a break in the chain of authorship.5 The use of AI by a paper mill to fabricate a study is a complete invention of provenance.20 The use of an LLM in peer review is a breach of the confidential chain of trust.20 In every case, the fundamental problem is the same: the erosion of verifiable provenance. Therefore, the primary and most urgent goal of any governance policy for AI in science must be the re-establishment and strict enforcement of a clear and transparent chain of intellectual provenance through mandatory, detailed, and standardized disclosure of any and all use of AI tools in the research process.5
+To aid in the proactive management of these myriad risks, the following framework provides a structured approach to risk assessment and mitigation, assigning responsibilities to the various stakeholders within the scientific ecosystem.
+Table 4: A Framework for Risk Assessment and Mitigation in Scientific AI
+Risk Category
+	Specific Risk
+	Impact on Scientific Enterprise
+	Mitigation Strategies (Technical & Procedural)
+	Primary Responsible Stakeholder(s)
+	Key Sources
+	Factual Integrity
+	Hallucination of data, facts, or citations.
+	Pollution of the scientific literature with false information; erosion of public trust in science.
+	Technical: Use Retrieval-Augmented Generation (RAG) to ground outputs in vetted sources. Procedural: Mandatory human expert validation of all AI outputs; adopt "zero-shot translator" paradigm.
+	Individual Researcher, Research Institution
+	11
+	Data & Algorithmic Bias
+	Perpetuation of societal biases (race, gender) from training data.
+	Reinforcement of harmful stereotypes; inequitable research outcomes (e.g., in medicine).
+	Technical: Audit training data for biases; develop bias mitigation algorithms. Procedural: "Slow science" approach with thoughtful reflection; check outputs specifically for bias.
+	AI Developer, Research Institution, Researcher
+	2
+	
+
+	Entrenchment of dominant scientific narratives.
+	Stifling of creativity, innovation, and novel viewpoints; overlooking of knowledge gaps.
+	Procedural: Use LLMs primarily in later stages after human-led creative inquiry; prompt for alternative or contradictory viewpoints.
+	Individual Researcher, Funding Agency
+	24
+	Academic & Professional Integrity
+	AI-assisted plagiarism and improper authorship.
+	Devaluation of authorship; breakdown of scientific accountability and credit assignment.
+	Procedural: Mandatory, detailed disclosure policies; development of clear authorship guidelines by publishers; use of AI detection tools.
+	Publisher/Journal, Research Institution, Researcher
+	5
+	
+
+	Use of AI in peer review.
+	Breach of confidentiality; superficial and low-quality reviews; erosion of trust in the publication system.
+	Procedural: Strict publisher policies prohibiting or regulating use; secure, journal-provided tools; transparency from reviewers.
+	Publisher/Journal, Editor, Reviewer
+	20
+	
+
+	Generation of fake data and papers ("paper mills").
+	Widespread fraud; waste of scientific resources on refuting fake studies; damage to scientific credibility.
+	Technical: Development of robust AI-generated content detectors (e.g., watermarking). Procedural: Rigorous institutional and publisher verification of author/study legitimacy.
+	Publisher/Journal, Research Institution
+	20
+	Equity & Accessibility
+	Creation of a new "AI divide" due to resource inequality.
+	Widening of the global research gap between well-funded and less-funded institutions/nations.
+	Procedural: Promotion of open-source models; creation of public compute resources (e.g., NAIRR); funding for access.
+	Government, Funding Agency, AI Developer
+	1
+	
+
+Part V: Charting the Course: Governance, Best Practices, and the Future of Inquiry
+
+
+The rapid integration of AI into science is not a future prospect but a present reality, bringing with it a complex mixture of transformative potential and existential risk. The preceding sections have detailed the specific applications, underlying technologies, and profound challenges of this new era. This final part of the report looks forward, synthesizing these findings into a coherent strategy for navigating the path ahead. It will first examine the need for robust governance frameworks tailored to the unique culture of science. It will then distill the numerous recommendations from the literature into a set of actionable best practices for individual researchers. Finally, it will return to the ultimate and most consequential question: what is the true potential of AI in science, and can a machine ever formulate a new law of nature?
+
+
+Section 11: Architecting Responsibility: Governance Frameworks for Scientific AI
+
+
+The power and peril of AI necessitate the development of robust governance structures to guide its responsible deployment. While numerous high-level ethical frameworks for AI have been proposed, their effective application to the scientific domain requires careful adaptation to the specific values, workflows, and norms that define the research enterprise.
+
+
+Existing AI Governance Frameworks
+
+
+On the international stage, several influential frameworks provide a starting point. The OECD AI Principles, for example, emphasize human-centered values, inclusive growth, transparency, robustness, and accountability.73 The European Union has taken a more regulatory approach with its landmark
+AI Act, which establishes a risk-based framework that categorizes AI applications and bans those deemed to pose an "unacceptable risk," such as manipulative systems or social scoring.74 In the United States, the National Institute of Standards and Technology (NIST) has developed the
+AI Risk Management Framework (AI RMF), a voluntary but comprehensive guide for organizations to identify, assess, manage, and govern the risks associated with AI systems throughout their lifecycle.73 Other notable contributions include the IEEE's Ethically Aligned Design framework and the Asilomar AI Principles.73
+Across these diverse frameworks, a set of common, core principles consistently emerges:
+   * Transparency and Explainability: AI systems should be understandable, with their decision-making processes open to inspection.73
+   * Fairness and Non-Discrimination: AI should treat all individuals equitably and avoid creating or amplifying unjust biases.73
+   * Accountability: There must be clear lines of responsibility for the outcomes of AI systems.73
+   * Privacy and Data Governance: Personal and sensitive data must be protected and handled responsibly.73
+   * Technical Robustness and Safety: AI systems should be secure, reliable, and function as intended.73
+   * Human Agency and Oversight: Humans must always retain meaningful control over and the ability to intervene in the operation of AI systems.73
+
+
+Tailoring Governance for Science
+
+
+While these general principles are invaluable, they are insufficient on their own for the scientific context. The scientific community operates with its own deeply ingrained set of values and procedural norms, such as reproducibility, peer review, open data, and rigorous standards for evidence and authorship.73 Effective governance for AI in science cannot simply be imported from industry or government; it must be thoughtfully translated and integrated into these existing scientific structures.34
+There is a critical gap between the high-level, principle-based nature of general AI governance and the specific, process-oriented demands of scientific rigor. For example, the principle of "transparency" is a common refrain in AI ethics.73 In a general context, this might mean explaining how an algorithm works. In a scientific context, however, transparency has a much more precise and demanding meaning. It implies open access to the data used, the code written for analysis, and a methodology detailed enough for another researcher to reproduce the results. Similarly, "accountability" is tied directly to the formal system of authorship and the peer review process.
+Therefore, a general ethical guideline to "be transparent" is not actionable for a scientist. A scientifically relevant rule must be specific and operational: "Authors must disclose which specific LLM was used, for what precise purpose (e.g., language editing, code generation, literature summary), and must provide the exact prompts used as part of their supplementary materials to ensure reproducibility".5 The challenge for the scientific community is not a lack of ethical principles, but a lack of
+translation of those principles into the concrete, verifiable actions that constitute good scientific practice. The most effective and durable governance will therefore come from within the scientific community itself, by embedding these translated principles into the existing, powerful structures of institutional review boards, journal publication standards, and funding agency requirements.20
+
+
+Section 12: The Scientist's Compass: Best Practices for AI Integration
+
+
+While institutions and publishers develop high-level governance, individual researchers on the front lines need practical, actionable guidance for using these powerful new tools responsibly and effectively. Distilling the extensive literature on this topic yields a set of clear best practices that can serve as a compass for any scientist navigating this new terrain. These rules consistently point towards a single, overarching principle: the necessity of maintaining active, critical, and transparent human oversight at every stage of the process.
+   * Rule 1: Define the Task and Select the Right Tool. The first step in any research project involving AI is to carefully and precisely define the task to be performed.42 With a clear goal in mind, the researcher can then select the most appropriate tool. This does not always mean reaching for the largest, most powerful general-purpose model. For a specific task like text classification, a smaller, niche model that has been purpose-built for that function may be more efficient and effective.42 Researchers must also make a conscious choice between using closed, proprietary models (which may offer higher performance but limited transparency) and open-source models (which allow for greater scrutiny of potential biases and data handling practices).42
+   * Rule 2: Prioritize Human-Generated Drafts and Critical Oversight. To preserve originality and ensure scientific validity, the first draft of any substantive intellectual work—be it a manuscript section, a research proposal, or a line of theoretical inquiry—must come from the human researcher.23 It is tempting to use an LLM to overcome the "blank page" problem, but this risks ceding the core creative direction of the work to the machine. The human expert must always remain in the driver's seat, providing the crucial guidance, context, innovation, and critical judgment that AI systems currently lack.1
+   * Rule 3: Practice Rigorous Verification. An inviolable rule for using AI in science is: never trust, always verify. Given the known propensity of LLMs to hallucinate, all AI-generated content must be treated with profound skepticism. Every fact, every citation, every line of code, and every piece of data analysis generated by an AI must be meticulously reviewed, fact-checked against reliable primary sources, and validated by the human expert before it is accepted.5
+   * Rule 4: Master Prompt Engineering. The output of an LLM is exquisitely sensitive to the input it receives. "Prompt engineering"—the art and science of crafting effective prompts—is a critical skill for the modern researcher. Prompts should be as clear, specific, and detailed as possible to reduce ambiguity and guide the model towards the desired output.35 A powerful technique is "few-shot prompting," where the researcher includes several examples of the desired input-output format within the prompt itself. This is particularly effective for guiding the model to produce outputs in a specific style or a structured format, like a table.35
+   * Rule 5: Be Transparent and Disclose Usage. Adherence to the principles of open science and academic integrity is paramount. Researchers must diligently follow all guidelines set forth by their target journals and funding agencies regarding the use of AI.23 As a default principle, and especially when guidelines are unclear, researchers should proactively disclose their use of AI tools. This disclosure, typically placed in the methods or acknowledgements section, should be sufficiently detailed to allow for transparency and reproducibility, specifying which models were used and for what purposes.24
+A holistic view of these best practices reveals a unifying theme. Across the entire spectrum of identified risks—from the technical problem of hallucinations to the ethical challenge of plagiarism—the single most consistently proposed and universally effective mitigation strategy is the active, critical, and transparent engagement of a human expert. The risk of hallucination is managed by a human verifying the facts.24 The risk of bias is managed by a human checking for and correcting biased outputs.24 The risk of plagiarism is managed by the human taking ultimate responsibility and transparently disclosing the tool's use.5 The risk of incorrect code is managed by a human programmer debugging the output.5 The "human-in-the-loop" is therefore not just one best practice among many; it is the foundational principle of responsible AI in science, the master key that unlocks the immense benefits of these tools while keeping their inherent dangers in check.
+
+
+Section 13: The Final Frontier: Can AI Formulate a New Law of Nature?
+
+
+As AI becomes more deeply woven into the fabric of science, the ultimate question of its potential inevitably arises. Moving beyond practical applications, the scientific community is engaged in a profound and often contentious debate about the fundamental nature of these systems and their ultimate capacity for discovery. Can an AI ever move beyond calculation and pattern-matching to achieve a true conceptual breakthrough—to formulate a new and fundamental law of nature?
+
+
+The Debate: Stochastic Parrot vs. Sparks of Intelligence
+
+
+The debate is currently polarized between two opposing viewpoints. On one side are the skeptics, who argue that current LLMs, for all their fluency, are merely "stochastic parrots" or "autocomplete on steroids".32 In this view, the models are sophisticated pattern-matching systems that have learned the statistical relationships in their training data but lack any genuine understanding, consciousness, or capacity for true reasoning.32 They can interpolate and combine existing knowledge in novel ways, but they cannot create a truly new conceptual framework.
+On the other side are proponents who point to the emergent reasoning capabilities of the latest models and argue that they are showing "sparks of artificial general intelligence".32 They cite claims from leading scientists who, after working with frontier models, report that they are beginning to produce "legitimately good and useful novel ideas".32 In this view, the scaling of these models is leading to qualitatively new abilities that transcend simple pattern-matching.
+
+
+The Challenge of Defining and Measuring "Discovery"
+
+
+A central difficulty in resolving this debate is the ambiguity of the term "discovery" itself. While AI has already achieved stunning computational discoveries—such as AlphaFold's solution to the protein folding problem or GNoME's discovery of new materials—these successes involve solving well-defined, albeit incredibly complex, optimization or prediction problems.32 The gold standard for many is a
+conceptual discovery: the formulation of a new, abstract, and explanatory idea that fundamentally changes our understanding of the world, akin to Darwin's theory of natural selection or Einstein's theory of general relativity.32
+Measuring this kind of breakthrough is fraught with subjectivity. The "novelty" and "usefulness" of a new idea, particularly in fundamental science, are not easily quantifiable and are often judged by the scientific community based on subjective notions of elegance, importance, or alignment with current research trends.32 It is not difficult for an AI to combine known facts to produce a new, correct statement; the challenge is to produce one that is interesting and important.32
+
+
+The Path Forward: From Automation to Autonomy
+
+
+Despite the debate, the long-term vision for many in the field is a future where AI evolves from a tool for automation into a truly autonomous scientific partner. In this vision, AI agents will work side-by-side with human scientists at every stage of the discovery process, from generating initial hypotheses to designing and executing experiments, analyzing the data, and formulating the next round of questions in a continuous, accelerated cycle.19 Proponents of this view suggest that this could lead to a "compressed 21st century," where decades of scientific progress are achieved in just a few years.16
+
+
+The Ambiguous Future
+
+
+In the near term, the most probable reality is a "messy middle ground".32 AI models will continue to produce increasingly impressive and scientifically relevant outputs, but these will be intermingled with mistakes and hallucinations. Experts will disagree on whether these outputs represent genuine breakthroughs or clever recombinations of existing knowledge.32 As researchers increasingly use LLMs as conversational partners to iterate on their ideas, the lines of intellectual contribution will become blurred, making it difficult to assign credit for a discovery and fueling the interminable debate over AI's "intelligence".32 The future of AI in science is unlikely to be a single, monolithic, all-knowing LLM. Instead, it is more likely to be a diverse ecosystem, an ensemble of bespoke and often more lightweight models that have been explicitly designed, trained, and evaluated for the specific, rigorous tasks of scientific inquiry.76
+This ongoing debate about AI's ultimate potential is not merely a philosophical diversion; it represents a fundamental fork in the road for the future strategy and investment in AI for science. The path the scientific community chooses will be determined by which view of AI's capabilities it ultimately subscribes to, leading to two distinct research and development trajectories.
+If one adopts the "stochastic parrot" view—that LLMs are fundamentally sophisticated pattern-matchers limited by their training data 32—then the strategic priority for advancing AI in science is clear:
+better data. The key to unlocking better scientific AI is the painstaking work of creating, curating, and structuring massive, high-quality, domain-specific datasets. The goal is to provide the pattern-matching engine with better, more reliable patterns to learn from. In this future, the AI remains an incredibly powerful tool, an amplifier of human intellect, but a tool nonetheless.
+Conversely, if one subscribes to the "emergent intelligence" view—that these models have the potential for genuine reasoning and conceptual leaps 32—then the strategic priority is not just better data, but
+better architectures. The focus of investment should shift towards fundamental AI research, exploring novel architectures that move beyond next-word prediction to systems that can reason, plan, and build internal models of the world, pursuing something closer to artificial general intelligence. In this future, the goal is to create not just a tool, but an autonomous scientific partner.
+These two paths lead to vastly different research programs and long-term visions. The first path leads to more powerful instruments for human scientists; the second path leads toward the automated scientist. The current ambiguity of the "messy middle ground" suggests that for the foreseeable future, the scientific community must walk both paths simultaneously—investing in the creation of superior scientific data while also supporting fundamental research into the next generation of AI architectures capable of true reasoning and discovery. The course of scientific history in the 21st century may well be determined by the outcomes of this dual pursuit.
+Works cited
+   1. AI and the Future of Scientific Discovery - MIT FutureTech, accessed on June 29, 2025, https://futuretech.mit.edu/news/ai-and-the-future-of-scientific-discovery
+   2. Risks and Benefits of Large Language Models for the Environment | Environmental Science & Technology - ACS Publications, accessed on June 29, 2025, https://pubs.acs.org/doi/10.1021/acs.est.3c01106
+   3. The Importance of Large Language Models in Science | Blog | Enthought, accessed on June 29, 2025, https://www.enthought.com/blog/the-importance-of-large-language-models-in-science-even-if-you-dont-work-with-language/
+   4. What Is a Large Language Model in Science? - Rancho BioSciences, accessed on June 29, 2025, https://ranchobiosciences.com/2024/09/large-language-models-and-scientific-research/
+   5. Editorial – The Use of Large Language Models in Science: Opportunities and Challenges, accessed on June 29, 2025, https://pmc.ncbi.nlm.nih.gov/articles/PMC10485814/
+   6. Adapting to LLMs: How Insiders and Outsiders Reshape Scientific Knowledge Production, accessed on June 29, 2025, https://arxiv.org/html/2505.12666v1
+   7. Large Language Models in Scientific Writing in - Brill, accessed on June 29, 2025, https://brill.com/view/journals/fsd/aop/article-10.1163-18696945-bja00010/article-10.1163-18696945-bja00010.xml
+   8. How should the advancement of large language models affect the ..., accessed on June 29, 2025, https://www.pnas.org/doi/10.1073/pnas.2401227121
+   9. Ten simple rules to leverage large language models for getting grants - University of California Los Angeles, accessed on June 29, 2025, https://search.library.ucla.edu/discovery/fulldisplay?docid=cdi_doaj_primary_oai_doaj_org_article_9ac755efccd0482c85a94eb61a977dd0&context=PC&vid=01UCS_LAL:UCLA&lang=en&search_scope=ArticlesBooksMore&adaptor=Primo%20Central&tab=Articles_books_more_slot&query=creator%2Cexact%2C%20Rodriguez%2C%20Fatima%20%2CAND&facet=creator%2Cexact%2C%20Rodriguez%2C%20Fatima%20&mode=advanced&offset=0
+   10. Generative AI for Data-driven Research - Machines and Society, accessed on June 29, 2025, https://guides.nyu.edu/data/chatgpt-research
+   11. LLMs as Research Tools: A Large Scale Survey of Researchers' Usage and Perceptions, accessed on June 29, 2025, https://arxiv.org/html/2411.05025v1
+   12. The Transformative Impact of AI Across the Sciences - Greatness.bio, accessed on June 29, 2025, https://greatness.bio/the-transformative-impact-of-ai-across-the-sciences/
+   13. (PDF) GENERATIVE AI FOR SCIENTIFIC DISCOVERY ..., accessed on June 29, 2025, https://www.researchgate.net/publication/390371479_GENERATIVE_AI_FOR_SCIENTIFIC_DISCOVERY_AUTOMATED_HYPOTHESIS_GENERATION_AND_TESTING
+   14. www.qualtrics.com, accessed on June 29, 2025, https://www.qualtrics.com/experience-management/research/ai-research-strategies/#:~:text=AI%20is%20enhancing%20research%20planning,and%20even%20optimize%20sample%20selection.
+   15. How To Use AI To Integrate Advanced Research Methods in Surveys - Quantilope, accessed on June 29, 2025, https://www.quantilope.com/resources/how-to-use-ai-to-integrate-advanced-research-methods-in-surveys
+   16. The scientific sprint: how AI is rewriting discovery timelines - IBM, accessed on June 29, 2025, https://www.ibm.com/think/news/scientific-sprint-how-AI-rewriting-discovery-timelines
+   17. Revolutionizing Scientific Discovery with AI - Science Data Portal, accessed on June 29, 2025, https://science.data.nasa.gov/learn/blog/artificial-intelligence-data-discovery
+   18. What AI Really Can Do Now: 6 Lessons for Harnessing Artificial Intelligence - Newsweek, accessed on June 29, 2025, https://www.newsweek.com/2025/07/04/ai-impact-six-lessons-2088669.html
+   19. Physics-Guided AI for Accelerating Scientific Discovery - YouTube, accessed on June 29, 2025, https://www.youtube.com/watch?v=VnQjADOKV6g
+   20. Large Language Models for Scientific Publishing: Please, Do Not Make Them a Foe | Clinical Chemistry | Oxford Academic, accessed on June 29, 2025, https://academic.oup.com/clinchem/article/70/3/468/7609500
+   21. Science journal Nature promotes AI chatbots for academic peer review - Pivot to AI, accessed on June 29, 2025, https://pivot-to-ai.com/2025/03/08/science-journal-nature-promotes-using-chatbots-for-academic-peer-review/
+   22. Impact of LLMs on Academic Literature Synthesis: Influence and Oversight in Business Economics and Other Disciplines - Deep Blue Repositories, accessed on June 29, 2025, https://deepblue.lib.umich.edu/bitstream/handle/2027.42/194326/Alex%20Zhang%20BE%20399%20SS24.pdf?sequence=1&isAllowed=y
+   23. Ten simple rules to leverage large language models for getting grants - PLOS, accessed on June 29, 2025, https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011863
+   24. Ten simple rules for using large language models in science, version 1.0 - PMC, accessed on June 29, 2025, https://pmc.ncbi.nlm.nih.gov/articles/PMC10829980/
+   25. Foundation Models for Scientific Discovery and Innovation Opportunities Across the Department of Energy | National Academies, accessed on June 29, 2025, https://www.nationalacademies.org/our-work/foundation-models-for-scientific-discovery-and-innovation-opportunities-across-the-department-of-energy
+   26. Scientific Foundation Models | Michigan Institute for Computational Discovery and Engineering, accessed on June 29, 2025, https://micde.umich.edu/research/scientific-foundation-models/
+   27. www.nationalacademies.org, accessed on June 29, 2025, https://www.nationalacademies.org/our-work/foundation-models-for-scientific-discovery-and-innovation-opportunities-across-the-department-of-energy#:~:text=Foundation%20models%20are%20Artificial%20Intelligence,text%2C%20image%20or%20audio%20generation.
+   28. Large Language Models in Genomics—A Perspective on Personalized Medicine - PMC, accessed on June 29, 2025, https://pmc.ncbi.nlm.nih.gov/articles/PMC12108693/
+   29. Large Language Models in Bioinformatics: A Survey - arXiv, accessed on June 29, 2025, https://arxiv.org/html/2503.04490v1
+   30. A Survey of AI for Materials Science: Foundation Models, LLM Agents, Datasets, and Tools, accessed on June 29, 2025, https://arxiv.org/html/2506.20743v1
+   31. The Future of Large Language Models in 2025 - Research AIMultiple, accessed on June 29, 2025, https://research.aimultiple.com/future-of-large-language-models/
+   32. We'll Be Arguing for Years Whether Large Language Models Can ..., accessed on June 29, 2025, https://ai-frontiers.org/articles/arguing-whether-ai-models-make-scientific-discoveries
+   33. Large Language Models pose risk to science with false answers ..., accessed on June 29, 2025, https://www.ox.ac.uk/news/2023-11-20-large-language-models-pose-risk-science-false-answers-says-oxford-study-0
+   34. Responsible Use of LLMs in Research: Moving Beyond the Hype ..., accessed on June 29, 2025, https://science.ai.cam.ac.uk/2025/01/13/responsible-use-of-llms-in-research-moving-beyond-the-hype
+   35. Large language models for reticular chemistry, accessed on June 29, 2025, https://sites.wustl.edu/zhenglab/files/2025/06/large-language-models-for-reticular-chemistry.pdf
+   36. Generic LLMs vs. Domain-Specific LLMs: What's the Difference? - Dataversity, accessed on June 29, 2025, https://www.dataversity.net/generic-llms-vs-domain-specific-llms-whats-the-difference/
+   37. Building Domain-Specific LLMs: Examples and Techniques - Kili Technology, accessed on June 29, 2025, https://kili-technology.com/large-language-models-llms/building-domain-specific-llms-examples-and-techniques
+   38. Fine-Tuning Large Language Models for Specialized Use Cases - PMC, accessed on June 29, 2025, https://pmc.ncbi.nlm.nih.gov/articles/PMC11976015/
+   39. OmniScience: A Domain-Specialized LLM for Scientific Reasoning and Discovery - arXiv, accessed on June 29, 2025, https://arxiv.org/html/2503.17604v1
+   40. [Revue de papier] OmniScience: A Domain-Specialized LLM for Scientific Reasoning and Discovery - Moonlight | AI Colleague for Research Papers, accessed on June 29, 2025, https://www.themoonlight.io/fr/review/omniscience-a-domain-specialized-llm-for-scientific-reasoning-and-discovery
+   41. Architecting the Future: A Vision for Using Large Language Models to Enable Open Science, accessed on June 29, 2025, https://www.earthdata.nasa.gov/news/blog/architecting-future-vision-using-large-language-models-enable-open-science
+   42. Accelerating the use of LLMs in science: sharing ideas and best practice, accessed on June 29, 2025, https://science.ai.cam.ac.uk/2024/09/24/accelerating-the-use-of-llms-in-science-sharing-ideas-and-best-practice
+   43. FutureHouse, accessed on June 29, 2025, https://www.futurehouse.org/
+   44. A Comprehensive Survey of Scientific Large Language Models and Their Applications in Scientific Discovery - arXiv, accessed on June 29, 2025, https://arxiv.org/html/2406.10833v2
+   45. Hybrid-LLM-GNN: integrating large language models and graph neural networks for enhanced materials property prediction (Journal Article) - OSTI, accessed on June 29, 2025, https://www.osti.gov/biblio/2483725
+   46. Empowering Graph Neural Network-based Computational Drug Repositioning with Large Language Model-inferred Knowledge Representation, accessed on June 29, 2025, https://www.cs.emory.edu/~jyang71/files/llm-dda.pdf
+   47. [2410.15165] Explaining Graph Neural Networks with Large Language Models: A Counterfactual Perspective for Molecular Property Prediction - arXiv, accessed on June 29, 2025, https://arxiv.org/abs/2410.15165
+   48. Protein structure prediction beyond AlphaFold - ResearchGate, accessed on June 29, 2025, https://www.researchgate.net/publication/335087662_Protein_structure_prediction_beyond_AlphaFold
+   49. OmniScience: A Domain-Specialized LLM for Scientific Reasoning and Discovery - arXiv, accessed on June 29, 2025, https://arxiv.org/pdf/2503.17604
+   50. OmniScience: A Domain-Specialized LLM for Scientific Reasoning and Discovery | AI Research Paper Details - AIModels.fyi, accessed on June 29, 2025, https://www.aimodels.fyi/papers/arxiv/omniscience-domain-specialized-llm-scientific-reasoning-discovery
+   51. 10 Benefits and 10 Challenges of Applying Large Language Models to DoD Software Acquisition - SEI Blog, accessed on June 29, 2025, https://insights.sei.cmu.edu/blog/10-benefits-and-10-challenges-of-applying-large-language-models-to-dod-software-acquisition/
+   52. STELLA: Towards Protein Function Prediction with Multimodal LLMs Integrating Sequence-Structure Representations - arXiv, accessed on June 29, 2025, https://arxiv.org/html/2506.03800v1
+   53. How Google AI is advancing science - Google Blog, accessed on June 29, 2025, https://blog.google/technology/ai/google-ai-big-scientific-breakthroughs-2024/
+   54. Beyond LLMs: The Future of AI-Driven Protein Design, accessed on June 29, 2025, https://hyperlab.hits.ai/en/blog/Protein_Design_AI_
+   55. STELLA: Towards Protein Function Prediction with Multimodal LLMs Integrating Sequence-Structure Representations - ResearchGate, accessed on June 29, 2025, https://www.researchgate.net/publication/392406698_STELLA_Towards_Protein_Function_Prediction_with_Multimodal_LLMs_Integrating_Sequence-Structure_Representations
+   56. Leveraging a large language model to predict protein phase transition: A physical, multiscale, and interpretable approach | PNAS, accessed on June 29, 2025, https://www.pnas.org/doi/10.1073/pnas.2320510121
+   57. STELLA: Leveraging Structural Representations to Enhance Protein Understanding with Multimodal LLMs | OpenReview, accessed on June 29, 2025, https://openreview.net/forum?id=X7SQiI5Uul
+   58. AI-Empowered Genome Decoding: Applications of Large Language Models in Genomics, accessed on June 29, 2025, https://journal.hep.com.cn/fde/EN/10.1007/s44366-025-0051-1
+   59. Large Language Models in Bioinformatics: A Survey - arXiv, accessed on June 29, 2025, https://arxiv.org/pdf/2503.04490
+   60. Large Language Models in Bioinformatics: A Survey | Request PDF - ResearchGate, accessed on June 29, 2025, https://www.researchgate.net/publication/389648105_Large_Language_Models_in_Bioinformatics_A_Survey
+   61. Advancing bioinformatics with large language models: components, applications and perspectives - PMC, accessed on June 29, 2025, https://pmc.ncbi.nlm.nih.gov/articles/PMC10802675/
+   62. 34 Examples of LLM Applications in Materials Science and Chemistry: Towards Automation, Assistants, Agents, and Accelerated Scientific Discovery - ResearchGate, accessed on June 29, 2025, https://www.researchgate.net/publication/391493027_34_Examples_of_LLM_Applications_in_Materials_Science_and_Chemistry_Towards_Automation_Assistants_Agents_and_Accelerated_Scientific_Discovery
+   63. [2505.03049] 34 Examples of LLM Applications in Materials Science and Chemistry: Towards Automation, Assistants, Agents, and Accelerated Scientific Discovery - arXiv, accessed on June 29, 2025, https://arxiv.org/abs/2505.03049
+   64. [Literature Review] 34 Examples of LLM Applications in Materials Science and Chemistry: Towards Automation, Assistants, Agents, and Accelerated Scientific Discovery - Moonlight | AI Colleague for Research Papers, accessed on June 29, 2025, https://www.themoonlight.io/en/review/34-examples-of-llm-applications-in-materials-science-and-chemistry-towards-automation-assistants-agents-and-accelerated-scientific-discovery
+   65. A Survey of AI for Materials Science: Foundation Models, LLM Agents, Datasets, and Tools - arXiv, accessed on June 29, 2025, https://www.arxiv.org/pdf/2506.20743
+   66. Automating Scientific Discovery: A Research Agenda for Advancing Self-Driving Labs, accessed on June 29, 2025, https://fas.org/publication/automating-scientific-discovery/
+   67. Autonomous Discovery | Argonne National Laboratory, accessed on June 29, 2025, https://www.anl.gov/autonomous-discovery
+   68. Could AI make breakthroughs in physics? : r/AskPhysics - Reddit, accessed on June 29, 2025, https://www.reddit.com/r/AskPhysics/comments/1987g91/could_ai_make_breakthroughs_in_physics/
+   69. About the AI and Science Initiative – DSI, accessed on June 29, 2025, https://datascience.uchicago.edu/research/ai-science/about-the-ai-and-science-initiative/
+   70. Insights into Classifying and Mitigating LLMs' Hallucinations - CEUR-WS.org, accessed on June 29, 2025, https://ceur-ws.org/Vol-3563/paper_12.pdf
+   71. A Stitch in Time Saves Nine: Detecting and Mitigating Hallucinations ..., accessed on June 29, 2025, https://openreview.net/forum?id=d3UGSRLbPo
+   72. r/learnmachinelearning on Reddit: Use uncertainty estimation to catch hallucinations from any LLM (including o3, o1, GPT 4.5, Sonnet 3.7, ...), accessed on June 29, 2025, https://www.reddit.com/r/learnmachinelearning/comments/1j6zbor/use_uncertainty_estimation_to_catch/
+   73. AI Governance Frameworks for Scientific Applications - AZoRobotics, accessed on June 29, 2025, https://www.azorobotics.com/Article.aspx?ArticleID=761
+   74. Implementing Ethical AI Frameworks in Industry - University of San Diego Online Degrees, accessed on June 29, 2025, https://onlinedegrees.sandiego.edu/ethics-in-ai/
+   75. AI Ethics Framework: Key Resources for Responsible AI Usage - SecureITWorld, accessed on June 29, 2025, https://www.secureitworld.com/blog/ai-ethics-frameworks-10-essential-resources-to-build-an-ethical-ai-framework/
+   76. www.pnas.org, accessed on June 29, 2025, https://www.pnas.org/doi/10.1073/pnas.2401227121#:~:text=We%20envision%20the%20future%20of,terms%20of%20those%20specific%20tasks.

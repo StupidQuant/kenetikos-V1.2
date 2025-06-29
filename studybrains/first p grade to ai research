@@ -1,0 +1,697 @@
+I'm embarking on a comprehensive research initiative to gather the technical specifications for a sophisticated quantitative analysis platform. This platform, named 'kinētikós entropḗ', aims to dynamically estimate market parameters, autonomously identify market regimes, and leverage historical data for probabilistic forecasts. My goal is to provide detailed conceptual explanations, mathematical formulations, Python code implementations, and comparisons of relevant open-source libraries for each component.
+Dynamic Market State Estimation
+My initial focus is on developing a 'Living Model' for dynamic state estimation. This involves implementing a Particle Filter to track time-varying market parameters, ensuring that physical constraints like positive values for stiffness and driving force are handled correctly, potentially by sampling from appropriate distributions. I'm also looking into using STL Decomposition for robust equilibrium price modeling, with a key aspect being the dynamic selection of the decomposition period using spectral analysis methods like Fast Fourier Transform.
+Next Steps in Research
+I will proceed by conducting targeted searches for each of these components, prioritizing academic papers, technical blogs, and official library documentation to ensure the highest quality of information. My approach will involve starting with broader searches to grasp the overall concepts and then narrowing down to find specific implementation details and production-ready code patterns.
+
+Researching websites
+
+svantek.com
+FFT Fast Fourier Transform | Svantek Academy
+
+github.com
+AleksandarHaber/Python-Implementation-of-Particle-Filter - GitHub
+
+stackoverflow.com
+numpy - How to interpret the results of the Discrete Fourier Transform (FFT) in Python
+
+reddit.com
+Question about using Fast Fourier Transform to get the dominant frequencies of an oscillation. Details below with my main question at the beginning. - Reddit
+
+youtube.com
+How to Compute FFT and Plot Frequency Spectrum in Python using Numpy and Matplotlib
+
+github.com
+jelfring/particle-filter-tutorial - GitHub
+
+gitlab.unimelb.edu.au
+doc/how-to · 0.8.2 · Rob Moss / particle-filter-for-python - GitLab
+
+github.com
+particle-filter-tutorial/challenge5_adaptive_particle_filter.py at master - GitHub
+
+particles-sequential-monte-carlo-in-python.readthedocs.io
+Basic tutorial — particles alpha documentation
+
+pypfilt.readthedocs.io
+How-to Guides — pypfilt 0.8.6 documentation
+
+medium.com
+Particle Filter Part 4 — Pseudocode (and Python code) | by Mathias Mantelli - Medium
+
+github.com
+PythonRobotics/Localization/particle_filter/particle_filter.py at master · AtsushiSakai/PythonRobotics - GitHub
+
+particles-sequential-monte-carlo-in-python.readthedocs.io
+Advanced Tutorial (geared toward state-space models) - particles' documentation!
+
+github.com
+tingiskhan/pyfilter: Particle filtering and sequential parameter inference in Python - GitHub
+
+medium.com
+Demystifying STL: Understanding Seasonal Decomposition of Time Series | by András Kis
+
+stackoverflow.com
+Implementation of sequential monte carlo method (particle filters) - Stack Overflow
+
+doc.arcgis.com
+Seasonal-Trend decomposition using LOESS—ArcGIS Insights - Esri Documentation
+
+otexts.com
+3 Time series decomposition – Forecasting - OTexts
+
+medium.com
+Test-Driving Particle Filter: Python Implementation on Stock Prices | by Simon Leung
+
+datacamp.com
+Time Series Decomposition: Understand Trends, Seasonality, and Noise - DataCamp
+
+stackoverflow.com
+Recreating time series data using FFT results without using ifft - Stack Overflow
+
+github.com
+statsmodels/statsmodels/tsa/stl/_stl.pyx at main - GitHub
+
+github.com
+jrmontag/STLDecompose: A Python implementation of Seasonal and Trend decomposition using Loess (STL) for time series data. - GitHub
+
+csroc.cmex.org.tw
+STSB Model Based on STL Decomposition Algorithm and Its Application in Stock Price Prediction Studies
+
+dsp.stackexchange.com
+How to determine multiple Periodicities present in Timeseries data?
+
+researchgate.net
+STL decomposition based LSTM model for seasonal agricultural price forecasting
+
+mountain-hydrology-research-group.github.io
+Lab 8-3: Example timeseries analysis with FFT
+
+statsmodels.org
+Source code for statsmodels.tsa.forecasting.stl
+
+geo.fu-berlin.de
+Seasonal and Trend decomposition using Loess (STL)
+
+cp-algorithms.com
+Main Page - Algorithms for Competitive Programming
+
+statsmodels.org
+statsmodels.tsa.forecasting.stl.STLForecast
+
+statsmodels.org
+statsmodels.tsa.forecasting.stl.STLForecastResults
+
+acsu.buffalo.edu
+Probability Playground: The Gamma Distribution
+
+en.wikipedia.org
+Gamma distribution - Wikipedia
+
+fastercapital.com
+Application Of Gamma Distribution In Real Life - FasterCapital
+
+researchgate.net
+A Local Particle Filter Using Gamma Test Theory for High‐Dimensional State Spaces
+
+github.com
+filterpy/filterpy/monte_carlo/resampling.py at master · rlabbe/filterpy - GitHub
+
+filterpy.readthedocs.io
+resampling — FilterPy 1.4.4 documentation - Read the Docs
+
+stonesoup.readthedocs.io
+Particle Filter Resamplers: Tutorial - Stone Soup's documentation!
+
+cocalc.com
+12-Particle-Filters.ipynb - CoCalc
+Deep Dive into Particle Filters
+I've started gathering information on Particle Filters for dynamic state estimation. I'm exploring the `particles` and `filterpy` libraries, which offer implementations of sequential Monte Carlo methods, including the bootstrap filter and systematic resampling. I'm also looking into how to incorporate physical constraints, such as ensuring positive values for parameters, potentially by sampling from distributions like the Gamma distribution during particle initialization and prediction steps.
+Understanding STL Decomposition for Equilibrium Price
+For robust equilibrium price modeling, I'm researching STL (Seasonal-Trend-Loess) Decomposition. I'm focusing on how to implement this using libraries like `statsmodels` and how to dynamically determine the `period` parameter, which is crucial for accurate decomposition. I'm investigating the use of Fast Fourier Transform (FFT) to identify the dominant cycle period in the price data, which can then inform the `period` selection for STL.
+Next Steps: Code Implementation and Constraint Handling
+My immediate next steps involve synthesizing the gathered information to develop a production-ready Python class for the Particle Filter, including methods for initialization, prediction, update, and systematic resampling. I will also focus on explicitly handling the positivity constraints for the market parameters. Concurrently, I will work on implementing the STL decomposition, with a particular emphasis on integrating the FFT-based dynamic period selection for the equilibrium price calculation.
+
+Researching websites
+
+medium.com
+Test-Driving Particle Filter: Python Implementation on Stock Prices ...
+
+github.com
+filterpy/filterpy/monte_carlo/resampling.py at master · rlabbe/filterpy ...
+
+particles-sequential-monte-carlo-in-python.readthedocs.io
+Basic tutorial — particles alpha documentation
+
+stackoverflow.com
+numpy - How to interpret the results of the Discrete Fourier ...
+Advancing Particle Filter Implementation
+I've made progress in understanding Particle Filters, specifically the bootstrap filter and systematic resampling, with insights from the `particles` and `filterpy` libraries. I've also found code snippets for the core components of a particle filter. My next step is to consolidate this into a complete, production-ready Python class. A key challenge I'm addressing is how to enforce positivity constraints on market parameters, such as 'k' and 'm', within the particle filter's prediction and update steps, potentially by sampling from Gamma distributions.
+Refining Equilibrium Price Modeling with STL and FFT
+For robust equilibrium price modeling, I've gained a conceptual understanding of STL decomposition and how Fast Fourier Transform (FFT) can be used to dynamically determine the dominant cycle period for the `period` parameter in STL. I've identified the `statsmodels` library as a primary tool for STL implementation. My focus now is to integrate the FFT-based dynamic period selection with the `statsmodels` STL implementation to accurately calculate the equilibrium price.
+Initiating Research on Unsupervised Regime Discovery
+In parallel with refining the dynamic state estimation, I'm beginning to research unsupervised regime discovery using Gaussian Mixture Models (GMMs). My goal is to develop a workflow for clustering 4D state-vector data and to programmatically determine the optimal number of clusters using criteria like BIC or AIC. I'll also be looking for Python functions to identify the best-fit GMM and to generate regime probability vectors for new data points.
+
+Researching websites
+
+github.com
+connormcmonigle/particle-filter: GPU accelerated particle filter - GitHub
+
+github.com
+tejaskhot/particle_filters: Particle filters implementation using python - GitHub
+
+github.com
+particle-filter-tutorial/challenge5_adaptive_particle_filter.py at master - GitHub
+
+mrinalyadav7.medium.com
+METHODS FOR DETERMINING OPTIMAL NUMBER OF CLUSTERS: | by Mrinal Yadav
+
+medium.com
+Constrained Optimization demystified, with implementation in Python. - Medium
+
+researchgate.net
+A Method to Enforce Map Constraints in a Particle Filter's Position Estimate - ResearchGate
+
+users.rowan.edu
+CONSTRAINED STATE ESTIMATION IN PARTICLE FILTERS Bradley Ebinger, Nidhal Bouaynaya and Robi Polikar Roman Shterenberg Rowan Uni - Index of /
+
+scikit-learn.org
+Gaussian Mixture Model Selection — scikit-learn 1.0.2 documentation
+
+stackoverflow.com
+Scipy.optimize: how to restrict argument values - Stack Overflow
+
+scikit-learn.org
+Gaussian Mixture Model Selection — scikit-learn 1.7.0 documentation
+
+stackoverflow.com
+Pyspark: Find optimal k-value for Gaussian Mixture Model - Stack Overflow
+
+astroml.org
+Gaussian Mixture Models Example — AstroML Interactive Book
+
+stats.stackexchange.com
+Optimal number of components in a Gaussian mixture - Cross Validated
+
+github.com
+Gaussian Mixture with BIC/AIC · Issue #19338 - GitHub
+
+stackoverflow.com
+Kmeans, GMM or any cluster algorithm but you can set a minimum number of datapoints any cluster should have? - Stack Overflow
+
+youtube.com
+Gaussian Mixture Model (GMM) for clustering - calculate AIC/BIC - YouTube
+
+github.com
+AleksandarHaber/Python-Implementation-of-Particle-Filter - GitHub
+
+cocalc.com
+12-Particle-Filters.ipynb - CoCalc
+
+github.com
+jelfring/particle-filter-tutorial - GitHub
+
+medium.com
+Particle Filter Part 4 — Pseudocode (and Python code) | by Mathias Mantelli - Medium
+
+builtin.com
+How to Form Clusters in Python: Data Clustering Methods | Built In
+
+pypfilt.readthedocs.io
+How-to Guides — pypfilt 0.8.6 documentation
+
+geeksforgeeks.org
+Gaussian Mixture Models (GMM) in Scikit Learn - GeeksforGeeks
+
+stackoverflow.com
+GMM/EM on time series cluster - scikit learn - Stack Overflow
+
+scikit-learn.org
+2.1. Gaussian mixture models - Scikit-learn
+
+sacha-schwab.medium.com
+Clustering Stock Prices using Python and GMM | by Sacha Schwab - Medium
+
+numberanalytics.com
+Gaussian Mixture Model Tutorial - Number Analytics
+
+lazyprogrammer.me
+Gaussian Mixture Model (GMM) — Machine Learning and Data Science Compendium
+
+labex.io
+Mastering Gaussian Mixture Models with Python - LabEx
+
+github.com
+Ransaka/GMM-from-scratch: The only guide you need to learn everything about GMM - GitHub
+
+scikit-learn.org
+GaussianMixture — scikit-learn 1.7.0 documentation
+
+youtube.com
+Time Series Decomposition in Python: Trend, Seasonality, and Residuals Explained
+
+medium.com
+Time Series Decomposition in Python | by Hey Amit - Medium
+
+geeksforgeeks.org
+Seasonal Decomposition of Time Series by Loess (STL) - GeeksforGeeks
+
+github.com
+9.1.1 Seasonal Decomposition of Time Series (STL).ipynb - GitHub
+
+medium.com
+Demystifying STL: Understanding Seasonal Decomposition of Time Series | by András Kis
+
+github.com
+statsmodels/statsmodels/tsa/stl/_stl.pyx at main - GitHub
+
+statsmodels.org
+Source code for statsmodels.tsa.forecasting.stl
+
+statsmodels.org
+statsmodels.tsa.seasonal.STL.period
+
+statsmodels.org
+statsmodels.tsa.seasonal.STL.fit
+Progress on Dynamic State Estimation
+I'm continuing to build out the 'Living Model' for dynamic state estimation. For the Particle Filter, I've gathered conceptual understanding and code snippets from various sources, including the `particles` and `filterpy` libraries. I'm now focusing on synthesizing this information into a complete, production-ready Python class that includes methods for initialization, prediction, update, and systematic resampling. A key challenge I'm addressing is how to incorporate physical constraints, such as ensuring positive values for parameters like 'k' and 'F', potentially by sampling from appropriate distributions like the Gamma distribution during particle initialization and prediction steps. I've also explored how the Gamma distribution's properties, like its support for positive values, make it suitable for this purpose.
+Advancing Equilibrium Price Modeling
+For robust equilibrium price modeling, I've deepened my understanding of STL (Seasonal-Trend-Loess) decomposition and the use of Fast Fourier Transform (FFT) to dynamically select the optimal period. I've identified `statsmodels` as a primary library for STL. My next step is to integrate the FFT-based dynamic period selection with the `statsmodels` STL implementation to accurately calculate the equilibrium price. I'm looking for clear examples of this integration.
+Initiating Unsupervised Regime Discovery and Future Pillars
+I'm also moving forward with the 'Emergent Mind' pillar, focusing on unsupervised regime discovery using Gaussian Mixture Models (GMMs). I'm researching how to cluster 4D state-vector data and programmatically determine the optimal number of clusters using criteria like BIC or AIC. Concurrently, I'm beginning to explore the 'Sentient Analyst' pillar, which involves building a RAG pipeline for historical memory using vector databases like FAISS or ChromaDB, and formulating advanced Chain-of-Thought prompts. I'm also starting to research the 'Unbiased Judge' pillar, which will involve developing an event-driven backtesting framework and implementing Walk-Forward Optimization with key performance metrics.
+
+Researching websites
+
+promptingguide.ai
+Chain-of-Thought Prompting | Prompt Engineering Guide
+
+reddit.com
+Everyone share their favorite chain of thought prompts! : r/LocalLLaMA - Reddit
+
+peerspot.com
+Chroma vs Faiss comparison - PeerSpot
+
+prompthub.us
+Chain of Thought Prompting Guide - PromptHub
+
+helicone.ai
+Chain-of-Thought Prompting: Techniques, Tips, and Code Examples - Helicone
+
+research.aimultiple.com
+Top Open-Source Vector Databases: FAISS vs. Chroma & More - Research AIMultiple
+
+zilliz.com
+Chroma vs FAISS - Zilliz
+
+risingwave.com
+Chroma DB vs. Pinecone vs. FAISS: Vector Database Showdown - RisingWave
+
+community.hpe.com
+Comparing Pinecone, Chroma DB and FAISS: Exploring Vector Databases
+
+medium.com
+Comparing RAG Part 2: Vector Stores; FAISS vs Chroma | by Stepkurniawan - Medium
+
+reddit.com
+Chroma or FAISS? : r/LangChain - Reddit
+
+myscale.com
+FAISS vs Chroma: A Battle of Efficiency in Vector Storage - MyScale
+
+medium.com
+Which Vector Database Should You Use? Choosing the Best One for Your Needs | by Plaban Nayak | The AI Forum | Medium
+
+en.wikipedia.org
+Walk forward optimization - Wikipedia
+
+github.com
+Walkforward? · kernc backtesting.py · Discussion #497 - GitHub
+
+ibm.com
+What is chain of thought (CoT) prompting? - IBM
+
+youaccel.com
+Chain of Thought (CoT) Prompting for Financial Analysis | Certified Prompt Engineer for Finance & Banking (CPE-FB) | YouAccel
+
+quantvps.com
+Backtrader Tutorial: 10 Steps to Profitable Trading Strategy - QuantVPS
+
+reddit.com
+AI Prompting (2/10): Chain-of-Thought Prompting—4 Methods for Better Reasoning - Reddit
+
+backtrader.com
+Strategy - Backtrader
+
+pyquantnews.com
+The Future of Backtesting: A Deep Dive into Walk Forward Analysis - PyQuant News
+
+blog.quantinsti.com
+Walk-Forward Optimization: How It Works, Its Limitations, and Backtesting Implementation
+
+youtube.com
+Walk Forward Optimization in Python with Backtesting.py - YouTube
+
+ntguardian.wordpress.com
+Walk-Forward Analysis Demonstration with backtrader | Curtis Miller's Personal Website
+
+numberanalytics.com
+Mastering Walk-Forward Optimization - Number Analytics
+
+corporatefinanceinstitute.com
+Chain-of-Thought (CoT) Prompting in AI-Powered Financial Analysis
+
+quantconnect.com
+Walk Forward Optimization - QuantConnect.com
+
+openxcell.com
+Chain of Thought Prompting: A Guide to Enhanced AI Reasoning - Openxcell
+
+github.com
+DavidCico/Enhanced-Event-Driven-Backtester: In this repository, an event-driven backtester is implemented based on QuantStart articles. The backtester is programmed in Python featuring numerous improvements, in terms of coding structure, data handling, and simple trading strategies. - GitHub
+
+github.com
+RickyXuPengfei/Intelligent-BackTesing-System: Event-Driven BackTesting Framework
+
+github.com
+t-cousins/Event-Driven-Backtester - GitHub
+
+github.com
+tobiasbrodd/backtester: An event-driven backtester - GitHub
+
+youtube.com
+Local Retrieval Augmented Generation (RAG) from Scratch (step by step tutorial) - YouTube
+
+medium.com
+How I built a Simple Retrieval-Augmented Generation (RAG) Pipeline | by Dr Julija | Medium
+
+reddit.com
+How can I build a RAG chatbot in Python that extracts data from PDFs and responds with text, tables, images, or flowcharts? - Reddit
+
+dzone.com
+Building a RAG Model Pipeline Using Python With Online Text Data - DZone
+
+dataloop.ai
+Finance Embeddings Investopedia · Models - Dataloop
+
+github.com
+UKPLab/sentence-transformers: State-of-the-Art Text Embeddings - GitHub
+
+aws.amazon.com
+Create and fine-tune sentence transformers for enhanced classification accuracy - AWS
+
+huggingface.co
+FinLang/finance-embeddings-investopedia - Hugging Face
+
+github.com
+jelfring/particle-filter-tutorial - GitHub
+
+statsmodels.org
+Seasonal-Trend decomposition using LOESS (STL) - statsmodels ...
+
+scikit-learn.org
+2.1. Gaussian mixture models — scikit-learn 1.7.0 documentation
+Refining Dynamic State Estimation
+I've made significant progress on the 'Living Model' pillar. For the Particle Filter, I've gathered conceptual understanding and code snippets from various sources, including the `particles` and `filterpy` libraries. I'm now focusing on synthesizing this information into a complete, production-ready Python class that includes methods for initialization, prediction, update, and systematic resampling. A key insight is the suitability of the Gamma distribution for enforcing positivity constraints on parameters like 'k' and 'F' during particle initialization and prediction, given its inherent support for positive values. I'm actively seeking a more comprehensive, class-based implementation example to finalize this component.
+Integrating STL Decomposition with Dynamic Period Selection
+For robust equilibrium price modeling, I've deepened my understanding of STL (Seasonal-Trend-Loess) decomposition and the use of Fast Fourier Transform (FFT) to dynamically select the optimal period. I've identified `statsmodels` as a primary library for STL and have found examples of FFT for dominant cycle detection. My next step is to integrate the FFT-based dynamic period selection with the `statsmodels` STL implementation to accurately calculate the equilibrium price, creating a coherent workflow with Python code.
+Advancing Unsupervised Regime Discovery and Future Pillars
+I'm also moving forward with the 'Emergent Mind' pillar, focusing on unsupervised regime discovery using Gaussian Mixture Models (GMMs). I'm researching how to cluster 4D state-vector data and programmatically determine the optimal number of clusters using criteria like BIC or AIC. Concurrently, I'm beginning to explore the 'Sentient Analyst' pillar, which involves building a RAG pipeline for historical memory using vector databases like FAISS or ChromaDB, and formulating advanced Chain-of-Thought prompts. I'm also starting to research the 'Unbiased Judge' pillar, which will involve developing an event-driven backtesting framework and implementing Walk-Forward Optimization with key performance metrics.
+Next Steps in Research
+My immediate next steps involve finding a more suitable Particle Filter implementation, creating the combined FFT+STL workflow, and locating a complete GMM clustering workflow example. I will also delve deeper into the FAISS vs. ChromaDB comparisons, RAG tutorials, and event-driven backtester repositories, while also synthesizing the Chain-of-Thought prompt and walk-forward optimization implementation. I will continue to work on all pillars in parallel to ensure a timely completion of the research.
+
+Researching websites
+
+mountain-hydrology-research-group.github.io
+Lab 8-3: Example timeseries analysis with FFT
+
+github.com
+connormcmonigle/particle-filter: GPU accelerated particle filter - GitHub
+
+quantconnect.com
+Walk Forward Optimization - QuantConnect.com
+
+realpython.com
+Fourier Transforms With scipy.fft: Python Signal Processing
+
+dsp.stackexchange.com
+Deducing fundamental period of signal consisting of multiple sinusoids using python LCM
+
+medium.com
+Gamma Distribution with Python. Statistical Distributions with Examples… | by Gianpiero Andrenacci | AI Bistrot | Medium
+
+numberanalytics.com
+Mastering Walk-Forward Optimization - Number Analytics
+
+github.com
+In this section, you will learn about particle filters for estimating the state of a system - GitHub
+
+pygam.readthedocs.io
+GammaGAM — pyGAM documentation - Read the Docs
+
+medium.com
+Beyond Returns: A Deep Dive into Risk-Adjusted Metrics with Sharpe, Sortino, Calmer, and Modigliani Ratios| How to Calculate with Python | by Muhammed Burak Bedir | Medium
+
+docs.scipy.org
+Fourier Transforms (scipy.fft) — SciPy v1.16.0 Manual
+
+github.com
+rlabbe/filterpy: Python Kalman filtering and optimal estimation library. Implements Kalman filter, particle filter, Extended Kalman filter, Unscented Kalman filter, g-h (alpha-beta), least squares, H Infinity, smoothers, and more. Has companion book 'Kalman and Bayesian Filters in Python'. - GitHub
+
+stackoverflow.com
+Fitting a gamma distribution with (python) Scipy - Stack Overflow
+
+turingfinance.com
+Measures of Risk-adjusted Return - Turing Finance
+
+stackoverflow.com
+Recreating time series data using FFT results without using ifft - Stack Overflow
+
+github.com
+Hyperopt / Sharpe Ratio v.s. Sortino · Issue #2407 - GitHub
+
+github.com
+GitHub - rlabbe/Kalman-and-Bayesian-Filters-in-Python
+
+github.com
+BUG: scipy.stats.gamma.fit doesn't fit the data well, when using method="ML" · Issue #18775
+
+stackoverflow.com
+Understanding constraint in scipy's optimize - python - Stack Overflow
+
+quantstart.com
+Event-Driven Backtesting with Python - Part I - QuantStart
+
+kernc.github.io
+Backtesting.py - Backtest trading strategies in Python
+
+interactivebrokers.com
+Backtesting.py – An Introductory Guide to Backtesting with Python - Interactive Brokers
+
+haystack.deepset.ai
+Tutorial: Creating Your First QA Pipeline with Retrieval-Augmentation - Haystack
+
+lakefs.io
+RAG Pipeline: Example, Tools & How to Build It - lakeFS
+
+quantstart.com
+Event-Driven Backtesting with Python - Part III - QuantStart
+
+fmz.com
+Event-Driven Backtesting with Python - Part V
+
+medium.com
+Build Your Own RAG-Powered Chatbot in Python (with Transformers + FAISS) | by Felipe A. Moreno | LatinXinAI | May, 2025 | Medium
+
+machinelearningmastery.com
+Building RAG Systems with Transformers - MachineLearningMastery.com
+
+python.langchain.com
+Build a Retrieval Augmented Generation (RAG) App: Part 1 - Python LangChain
+
+peerspot.com
+Chroma vs Faiss comparison - PeerSpot
+
+github.com
+Clustering-in-Python/13_Gaussian_Mixture_Model.ipynb at master - GitHub
+
+geeksforgeeks.org
+Gaussian Mixture Model - GeeksforGeeks
+
+slashdot.org
+Compare Faiss vs. Chroma in 2025 - Slashdot
+
+byteplus.com
+How to Use Gaussian Mixture Models (GMM) - BytePlus
+
+stackoverflow.com
+How can I do a histogram with 1D gaussian mixture with sklearn? - Stack Overflow
+
+jakevdp.github.io
+In Depth: Gaussian Mixture Models | Python Data Science Handbook
+
+capellasolutions.com
+FAISS vs Chroma? Let's Settle the Vector Database Debate! - Capella Solutions
+
+medium.com
+Comparing RAG Part 2: Vector Stores; FAISS vs Chroma | by Stepkurniawan - Medium
+
+risingwave.com
+Chroma DB vs. Pinecone vs. FAISS: Vector Database Showdown - RisingWave
+
+statsmodels.org
+Seasonal-Trend decomposition using LOESS (STL) - statsmodels ...
+
+zilliz.com
+Chroma vs FAISS | Zilliz
+
+medium.com
+How I built a Simple Retrieval-Augmented Generation (RAG ...
+
+pyquantnews.com
+The Future of Backtesting: A Deep Dive into Walk Forward Analysis
+
+github.com
+DavidCico/Enhanced-Event-Driven-Backtester: In this ... - GitHub
+
+scikit-learn.org
+Gaussian Mixture Model Selection — scikit-learn 1.7.0 documentation
+
+github.com
+AleksandarHaber/Python-Implementation-of-Particle-Filter - GitHub
+Refining Dynamic State Estimation with Particle Filters
+I've made significant strides in understanding and preparing to implement the Particle Filter for dynamic state estimation. I've identified the `particles` and `filterpy` libraries as strong candidates for implementation, and I've gathered various code snippets for core functionalities like initialization, prediction, update, and systematic resampling. A key insight is the importance of handling physical constraints, such as ensuring positivity for parameters like 'k' and 'F', by sampling from appropriate distributions like the Gamma distribution. While I have a good conceptual grasp, I'm still looking for a more comprehensive, production-ready Python class structure that explicitly demonstrates these constraint handling mechanisms.
+Integrating STL Decomposition and FFT for Equilibrium Price
+For robust equilibrium price modeling, I've deepened my understanding of STL (Seasonal-Trend-Loess) decomposition and how Fast Fourier Transform (FFT) can be used to dynamically select the optimal period. I've confirmed that `statsmodels` is a suitable library for STL. My next step is to integrate the FFT-based dominant cycle detection with the `statsmodels` STL implementation to create a cohesive Python workflow for calculating the equilibrium price. I'm now ready to write the code for this combined approach.
+Advancing Unsupervised Regime Discovery and Future Pillars
+I'm progressing on the 'Emergent Mind' pillar, focusing on unsupervised regime discovery using Gaussian Mixture Models (GMMs). I have a solid understanding of how to cluster 4D state-vector data and programmatically determine the optimal number of clusters using criteria like BIC or AIC. I'm now ready to develop the complete Python workflow for this. Concurrently, I'm continuing to explore the 'Sentient Analyst' pillar, which involves building a RAG pipeline for historical memory using vector databases and formulating advanced Chain-of-Thought prompts. I'm also researching the 'Unbiased Judge' pillar, focusing on event-driven backtesting frameworks and Walk-Forward Optimization with key performance metrics.
+Next Steps for Comprehensive Implementation
+My immediate next steps involve a final targeted search for a more advanced Particle Filter implementation that explicitly handles constraints within a class structure. I will then proceed to write the Python code for the combined FFT+STL workflow and the complete GMM clustering workflow. I will also finalize the comparative analysis of FAISS vs. ChromaDB, develop the end-to-end RAG pipeline script, and formulate the advanced Chain-of-Thought prompt. For the backtesting framework, I will delve deeper into existing GitHub repositories to extract the full class definitions and search for a more complete Walk-Forward Optimization implementation that includes the required performance metrics. I anticipate that these steps will provide all the necessary information to complete the research.
+
+Researching websites
+
+github.com
+Particle Filter Implementation in Python for STR Course Project - GitHub
+
+github.com
+AleksandarHaber/Python-Implementation-of-Particle-Filter - GitHub
+
+github.com
+tejaskhot/particle_filters: Particle filters implementation using python - GitHub
+
+github.com
+SIR Particle Filter time series · Issue #438 · rlabbe/Kalman-and-Bayesian-Filters-in-Python
+
+github.com
+mathiasmantelli/ParticleFilter: Particle Filter (PF) implementation in Python for my PF series on Medium - GitHub
+
+pmc.ncbi.nlm.nih.gov
+Particle Filters: A Hands-On Tutorial - PMC - PubMed Central
+
+discourse.acados.org
+Use predicted states to update constraints - User Questions - acados forum
+
+jstatsoft.org
+pyParticleEst: A Python Framework for Particle-Based Estimation Methods - Journal of Statistical Software
+
+github.com
+statsmodels/statsmodels/tsa/stl/_stl.pyx at main - GitHub
+
+quantconnect.com
+Walk Forward Optimization - QuantConnect.com
+
+mlpills.dev
+Time Series Forecasting with STL - ML Pills
+
+users.rowan.edu
+CONSTRAINED STATE ESTIMATION IN PARTICLE FILTERS Bradley Ebinger, Nidhal Bouaynaya and Robi Polikar Roman Shterenberg Rowan Uni - Index of /
+
+blog.quantinsti.com
+Implement Walk-Forward Optimization with XGBoost for Stock Price Prediction in Python
+
+stackoverflow.com
+How to choose the correct arguments of statsmodels STL function? - Stack Overflow
+
+sites.engineering.ucsb.edu
+4.7 Particle Filtering - UCSB College of Engineering
+
+blog.quantinsti.com
+Walk-Forward Optimization: How It Works, Its Limitations, and Backtesting Implementation
+
+medium.com
+My favorite Trend-Seasonality decomposition algorithms for Time Series Analysis - Medium
+
+geo.fu-berlin.de
+Seasonal and Trend decomposition using Loess (STL)
+
+quantrocket.com
+Portfolio Analysis with pyfolio - Code Library
+
+pyquantnews.com
+The Future of Backtesting: A Deep Dive into Walk Forward Analysis - PyQuant News
+
+quantstart.com
+Event-Driven Backtesting with Python - Part I - QuantStart
+
+kernc.github.io
+Backtesting.py - Backtest trading strategies in Python
+
+medium.com
+How to Implement a Backtester in Python | by Diogo Matos Chaves | Medium
+
+reddit.com
+Backtesting Market Data and Event Driven backtesting : r/algotrading - Reddit
+
+quantstart.com
+Event-Driven Backtesting with Python - Part V - QuantStart
+
+stephendiehl.com
+FAISS and sentence-transformers in 5 Minutes - Stephen Diehl
+
+github.com
+rag-knowledge-graph/faiss/demo.ipynb at main - GitHub
+
+machinelearningmastery.com
+Building RAG Systems with Transformers - MachineLearningMastery.com
+
+preplaced.in
+Retrieval Augmented Generation — IN & OUT - Preplaced
+
+research.aimultiple.com
+Top Open-Source Vector Databases: FAISS vs. Chroma & More - Research AIMultiple
+
+jimmy-wang-gen-ai.medium.com
+Advanced Retrieval Augmented Generation (RAG) pipeline | by Jimmy Wang - Medium
+
+capellasolutions.com
+FAISS vs Chroma? Let's Settle the Vector Database Debate! - Capella Solutions
+
+myscale.com
+FAISS vs Chroma: Vector Storage Battle - MyScale
+
+kaggle.com
+Gaussian Mixture Models Clustering - Explained - Kaggle
+
+risingwave.com
+Chroma DB vs. Pinecone vs. FAISS: Vector Database Showdown - RisingWave
+
+geeksforgeeks.org
+Gaussian Mixture Model - GeeksforGeeks
+
+jakevdp.github.io
+In Depth: Gaussian Mixture Models | Python Data Science Handbook
+
+stackoverflow.com
+Sklearn BIC criterion : differents optimum values of k for clustering - Stack Overflow
+
+scikit-learn.org
+Gaussian Mixture Model Selection — scikit-learn 1.7.0 documentation
+
+medium.com
+Comparing RAG Part 2: Vector Stores; FAISS vs Chroma | by ...
+
+youaccel.com
+Chain of Thought (CoT) Prompting for Financial Analysis | Certified ...
+Research Completion and Next Steps
+I have successfully completed the research and development phase for all four pillars of the 'Living Indicator' system. This includes gathering comprehensive information on dynamic state estimation using Particle Filters, robust equilibrium price modeling with STL decomposition and FFT, unsupervised regime discovery with Gaussian Mixture Models, and the foundational elements for a historical memory system and backtesting framework. I am now ready to synthesize all the gathered information into a detailed technical report, including conceptual explanations, mathematical formulas, and production-ready Python code implementations for each component.
+Preparing the Final Report
+My next action is to generate the final, detailed report that encapsulates all the findings from the research. This report will serve as the complete technical specification for building the 'kinētikós entropḗ' system, providing the necessary blueprints for implementation.

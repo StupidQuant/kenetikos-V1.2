@@ -1,8 +1,8 @@
 
 import * as math from 'mathjs';
+import { STL } from '@/lib/stl';
 
 // --- TYPE DEFINITIONS ---
-
 export type MarketDataPoint = {
   timestamp: number;
   price: number;
@@ -10,17 +10,14 @@ export type MarketDataPoint = {
 };
 
 export type StateVectorDataPoint = MarketDataPoint & {
-  // Core calculated values
   p_eq: number | null;
   k: number | null;
   F: number | null;
-  m: number | null;
+  m: number;
   potential: number | null;
   momentum: number | null;
   entropy: number | null;
   temperature: number | null;
-  
-  // Intermediate values for debugging/analysis
   smoothed_price: number | null;
   price_velocity: number | null;
   price_acceleration: number | null;
@@ -29,317 +26,297 @@ export type StateVectorDataPoint = MarketDataPoint & {
 export type IndicatorOptions = {
     sgWindow: number;
     sgPolyOrder: number;
-    regressionWindow: number;
     equilibriumWindow: number;
     entropyWindow: number;
     numBins: number;
     temperatureWindow: number;
 };
 
+// --- EKF IMPLEMENTATION using math.js ---
+class MarketPhysicsEKF {
+    private x: math.Matrix;
+    private P: math.Matrix;
+    private Q: math.Matrix;
+    private R: math.Matrix;
+    private dt: number;
+    private m: number;
+
+    constructor(dt: number, m: number = 1.0) {
+        this.dt = dt;
+        this.m = m;
+        this.x = math.matrix([[0.1], [0.0]]);
+        this.P = math.matrix([[0.1, 0], [0, 0.1]]);
+        this.Q = math.matrix([[0.00001, 0], [0, 0.00025]]);
+        this.R = math.matrix([[0.01]]);
+    }
+
+    predict() {
+        this.P = math.add(this.P, this.Q) as math.Matrix;
+    }
+
+    update(p: number, p_prev: number, p_prev2: number, p_eq: number) {
+        const H = math.matrix([[p_prev - p_eq, -1]]);
+        const H_T = math.transpose(H);
+
+        const S = math.add(math.multiply(math.multiply(H, this.P), H_T), this.R) as math.Matrix;
+        const S_inv = math.inv(S);
+        
+        const K_intermediate = math.multiply(this.P, H_T);
+        const K = math.multiply(K_intermediate, S_inv) as math.Matrix;
+
+        const k_val = this.x.get([0, 0]);
+        const F_val = this.x.get([1, 0]);
+        const p_ddot = (p - 2 * p_prev + p_prev2) / (this.dt**2);
+        const hx = this.m * p_ddot + k_val * (p_prev - p_eq) - F_val;
+        const y = 0 - hx;
+
+        const Ky = math.multiply(K, y);
+        this.x = math.add(this.x, Ky) as math.Matrix;
+        
+        const I = math.identity(2) as math.Matrix;
+        const KH = math.multiply(K, H);
+        const I_KH = math.subtract(I, KH) as math.Matrix;
+        this.P = math.multiply(I_KH, this.P) as math.Matrix;
+    }
+    
+    get state() {
+        return { k: this.x.get([0, 0]), F: this.x.get([1, 0]) };
+    }
+}
+
+
 // --- CORE CALCULATION FUNCTIONS ---
 
-/**
- * Applies a Savitzky-Golay filter to smooth data and calculate derivatives.
- * This is a TypeScript implementation of the logic found in the original prototype.
- */
-export function savitzkyGolay(data: MarketDataPoint[], { windowSize, polynomialOrder }: { windowSize: number; polynomialOrder: number; }): Omit<StateVectorDataPoint, 'p_eq' | 'k' | 'F' | 'm' | 'potential' | 'momentum' | 'entropy' | 'temperature'>[] {
-    if (!Number.isInteger(windowSize) || windowSize % 2 === 0 || windowSize <= 0) return data.map(d => ({ ...d, smoothed_price: null, price_velocity: null, price_acceleration: null }));
-    if (!Number.isInteger(polynomialOrder) || polynomialOrder < 0 || polynomialOrder >= windowSize) return data.map(d => ({ ...d, smoothed_price: null, price_velocity: null, price_acceleration: null }));
-
+function savitzkyGolay(data: MarketDataPoint[], { windowSize, polynomialOrder }: { windowSize: number; polynomialOrder: number; }): { smoothed_price: number | null, price_velocity: number | null, price_acceleration: number | null }[] {
     const halfWindow = Math.floor(windowSize / 2);
-    const result: Omit<StateVectorDataPoint, 'p_eq' | 'k' | 'F' | 'm' | 'potential' | 'momentum' | 'entropy' | 'temperature'>[] = [];
-
+    const results = [];
     for (let i = 0; i < data.length; i++) {
         if (i < halfWindow || i >= data.length - halfWindow) {
-            result.push({ ...data[i], smoothed_price: null, price_velocity: null, price_acceleration: null });
+            results.push({ smoothed_price: data[i].price, price_velocity: 0, price_acceleration: 0 });
             continue;
         }
-
-        const window = data.slice(i - halfWindow, i + halfWindow + 1);
-        const centerTimestampInSeconds = data[i].timestamp / 1000.0;
-        const t = window.map(p => (p.timestamp / 1000.0) - centerTimestampInSeconds);
-        const y = window.map(p => p.price);
-        
-        const A_data: number[][] = [];
-        for (let j = 0; j < windowSize; j++) {
-            const row: number[] = [];
-            for (let p = 0; p <= polynomialOrder; p++) {
-                row.push(Math.pow(t[j], p));
-            }
-            A_data.push(row);
-        }
-
-        const A = math.matrix(A_data);
+        const windowSlice = data.slice(i - halfWindow, i + halfWindow + 1);
+        const t = windowSlice.map((_, j) => -halfWindow + j);
+        const y = windowSlice.map(p => p.price);
         try {
-            const c = math.lusolve(math.multiply(math.transpose(A), A), math.multiply(math.transpose(A), y)).toArray().flat() as number[];
-            result.push({
-                ...data[i],
-                smoothed_price: c[0],
-                price_velocity: c[1] ?? null,
-                price_acceleration: polynomialOrder >= 2 ? 2 * (c[2] ?? 0) : 0,
+            const A = math.matrix(t.map(ti => Array.from({length: polynomialOrder + 1}, (_, p) => Math.pow(ti, p))));
+            const c = math.lusolve(math.multiply(math.transpose(A), A), math.multiply(math.transpose(A), y)).toArray().flat();
+            results.push({
+                smoothed_price: c[0] ?? data[i].price,
+                price_velocity: c[1] ?? 0,
+                price_acceleration: (c[2] ?? 0) * 2,
             });
         } catch (error) {
-            result.push({ ...data[i], smoothed_price: null, price_velocity: null, price_acceleration: null });
+            results.push({ smoothed_price: data[i].price, price_velocity: 0, price_acceleration: 0 });
         }
     }
-    return result;
+    return results;
 }
 
-function calculateSMA(arr: any[], startIndex: number, endIndex: number, key: string): number {
-    let sum = 0;
-    let count = 0;
-    for (let i = startIndex; i < endIndex; i++) {
-        if (arr[i] && typeof arr[i][key] === 'number' && isFinite(arr[i][key])) {
-            sum += arr[i][key];
-            count++;
-        }
-    }
-    return count > 0 ? sum / count : 0;
-}
-
-export function estimateMarketParameters<T extends { price_acceleration: number | null, smoothed_price: number | null, volume: number }>(data: T[], { regressionWindow, equilibriumWindow }: { regressionWindow: number, equilibriumWindow: number }): (T & { k: number | null; F: number | null; m: number | null; p_eq: number | null; })[] {
-    const minDataLength = Math.max(regressionWindow, equilibriumWindow);
-    return data.map((point, i) => {
-        if (i < minDataLength - 1 || point.price_acceleration === null || point.smoothed_price === null) {
-            return { ...point, k: null, F: null, m: null, p_eq: null };
-        }
-
-        const p_eq = calculateSMA(data, i - equilibriumWindow + 1, i + 1, 'smoothed_price');
-        const avg_vol = calculateSMA(data, i - regressionWindow + 1, i + 1, 'volume');
-        const avg_price = calculateSMA(data, i - regressionWindow + 1, i + 1, 'smoothed_price');
-        const m = avg_price > 0 ? avg_vol / avg_price : 0;
-
-        if (m < 1e-9) {
-            return { ...point, k: null, F: null, m, p_eq };
-        }
-
-        const y_data: number[][] = [];
-        const x_data: number[][] = [];
-        for (let j = 0; j < regressionWindow; j++) {
-            const wp = data[i - j];
-            if (wp && wp.price_acceleration !== null && wp.smoothed_price !== null) {
-                y_data.push([m * wp.price_acceleration]);
-                x_data.push([1, wp.smoothed_price - p_eq]);
-            }
-        }
-
-        if (x_data.length < 2) {
-            return { ...point, k: null, F: null, m, p_eq };
-        }
-
-        try {
-            const X = math.matrix(x_data);
-            const Y = math.matrix(y_data);
-            const beta = math.lusolve(math.multiply(math.transpose(X), X), math.multiply(math.transpose(X), Y)).toArray().flat() as number[];
-            return { ...point, k: -beta[1], F: beta[0], p_eq, m };
-        } catch (error) {
-            return { ...point, k: null, F: null, m, p_eq };
-        }
-    });
-}
-
-export function calculateRollingLagrangianEntropy(series: (number | null)[], { entropyWindow, numBins }: { entropyWindow: number; numBins: number; }): (number | null)[] {
-    if (!series || series.length < entropyWindow) {
-        return new Array(series.length).fill(null);
-    }
+function calculateRollingLagrangianEntropy(series: (number | null)[], { entropyWindow, numBins }: { entropyWindow: number; numBins: number; }): (number | null)[] {
+    if (!series || series.length < entropyWindow) return new Array(series.length).fill(null);
     const log = Math.log2;
-    let globalMin = Infinity;
-    let globalMax = -Infinity;
-    series.forEach(value => {
-        if (value !== null && isFinite(value)) {
-            globalMin = Math.min(globalMin, value);
-            globalMax = Math.max(globalMax, value);
+    let globalMin = Infinity, globalMax = -Infinity;
+    series.forEach(v => {
+        if (v !== null && isFinite(v)) {
+            globalMin = Math.min(globalMin, v);
+            globalMax = Math.max(globalMax, v);
         }
     });
 
-    if (globalMin === globalMax || !isFinite(globalMin)) {
-        return new Array(series.length).fill(0);
-    }
-
+    if (!isFinite(globalMin)) return new Array(series.length).fill(null);
     const binWidth = (globalMax - globalMin) / numBins;
-    if (binWidth <= 0) {
-        return new Array(series.length).fill(0);
-    }
-
-    const discretizeValue = (v: number | null) => v === null || !isFinite(v) ? null : Math.floor(Math.max(0, Math.min(numBins - 1, (v - globalMin) / binWidth)));
-    const calculateEntropyFromCounts = (counts: Map<number, number>, size: number) => {
-        let e = 0;
-        for (const c of counts.values()) {
-            if (c > 0) {
-                const p = c / size;
-                e -= p * log(p);
-            }
-        }
-        return e;
-    };
-
-    const results = new Array(series.length).fill(null);
-    const counts = new Map(Array.from({ length: numBins }, (_, i) => [i, 0]));
+    if (binWidth <= 0) return new Array(series.length).fill(0);
+    const results: (number | null)[] = new Array(series.length).fill(null);
+    const counts = new Array(numBins).fill(0);
     let validPoints = 0;
-    
-    for (let i = 0; i < entropyWindow; i++) {
-        const bin = discretizeValue(series[i]);
-        if (bin !== null) {
-            counts.set(bin, (counts.get(bin) ?? 0) + 1);
+    const discretize = (v: number) => Math.floor(Math.max(0, Math.min(numBins - 1, (v - globalMin) / binWidth)));
+
+    for (let i = 0; i < series.length; i++) {
+        const val = series[i];
+        if (val !== null && isFinite(val)) {
+            counts[discretize(val)]++;
             validPoints++;
         }
-    }
-    
-    if (validPoints > 0) {
-        results[entropyWindow - 1] = calculateEntropyFromCounts(counts, validPoints);
-    }
-
-    for (let i = entropyWindow; i < series.length; i++) {
-        const oldBin = discretizeValue(series[i - entropyWindow]);
-        const newBin = discretizeValue(series[i]);
-        
-        if (oldBin !== null) {
-            const oldBinCount = counts.get(oldBin);
-            if(oldBinCount && oldBinCount > 0) {
-                counts.set(oldBin, oldBinCount - 1);
+        if (i >= entropyWindow) {
+            const oldVal = series[i - entropyWindow];
+            if (oldVal !== null && isFinite(oldVal)) {
+                counts[discretize(oldVal)]--;
                 validPoints--;
             }
         }
-        if (newBin !== null) {
-            counts.set(newBin, (counts.get(newBin) ?? 0) + 1);
-            validPoints++;
-        }
-        
-        if (validPoints > 0) {
-            results[i] = calculateEntropyFromCounts(counts, validPoints);
-        }
-    }
-    return results;
-}
-
-export function calculateTemperature<T extends { entropy: number | null, volume: number | null }>(data: T[], { temperatureWindow }: { temperatureWindow: number; }): (T & { temperature: number | null })[] {
-    const results = data.map(d => ({ ...d, temperature: null }));
-    const epsilon = 1e-10;
-
-    for (let i = temperatureWindow - 1; i < data.length; i++) {
-        const deltas: { x: number; y: number }[] = [];
-        for (let j = 0; j < temperatureWindow - 1; j++) {
-            const curr = data[i - j];
-            const prev = data[i - j - 1];
-            if (curr && prev && curr.entropy !== null && prev.entropy !== null && curr.volume !== null && prev.volume !== null) {
-                deltas.push({ x: curr.entropy - prev.entropy, y: curr.volume - prev.volume });
+        if (i >= entropyWindow - 1) {
+            let entropy = 0;
+            if (validPoints > 0) {
+                for (const count of counts) {
+                    if (count > 0) {
+                        const p = count / validPoints;
+                        entropy -= p * log(p);
+                    }
+                }
             }
+            results[i] = entropy;
         }
-        if (deltas.length < 2) continue;
-        
-        let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-        deltas.forEach(p => {
-            sumX += p.x;
-            sumY += p.y;
-            sumXY += p.x * p.y;
-            sumX2 += p.x * p.x;
-        });
-        
-        const denom = deltas.length * sumX2 - sumX * sumX;
-        const slope = Math.abs(denom) > epsilon ? (deltas.length * sumXY - sumX * sumY) / denom : 0;
-        results[i].temperature = Math.abs(slope) > epsilon ? 1 / Math.abs(slope) : Infinity;
     }
     return results;
 }
 
 
-/**
- * Main function to calculate the full 4D state vector.
- * This orchestrates the entire calculation pipeline.
- */
-export function calculateStateVector(data: MarketDataPoint[], options: IndicatorOptions): StateVectorDataPoint[] {
-    const smoothedData = savitzkyGolay(data, { windowSize: options.sgWindow, polynomialOrder: options.sgPolyOrder });
-    const parameterData = estimateMarketParameters(smoothedData, { regressionWindow: options.regressionWindow, equilibriumWindow: options.equilibriumWindow });
-    const velocitySeries = parameterData.map(d => d.price_velocity);
-    const entropySeries = calculateRollingLagrangianEntropy(velocitySeries, { entropyWindow: options.entropyWindow, numBins: options.numBins });
-    
-    let entropyData = parameterData.map((d, i) => ({ ...d, entropy: entropySeries[i] }));
-    const finalDataWithTemp = calculateTemperature(entropyData, { temperatureWindow: options.temperatureWindow });
+// --- THE MASTER CALCULATION PIPELINE ---
 
-    return finalDataWithTemp.map(d => {
-        let momentum: number | null = null, potential: number | null = null;
-        if (d.price_velocity !== null && d.m !== null) {
-            momentum = 0.5 * d.m * Math.pow(d.price_velocity, 2);
+export function calculateStateVector(data: MarketDataPoint[], options: IndicatorOptions): StateVectorDataPoint[] {
+    const n = data.length;
+    if (n < options.equilibriumWindow || n < options.sgWindow) return [];
+
+    const prices = data.map(d => d.price);
+    const p_eq_series = STL(prices, { period: options.equilibriumWindow, robust: true });
+    
+    const ekf = new MarketPhysicsEKF(1.0);
+    const kf_estimates: ({k: number, F: number})[] = [];
+    for (let i = 2; i < n; i++) {
+        ekf.predict();
+        if(p_eq_series[i-1] !== undefined){
+            ekf.update(prices[i], prices[i-1], prices[i-2], p_eq_series[i-1]);
         }
-        if (d.k !== null && d.F !== null && d.smoothed_price !== null && d.p_eq !== null) {
-            potential = 0.5 * d.k * Math.pow(d.smoothed_price - d.p_eq, 2) - d.F * d.smoothed_price;
-        }
-        return { ...d, potential, momentum };
+        kf_estimates.push(ekf.state);
+    }
+    
+    const sg_results = savitzkyGolay(data, options);
+
+    let combinedData: Partial<StateVectorDataPoint>[] = data.map((d, i) => {
+        const est_idx = i - 2;
+        return {
+            ...d,
+            p_eq: p_eq_series[i] ?? null,
+            k: kf_estimates[est_idx]?.k ?? null,
+            F: kf_estimates[est_idx]?.F ?? null,
+            ...sg_results[i]
+        };
     });
+
+    const firstValidK = combinedData.find(d => d.k !== null)?.k ?? 0.1;
+    const firstValidF = combinedData.find(d => d.F !== null)?.F ?? 0;
+    for(let d of combinedData) {
+        if(d.k === null) d.k = firstValidK;
+        if(d.F === null) d.F = firstValidF;
+    }
+    
+    combinedData.forEach(d => {
+        const m = (d.volume && d.price) ? d.volume / d.price : 1.0;
+        d.m = m > 0 ? m : 1.0;
+        if (d.price_velocity !== null) d.momentum = 0.5 * d.m * (d.price_velocity ** 2);
+        if (d.k !== null && d.F !== null && d.smoothed_price !== null && d.p_eq !== null) {
+            d.potential = 0.5 * d.k * ((d.smoothed_price - d.p_eq) ** 2) - d.F * d.smoothed_price;
+        }
+    });
+
+    const velocitySeries = combinedData.map(d => d.price_velocity);
+    const entropySeries = calculateRollingLagrangianEntropy(velocitySeries, options);
+    combinedData.forEach((d, i) => d.entropy = entropySeries[i]);
+
+    const tempData = [...combinedData];
+    for (let i = options.temperatureWindow; i < n; i++) {
+        const window = tempData.slice(i - options.temperatureWindow, i);
+        const deltas = window.slice(1).map((curr, j) => {
+            const prev = window[j];
+            if(curr.entropy && prev.entropy && curr.volume && prev.volume){
+                return { x: curr.entropy - prev.entropy, y: curr.volume - prev.volume };
+            }
+            return {x: 0, y: 0};
+        }).filter(p => p.x !== 0);
+
+        if (deltas.length < 2) continue;
+        let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+        deltas.forEach(p => { sumX += p.x; sumY += p.y; sumXY += p.x * p.y; sumX2 += p.x * p.x; });
+        const denom = deltas.length * sumX2 - sumX * sumX;
+        const slope = Math.abs(denom) > 1e-9 ? (deltas.length * sumXY - sumX * sumY) / denom : 0;
+        tempData[i].temperature = Math.abs(slope) > 1e-9 ? 1 / Math.abs(slope) : Infinity;
+    }
+    
+    return tempData as StateVectorDataPoint[];
 }
 
+
+// --- REGIME CLASSIFIER ---
 export class RegimeClassifier {
     private historicalData: StateVectorDataPoint[];
     private sortedValues: Record<string, number[]>;
+    public regimeLogic: Record<string, ((s: StateVectorDataPoint) => boolean)[]>;
 
     constructor(historicalData: StateVectorDataPoint[]) {
-        this.historicalData = historicalData.filter(d => Object.values(d).every(v => v === null || (typeof v === 'number' && isFinite(v))));
+        this.historicalData = historicalData.filter(d => 
+            d.potential !== null && isFinite(d.potential) &&
+            d.momentum !== null && isFinite(d.momentum) &&
+            d.entropy !== null && isFinite(d.entropy) &&
+            d.temperature !== null && isFinite(d.temperature)
+        );
         this.sortedValues = {};
         this._calculatePercentiles();
+        
+        this.regimeLogic = {
+            'Fragile Topping / Reversal Risk': [
+                (s) => this.getPercentileRank('temperature', s.temperature) > 75,
+                (s) => this.getPercentileRank('entropy', s.entropy) > 75,
+                (s) => this.getPercentileRank('momentum', s.momentum) < 25,
+            ],
+            'Chaotic Indecision': [
+                (s) => this.getPercentileRank('temperature', s.temperature) > 75,
+                (s) => this.getPercentileRank('entropy', s.entropy) > 75,
+            ],
+            'Stable Bull Trend': [
+                (s) => this.getPercentileRank('entropy', s.entropy) < 25,
+                (s) => this.getPercentileRank('temperature', s.temperature) < 25,
+                (s) => this.getPercentileRank('momentum', s.momentum) > 75,
+                (s) => s.price_velocity !== null && s.price_velocity > 0,
+            ],
+            'Stable Bear Trend': [
+                (s) => this.getPercentileRank('entropy', s.entropy) < 25,
+                (s) => this.getPercentileRank('temperature', s.temperature) < 25,
+                (s) => this.getPercentileRank('momentum', s.momentum) > 75,
+                (s) => s.price_velocity !== null && s.price_velocity <= 0,
+            ],
+            'Coiling Spring (High Tension)': [
+                (s) => this.getPercentileRank('potential', s.potential) > 75,
+                (s) => this.getPercentileRank('momentum', s.momentum) < 25,
+                (s) => this.getPercentileRank('temperature', s.temperature) < 50,
+            ],
+            'Low Volatility / Orderly': [
+                 (s) => this.getPercentileRank('entropy', s.entropy) < 25,
+                 (s) => this.getPercentileRank('temperature', s.temperature) < 25,
+            ],
+        };
     }
 
     private _calculatePercentiles() {
-        const keys: (keyof StateVectorDataPoint)[] = ['potential', 'momentum', 'entropy', 'temperature'];
+        const keys = ['potential', 'momentum', 'entropy', 'temperature'];
         keys.forEach(key => {
-            this.sortedValues[key as string] = this.historicalData
-                .map(d => d[key] as number)
+            this.sortedValues[key] = this.historicalData
+                .map(d => d[key as keyof StateVectorDataPoint] as number)
                 .filter(v => v !== null && isFinite(v))
                 .sort((a, b) => a - b);
         });
     }
-
-    public getPercentileRank(value: number | null, key: keyof Omit<StateVectorDataPoint, 'timestamp' | 'price' | 'volume' | 'smoothed_price' | 'price_velocity' | 'price_acceleration' | 'p_eq' | 'k' | 'F' | 'm' >): number {
-        const keyStr = key as string;
-        if (value === null || !isFinite(value) || !this.sortedValues[keyStr] || this.sortedValues[keyStr].length === 0) {
-            return 0;
-        }
-        const arr = this.sortedValues[keyStr];
+    
+    public getPercentileRank(key: 'potential' | 'momentum' | 'entropy' | 'temperature', value: number | null): number {
+        if (value === null || !this.sortedValues[key] || this.sortedValues[key].length === 0) return 0;
+        
+        const arr = this.sortedValues[key];
         let low = 0, high = arr.length;
+        
         while (low < high) {
             const mid = Math.floor(low + (high - low) / 2);
-            if (arr[mid] < value) {
-                low = mid + 1;
-            } else {
-                high = mid;
-            }
+            if (arr[mid] < value) low = mid + 1;
+            else high = mid;
         }
         return (low / arr.length) * 100;
     }
-
+    
     public classify(latestState: StateVectorDataPoint): Record<string, number> {
-        const regimeLogic: Record<string, ((s: StateVectorDataPoint) => boolean)[]> = {
-            'Fragile topping/reversal risk': [
-                (s) => this.getPercentileRank(s.temperature, 'temperature') > 75,
-                (s) => this.getPercentileRank(s.entropy, 'entropy') > 75,
-                (s) => this.getPercentileRank(s.momentum, 'momentum') < 25,
-            ],
-            'Chaotic indecision': [
-                (s) => this.getPercentileRank(s.temperature, 'temperature') > 75,
-                (s) => this.getPercentileRank(s.entropy, 'entropy') > 75,
-            ],
-            'Stable bull/bear trend': [
-                (s) => this.getPercentileRank(s.entropy, 'entropy') < 25,
-                (s) => this.getPercentileRank(s.temperature, 'temperature') < 25,
-                (s) => this.getPercentileRank(s.momentum, 'momentum') > 75,
-            ],
-            'Coiling Spring (High Tension)': [
-                (s) => this.getPercentileRank(s.potential, 'potential') > 75,
-                (s) => this.getPercentileRank(s.momentum, 'momentum') < 25,
-                (s) => this.getPercentileRank(s.temperature, 'temperature') < 50,
-            ],
-            'Low volatility/Orderly': [
-                (s) => this.getPercentileRank(s.entropy, 'entropy') < 25,
-                (s) => this.getPercentileRank(s.temperature, 'temperature') < 25,
-            ],
-        };
-
-        const scores: Record<string, number> = {};
-        for (const [regime, conditions] of Object.entries(regimeLogic)) {
+        let scores: Record<string, number> = {};
+        for (const [regime, conditions] of Object.entries(this.regimeLogic)) {
             let metConditions = 0;
             conditions.forEach(condition => {
-                if (condition(latestState)) {
-                    metConditions++;
-                }
+                if (condition(latestState)) metConditions++;
             });
             scores[regime] = (100 * metConditions) / conditions.length;
         }
