@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import dynamic from 'next/dynamic';
 import { addDays } from 'date-fns';
 import { generateMarketAnalysis } from '@/ai/flows/generate-market-analysis';
 import { useToast } from '@/hooks/use-toast';
@@ -8,18 +9,36 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   calculateStateVector, 
   RegimeClassifier,
-  type StateVectorDataPoint,
   type IndicatorOptions,
 } from '@/lib/indicator';
 
 import { Header } from '@/components/header';
 import { Controls, type ControlState } from '@/components/controls';
 import { ParameterDial } from '@/components/parameter-dial';
-import { StateSpaceChart } from '@/components/state-space-chart';
 import { MarketRegimes } from '@/components/market-regimes';
 import { Analysis } from '@/components/analysis';
+import { Skeleton } from '@/components/ui/skeleton';
+import { RadarChart } from '@/components/radar-chart'; // Import the new RadarChart
 
 import { TrendingUp, Gauge, Shuffle, Thermometer } from 'lucide-react';
+
+const StateSpaceChart = dynamic(() =>
+  import('@/components/state-space-chart').then(mod => mod.StateSpaceChart),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="h-full w-full flex flex-col">
+            <div className="px-2">
+                <p className="text-lg font-semibold">4D State-Space Trajectory</p>
+                <p className="text-sm text-muted-foreground">Potential (x), Momentum (y), Entropy (z), Temperature (color)</p>
+            </div>
+            <div className="flex-1 flex items-center justify-center">
+                <Skeleton className="h-full w-full" />
+            </div>
+        </div>
+    )
+  }
+);
 
 export type MarketDataPoint = {
   timestamp: number;
@@ -56,7 +75,6 @@ export default function KinetikosEntropePage() {
     temperatureWindow: 50,
   });
 
-  // State for the raw, fetched data
   const [rawMarketData, setRawMarketData] = React.useState<MarketDataPoint[]>([]);
   const [calculatedParams, setCalculatedParams] = React.useState<CalculatedParameters | null>(null);
   const [analysisResult, setAnalysisResult] = React.useState<AnalysisResult | null>(null);
@@ -67,7 +85,6 @@ export default function KinetikosEntropePage() {
 
   React.useEffect(() => {
     setIsMounted(true);
-    // Set initial date range on client-side to avoid hydration mismatch
     setControlState(prevState => ({
       ...prevState,
       dateRange: {
@@ -77,8 +94,6 @@ export default function KinetikosEntropePage() {
     }));
   }, []);
 
-  // --- 1. Effect for FETCHING data ---
-  // This runs ONLY when the asset or date range changes.
   React.useEffect(() => {
     if (!isMounted || !controlState.dateRange.from || !controlState.dateRange.to) {
       return;
@@ -86,7 +101,7 @@ export default function KinetikosEntropePage() {
 
     const fetchMarketData = async () => {
       setIsLoadingData(true);
-      setCalculatedParams(null); // Clear old results
+      setCalculatedParams(null);
       try {
         const { from, to } = controlState.dateRange;
         const response = await fetch(`https://api.coingecko.com/api/v3/coins/${controlState.asset}/market_chart/range?vs_currency=usd&from=${from.getTime() / 1000}&to=${to.getTime() / 1000}`);
@@ -110,7 +125,7 @@ export default function KinetikosEntropePage() {
           title: 'Data Fetching Error',
           description: error.message || 'Failed to fetch market data.',
         });
-        setRawMarketData([]); // Clear data on error
+        setRawMarketData([]);
       } finally {
         setIsLoadingData(false);
       }
@@ -119,8 +134,6 @@ export default function KinetikosEntropePage() {
     fetchMarketData();
   }, [isMounted, controlState.asset, controlState.dateRange, toast]);
 
-  // --- 2. Effect for CALCULATING the indicator ---
-  // This runs whenever the raw data changes OR any indicator parameter changes.
   React.useEffect(() => {
     if (rawMarketData.length === 0) {
       setCalculatedParams(null);
@@ -151,7 +164,7 @@ export default function KinetikosEntropePage() {
         );
 
         if (validData.length === 0) {
-          throw new Error("Calculation resulted in no valid data points. Try adjusting parameters or date range.");
+          throw new Error("Calculation resulted in no valid data. Try adjusting parameters or date range.");
         }
         
         const classifier = new RegimeClassifier(validData);
@@ -182,7 +195,6 @@ export default function KinetikosEntropePage() {
       }
     };
     
-    // Use a timeout to debounce calculations while sliders are being moved
     const debounceTimeout = setTimeout(runCalculations, 50);
     return () => clearTimeout(debounceTimeout);
 
@@ -219,6 +231,13 @@ export default function KinetikosEntropePage() {
     { name: 'Entropy', value: calculatedParams?.entropy, icon: Shuffle, color: 'hsl(280, 80%, 60%)' },
     { name: 'Temperature', value: calculatedParams?.temperature, icon: Thermometer, color: 'hsl(30, 90%, 60%)' },
   ];
+  
+  const radarScores = calculatedParams ? {
+      potential: calculatedParams.potential,
+      momentum: calculatedParams.momentum,
+      entropy: calculatedParams.entropy,
+      temperature: calculatedParams.temperature,
+  } : undefined;
 
   return (
     <div className="min-h-screen bg-background text-foreground isolate">
@@ -232,7 +251,7 @@ export default function KinetikosEntropePage() {
             <Controls
               state={controlState}
               onStateChange={setControlState}
-              isLoading={isLoadingData} // Only lock controls during data fetch
+              isLoading={isLoadingData}
             />
           </aside>
           
@@ -251,10 +270,15 @@ export default function KinetikosEntropePage() {
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              
               <div className="xl:col-span-2 bg-glass rounded-xl p-4 min-h-[400px]">
                 <StateSpaceChart trajectory={calculatedParams?.trajectory} isLoading={isLoading} />
               </div>
-              <div className="xl:col-span-1">
+
+              <div className="xl:col-span-1 flex flex-col gap-6">
+                <div className="bg-glass rounded-xl p-4">
+                  <RadarChart scores={radarScores} isLoading={isLoading} />
+                </div>
                 <Analysis
                   result={analysisResult}
                   isLoading={isAnalysisLoading}
@@ -262,6 +286,7 @@ export default function KinetikosEntropePage() {
                   isGenerateDisabled={isLoading || !calculatedParams}
                 />
               </div>
+
             </div>
 
             <div>

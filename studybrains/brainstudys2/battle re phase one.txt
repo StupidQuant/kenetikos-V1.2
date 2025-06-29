@@ -1,0 +1,1003 @@
+
+
+
+
+
+
+
+# 📊 **Kinetikós Entropḗ 2.0: A Living Market Indicator System**
+---
+
+## **Vision:**  
+To evolve the **Kinetikós Entropḗ Dashboard** from a human-operated analysis tool into an adaptive, self-calibrating, memory-augmented quantitative analyst—a *"Living Indicator"* that not only describes but *learns* the underlying physics of the market over time.
+
+### 🎯 Main Objective:
+Make the 4D state vector — **Potential (𝓟), Momentum (𝓜), Entropy (𝓔), Temperature (Θ)** — dynamic by activating it with real market data in real-time, using advanced econophysics-inspired modeling:  
+- Model internal physical drivers (𝑘(t), 𝐹(t), 𝑚(t), 𝑝_eq(t)) as state variables.  
+- Let the system adapt as the regime changes — **with memory, context, and reasoning.**
+
+---
+
+## 🔷 **PILLAR I: Time-Varying Parameter Estimation**
+> *Goal: Replace static lookback window estimates with real-time, adaptive filters for evolving system parameters (𝑘(t), 𝐹(t), 𝑚(t)).*
+
+### 🔍 Concept:  
+You want to treat the market like a **dynamical system** governed by a force law:
+
+\[
+m(t) \cdot \ddot{p}(t) + k(t) \cdot \left(p(t) - p_{eq}(t)\right) = F(t)
+\]
+
+Key idea: You **don’t assume** 𝑘, 𝐹, or 𝑚 as fixed — instead, you want to **track their evolution** in real time. This is a classic **state estimation problem for a non-linear system**.
+
+---
+
+### 🔁 **Technique Comparison – EKF vs Particle Filter**
+
+| Feature                        | Extended Kalman Filter (EKF)             | Particle Filter (SMC)                          |
+|-------------------------------|------------------------------------------|------------------------------------------------|
+| Assumption                    | Gaussian noise + local linearization     | No distributional assumption                   |
+| Non-linearity                 | Handles via Taylor expansion             | Naturally handles full non-linearities         |
+| Computational cost            | Low                                       | High (resampling cost)                         |
+| Adaptation to regime shifts   | Slower; prone to divergence              | Excellent at tracking abrupt changes           |
+| Best Use Case                 | Smooth, gradually changing dynamics      | Multimodal, irregular financial time series    |
+| Library                       | `filterpy`, `pykalman`                   | Can implement manually or use `particles` lib |
+
+---
+
+### 🧠 Mathematical Framework (EKF)
+
+Given state:
+\[
+x_t = \left[k(t), F(t), m(t)\right],\quad \text{state vector}
+\]
+
+You linearize the system around the estimate to apply Kalman logic:
+
+#### Time Update (Prediction)
+\[
+\hat{x}_t = f(\hat{x}_{t-1}) + w_t
+\]
+
+#### Measurement Update (Correction)
+Observed measurement is:
+\[
+y_t = m(t)\ddot{p}_t + k(t)[p_t - p_{eq}(t)] - F(t)
+\]
+
+You update estimate based on y_t.
+
+---
+
+### 🧱 **Python Implementation – EKF with `filterpy`**
+
+```python
+from filterpy.kalman import ExtendedKalmanFilter
+import numpy as np
+
+def fx(x, dt=1):
+    # Predict next state assuming random walk on params
+    return x  # or add drift if needed
+
+def hx(x, obs):
+    k, F, m = x
+    p, p_prev, p_prev2, p_eq = obs
+    acc = (p - 2*p_prev + p_prev2)
+    return m * acc + k * (p - p_eq) - F
+
+ekf = ExtendedKalmanFilter(dim_x=3, dim_z=1)
+ekf.x = np.array([0.5, 0.1, 1.0])  # initial [k, F, m]
+ekf.P *= 0.1
+ekf.R *= 1
+ekf.Q *= 0.01
+
+for t in range(3, len(price_series)):
+    obs = [price[t], price[t-1], price[t-2], p_eq[t]]
+    ekf.predict(fx=fx)
+    predicted_measurement = hx(ekf.x, obs)
+    actual_measurement = 0  # or compute from real acceleration eq
+    ekf.update(actual_measurement - predicted_measurement)
+```
+
+---
+
+### 🔥 **Python From-Scratch Particle Filter**
+
+```python
+class ParticleFilter:
+    def __init__(self, N=1000):
+        self.N = N
+        self.particles = np.random.normal([0.5, 0.1, 1.0], [0.1]*3, size=(N, 3))
+        self.weights = np.ones(N) / N
+
+    def predict(self):
+        noise = np.random.normal(0, 0.02, self.particles.shape)
+        self.particles += noise
+
+    def likelihood(self, measurement, particle, p, p_prev, p_prev2, p_eq):
+        k, F, m = particle
+        acc = (p - 2*p_prev + p_prev2)
+        pred = m * acc + k * (p - p_eq) - F
+        return np.exp(-0.5 * (measurement - pred)**2)
+
+    def update(self, measurement, p, p_prev, p_prev2, p_eq):
+        for i in range(self.N):
+            self.weights[i] *= self.likelihood(measurement, self.particles[i], p, p_prev, p_prev2, p_eq)
+        self.weights += 1e-300  # Numerical stability
+        self.weights /= np.sum(self.weights)
+        self.resample()
+
+    def resample(self):
+        indices = np.random.choice(np.arange(self.N), size=self.N, p=self.weights)
+        self.particles = self.particles[indices]
+        self.weights[:] = 1.0 / self.N
+```
+
+---
+
+## ✅ Recommendation:
+Use **Particle Filters** for real-time physics param tracking due to nonlinearity and dynamics.
+
+🧩 Libraries:  
+- [`filterpy`](https://github.com/rlabbe/filterpy) (EKF)
+- [`particles`](https://github.com/PierreDel moral/particles) (advanced SMC)
+- [`pykalman`](https://pykalman.github.io/) (basic linear Kalman)
+
+---
+
+## 🔷 **PILLAR II: Robust Equilibrium Price Modeling**
+
+### 🎯 Goal:
+Replace SMA as p_eq(t) with a more robust, adaptive representation. Enter **STL (Seasonal-Trend-Loess Decomposition)**.
+
+---
+
+### 🎓 Intuition:
+Markets have structural/mechanical oscillations often confused as trend (ex: seasonality). Loess smooths local trends and removes noise better than MA/EMA.
+
+---
+
+### 🔬 Decomposition Equation:
+
+Given price series 𝑝(t):
+
+\[
+p(t) = T(t) + S(t) + R(t)
+\]
+
+We define:  
+- **p_eq(t) = T(t) + S(t)** — trend + cycle  
+- Residual R(t) becomes implied noise or arbitrage
+
+---
+
+### 🧱 Python Implementation
+
+```python
+import pandas as pd
+from statsmodels.tsa.seasonal import STL
+
+def compute_equilibrium_price(price_series):
+    stl = STL(price_series, period=30)
+    result = stl.fit()
+    return result.trend + result.seasonal  # robust p_eq
+```
+
+---
+
+## 🔷 **PILLAR III: Market Regime Clustering from [𝓟, 𝓜, 𝓔, Θ]**
+
+> Replaces hardcoded rule-based classifier with unsupervised statistical discovery of **emergent market states**.
+
+### 🕵️‍♀️ Algorithms Compared
+
+| Method       | Need k? | Handles Noise? | Cluster Shape   | Advantage                      |
+|--------------|---------|----------------|------------------|-------------------------------|
+| **k-Means**        | ✅ Yes  | ❌            | spherical         | Fast, simple baseline         |
+| **DBSCAN**         | ❌ No   | ✅ Yes         | Arbitrary         | Auto-discovers regime count   |
+| **GMM** (EM)       | ✅ Yes  | ✅ Probabilistic | Elliptical        | Assigns *soft* membership     |
+
+---
+
+### 🐍 Example: Clustering 4D State Vector [𝓟, 𝓜, 𝓔, Θ]
+
+```python
+from sklearn.cluster import KMeans, DBSCAN
+from sklearn.mixture import GaussianMixture
+import matplotlib.pyplot as plt
+
+# Input: DataFrame with P, M, E, Θ
+X = state_vector_df[["P", "M", "E", "T"]].values
+
+# KMeans
+kmeans = KMeans(n_clusters=4).fit(X)
+state_vector_df["regime_kmeans"] = kmeans.labels_
+
+# DBSCAN
+dbscan = DBSCAN(eps=0.5, min_samples=10).fit(X)
+state_vector_df["regime_dbscan"] = dbscan.labels_
+
+# GMM
+gmm = GaussianMixture(n_components=4).fit(X)
+labels = gmm.predict(X)
+probs = gmm.predict_proba(X)
+state_vector_df["regime_gmm"] = labels
+state_vector_df[["bull_prob", "bear_prob", "flat_prob", "vol_prob"]] = probs
+```
+
+---
+
+## ✅ Recommendation:
+Use **Gaussian Mixture Models (GMM)** for soft classification into regimes, enabling **blended beliefs** (e.g., "65% Consolidation; 35% Topping").
+
+Library:  
+[`scikit-learn`](https://scikit-learn.org/) – highly stable clustering implementations
+
+---
+
+## 🔷 **PILLAR IV: Memory-Augmented AI & Pattern Recall (RAG)**
+
+### 🌉 Architecture: Retrieval-Augmented Generation
+
+```
+                            ┌────────────┐
+                            │ User Query │
+                            └────┬───────┘
+                                 │
+         ┌──────────────[ 4D STATE ]──────────────┐
+         │                                        │
+◀────────▼───────────────┐                 ┌─────▼──────────────▶
+│  VECTOR DATABASE (FAISS)│←── embed() ────│StateVector[𝓟,𝓜,𝓔,Θ] │
+└────────▲────────────────┘                 └─────────────▲──────┘
+         │ Similar Vectors                                │
+         │                                                │
+     ┌────┴──┐             ┌───────────────────────┐
+     │  LLM  │◀────────────│  Prompt with State +  │
+     └───────┘             │  Precedent Embeddings │
+                           └───────────────────────┘
+```
+
+
+---
+
+### ⚙️ Vector Similarity Search
+
+```python
+from sentence_transformers import SentenceTransformer
+import faiss
+import numpy as np
+
+# Create embeddings
+model = SentenceTransformer("all-MiniLM-L6-v2")
+vectors = model.encode(state_vector_df.astype(str).values.tolist(), show_progress_bar=True)
+
+# Index setup
+index = faiss.IndexFlatIP(vectors.shape[1])
+faiss.normalize_L2(vectors)
+index.add(vectors)
+
+# Query
+query_vec = model.encode(["1.2", "0.8", "0.5", "0.9"])
+faiss.normalize_L2(query_vec)
+_, indices = index.search(np.array([query_vec]), k=3)
+```
+
+---
+
+### 🧠 Chain-of-Thought Prompt Template
+
+```text
+🧩 Current state vector: [𝓟={p}, 𝓜={m}, 𝓔={e}, Θ={T}]
+
+📚 Retrieved Similar Cases:
+1. Date: {date1}, State: [𝓟,𝓜,𝓔,Θ] = {vec1}, Outcome: {summary1}
+2. Date: {date2}, State: [𝓟,𝓜,𝓔,Θ] = {vec2}, Outcome: {summary2}
+3. Date: {date3}, State: [𝓟,𝓜,𝓔,Θ] = {vec3}, Outcome: {summary3}
+
+🧠 Thought Process:
+- Compare current state to precedent patterns
+- Analyze outcomes
+- Estimate likelihood of similar trajectory
+
+📈 Forecast: There is a {X}% chance of [Regime X] within N days, based on historical trajectory similarity.
+
+👉 Recommendation: {LONG/SHORT/Neutral}; Confidence: High/Medium/Low
+```
+
+---
+
+### 🔧 Tooling Comparison:
+| Tool       | Persistent | GPU search | Embedding Support | Language Server |
+|------------|------------|------------|--------------------|-----------------|
+| **FAISS**      | ❌ temp      | ✅ Yes      | Manual              | ❌              |
+| **ChromaDB**   | ✅ Yes       | ❌ No       | Native chunking     | ✅ Optional     |
+| **Weaviate**   | ✅ Yes       | ✅ (Hybrid) | AutoML + Schema     | ✅              |
+
+🏆 **Best for us:** **FAISS** + manual embeddings = high-speed & lightweight.
+
+---
+
+## 🔷 **Backtest Engine (Event-Based)**
+
+```python
+class Event: pass
+
+class DataEvent(Event): pass
+class SignalEvent(Event): pass
+class OrderEvent(Event): pass
+class FillEvent(Event): pass
+
+class Backtester:
+    def __init__(self, data_feed):
+        self.events = deque()
+        self.data = data_feed
+        self.portfolio = Portfolio()
+
+    def run(self):
+        while self.data.has_data():
+            self.events.append(DataEvent())
+            self._process_events()
+
+    def _process_events(self):
+        while self.events:
+            event = self.events.popleft()
+            if isinstance(event, DataEvent):
+                signal = self.generate_signal()
+                self.events.append(SignalEvent(signal))
+            elif isinstance(event, SignalEvent):
+                order = self.create_order(event)
+                self.events.append(OrderEvent(order))
+```
+
+---
+
+## 📊 Performance & Risk Metrics
+
+```python
+def sharpe_ratio(returns, risk_free=0.0):
+    return (returns.mean() - risk_free) / returns.std()
+
+def sortino_ratio(returns, target=0.0):
+    downside = returns[returns < target]
+    return (returns.mean() - target) / downside.std()
+
+def calmar_ratio(returns):
+    max_dd = (np.maximum.accumulate(returns) - returns).max()
+    return returns.mean() / max_dd
+```
+
+---
+
+## 🎲 Walkforward Optimization
+
+```python
+for start in range(0, len(data), step):
+    train = data[start:start+lookback]
+    test = data[start+lookback:start+lookback+forward]
+    
+    model.fit(train)
+    pnl = model.test(test)
+    results.append(pnl)
+```
+
+---
+
+## 🧠 Monte Carlo Significance
+
+Use permutation resampling:
+
+```python
+def monte_carlo_simulation(strategy_returns, num_samples=1000):
+    simulated_stats = []
+    for _ in range(num_samples):
+        permuted = np.random.permutation(strategy_returns)
+        stat = sharpe_ratio(permuted)
+        simulated_stats.append(stat)
+    return simulated_stats
+```
+
+---
+
+# ✅ Summary
+
+| Pillar                            | Algorithm                   | Output                             |
+|----------------------------------|-----------------------------|------------------------------------|
+| Time-Varying Estimation          | Particle Filter             | k(t), F(t), m(t)                   |
+| Robust p_eq                      | STL                         | p_eq series                        |
+| Market Regimes                   | GMM                         | Regime id + probabilities          |
+| AI Memory + Forecast             | RAG + CoT                   | Probabilistic forecast             |
+| Strategy Evaluation              | Walk-forward + Simulation   | Statistically validated results    |
+
+---
+
+# 🛠 Resources
+
+- Particle Filters: [Arulampalam 2002 - "A tutorial on particle filters"](https://www.cs.ubc.ca/~arnaud/journals/arulampalam02a.pdf)
+- Econophysics: [Stanley et al papers](https://arxiv.org/abs/cond-mat/0205457)
+- Vector Similarity: [FAISS docs](https://faiss.ai/)
+- RAG pipeline: [Haystack](https://haystack.deepset.ai/)
+- Backtesting tools: [`backtrader`](https://www.backtrader.com/) / [`zipline`](https://github.com/quantopian/zipline)
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Technical Report: Evolution of Financial Analysis Dashboard to Adaptive Quantitative System
+Executive Summary
+This report outlines the technical framework for transforming a static financial analysis dashboard into a dynamic, adaptive quantitative system. The current system calculates a 4D state vector (Potential, Momentum, Entropy, Temperature) based on econophysics principles. The proposed evolution will implement time-varying parameter estimation, unsupervised regime detection, AI-powered historical pattern recognition, and robust backtesting capabilities.
+
+I. Time-Varying Parameter Estimation
+A. Extended Kalman Filter (EKF) vs. Particle Filters
+Conceptual Explanation
+The Extended Kalman Filter (EKF) extends the classic Kalman filter to non-linear systems by linearizing around the current estimate. It's computationally efficient but can struggle with highly non-linear dynamics or non-Gaussian noise.
+
+Particle Filters use Sequential Monte Carlo methods to represent the posterior distribution with a set of weighted samples (particles). They can handle arbitrary distributions and severe non-linearities, making them ideal for tracking abrupt market regime changes.
+
+Core Mathematics
+Extended Kalman Filter:
+
+State prediction: 
+x
+^
+k
+−
+=
+f
+(
+x
+^
+k
+−
+1
+,
+u
+k
+−
+1
+)
+x
+^
+  
+k
+−
+​
+ =f( 
+x
+^
+  
+k−1
+​
+ ,u 
+k−1
+​
+ )
+Error covariance prediction: 
+P
+k
+−
+=
+F
+k
+P
+k
+−
+1
+F
+k
+T
++
+Q
+k
+P 
+k
+−
+​
+ =F 
+k
+​
+ P 
+k−1
+​
+ F 
+k
+T
+​
+ +Q 
+k
+​
+ 
+Kalman gain: 
+K
+k
+=
+P
+k
+−
+H
+k
+T
+(
+H
+k
+P
+k
+−
+H
+k
+T
++
+R
+k
+)
+−
+1
+K 
+k
+​
+ =P 
+k
+−
+​
+ H 
+k
+T
+​
+ (H 
+k
+​
+ P 
+k
+−
+​
+ H 
+k
+T
+​
+ +R 
+k
+​
+ ) 
+−1
+ 
+State update: 
+x
+^
+k
+=
+x
+^
+k
+−
++
+K
+k
+(
+z
+k
+−
+h
+(
+x
+^
+k
+−
+)
+)
+x
+^
+  
+k
+​
+ = 
+x
+^
+  
+k
+−
+​
+ +K 
+k
+​
+ (z 
+k
+​
+ −h( 
+x
+^
+  
+k
+−
+​
+ ))
+Error covariance update: 
+P
+k
+=
+(
+I
+−
+K
+k
+H
+k
+)
+P
+k
+−
+P 
+k
+​
+ =(I−K 
+k
+​
+ H 
+k
+​
+ )P 
+k
+−
+​
+ 
+Where 
+F
+k
+F 
+k
+​
+  and 
+H
+k
+H 
+k
+​
+  are Jacobian matrices of partial derivatives.
+
+Particle Filter:
+
+Initialize particles: 
+{
+x
+0
+i
+}
+i
+=
+1
+N
+∼
+p
+(
+x
+0
+)
+{x 
+0
+i
+​
+ } 
+i=1
+N
+​
+ ∼p(x 
+0
+​
+ )
+Prediction: 
+x
+k
+i
+∼
+p
+(
+x
+k
+∣
+x
+k
+−
+1
+i
+)
+x 
+k
+i
+​
+ ∼p(x 
+k
+​
+ ∣x 
+k−1
+i
+​
+ )
+Update weights: 
+w
+k
+i
+=
+w
+k
+−
+1
+i
+⋅
+p
+(
+z
+k
+∣
+x
+k
+i
+)
+w 
+k
+i
+​
+ =w 
+k−1
+i
+​
+ ⋅p(z 
+k
+​
+ ∣x 
+k
+i
+​
+ )
+Normalize weights: 
+w
+~
+k
+i
+=
+w
+k
+i
+∑
+j
+=
+1
+N
+w
+k
+j
+w
+~
+  
+k
+i
+​
+ = 
+∑ 
+j=1
+N
+​
+ w 
+k
+j
+​
+ 
+w 
+k
+i
+​
+ 
+​
+ 
+Resample particles based on weights
+Estimate state: 
+x
+^
+k
+=
+∑
+i
+=
+1
+N
+w
+~
+k
+i
+x
+k
+i
+x
+^
+  
+k
+​
+ =∑ 
+i=1
+N
+​
+  
+w
+~
+  
+k
+i
+​
+ x 
+k
+i
+​
+ 
+Comparative Analysis
+Aspect	Extended Kalman Filter	Particle Filter
+Computational Cost	Lower (O(n³))	Higher (O(n·N)) where N is particle count
+Distribution Assumptions	Assumes local linearity and Gaussian noise	No distributional assumptions
+Handling Non-linearities	Moderate - linearizes around estimate	Excellent - can handle severe non-linearities
+Abrupt Changes	Poor - struggles with discontinuities	Excellent - can recover quickly from jumps
+Parameter Tuning	Fewer parameters to tune	More parameters (particle count, resampling strategy)
+Market Regime Shifts	May lose track during violent transitions	Can maintain multiple hypotheses during uncertainty
+For financial markets with regime shifts, the Particle Filter is superior despite higher computational demands.
+
+Implementation Example
+# Particle Filter implementation for our equation of motion: mp̈ + k(p - p_eq) = F
+
+import numpy as np
+from scipy.stats import norm
+
+class ParticleFilter:
+    def __init__(self, num_particles=1000, process_noise=(0.01, 0.05, 0.01), measurement_noise=0.1):
+        self.num_particles = num_particles
+        self.process_noise = process_noise  # (σ_k, σ_F, σ_m)
+        self.measurement_noise = measurement_noise
+        
+        # State vector: [k, F, m]
+        self.particles = None
+        self.weights = None
+        
+    def initialize(self, initial_guess, uncertainty):
+        """Initialize particles around initial guess with specified uncertainty"""
+        self.particles = np.random.normal(   
+
+
+
+
+. Time-Varying Parameter Estimation
+Conceptual Foundation
+The core challenge is tracking how the market's "physical parameters" (k, F, m) evolve over time. These parameters represent:
+
+k: Market stiffness/mean reversion strength
+F: External forces/trends
+m: Market inertia/momentum effects
+The key insight is that these parameters aren't fixed - they evolve as market conditions change. For example, during high volatility periods, 'k' typically increases as mean reversion becomes stronger.
+
+Mathematical Framework
+Extended Kalman Filter Approach
+The EKF linearizes the non-linear system around the current estimate:
+
+def state_transition(x_prev):
+    # x_prev contains [k, F, m]
+    # Simple random walk model for parameters
+    return x_prev + process_noise
+
+def measurement_model(x, p, p_prev):
+    # Our physics equation: mp¨ + k(p - p_eq) = F
+    k, F, m = x
+    acceleration = (p - 2*p_prev[0] + p_prev[1]) / (dt**2)
+    return m*acceleration + k*(p - p_eq) - F
+
+Particle Filter Implementation
+import numpy as np
+from scipy.stats import norm
+
+class ParticleFilter:
+    def __init__(self, n_particles=1000):
+        self.n_particles = n_particles
+        # Initialize particles for [k, F, m]
+        self.particles = np.random.normal(size=(n_particles, 3))
+        self.weights = np.ones(n_particles) / n_particles
+        
+    def predict(self):
+        # Add process noise to particles
+        self.particles += np.random.normal(0, 0.1, size=self.particles.shape)
+        
+    def update(self, measurement, p, p_prev):
+        # Calculate likelihood for each particle
+        for i in range(self.n_particles):
+            pred = self.measurement_model(self.particles[i], p, p_prev)
+            self.weights[i] *= norm.pdf(measurement - pred, 0, 1)
+            
+        # Normalize weights
+        self.weights /= np.sum(self.weights)
+        
+        # Resample if effective particle size is too low
+        if 1.0 / np.sum(self.weights**2) < self.n_particles/2:
+            self.resample()
+            
+    def resample(self):
+        indices = np.random.choice(
+            self.n_particles, 
+            size=self.n_particles, 
+            p=self.weights
+        )
+        self.particles = self.particles[indices]
+        self.weights = np.ones(self.n_particles) / self.n_particles
+
+Comparative Analysis
+Extended Kalman Filter:
+
+Pros: Computationally efficient, works well for mild non-linearities
+Cons: Can diverge with strong non-linearities, assumes Gaussian noise
+Particle Filter:
+
+Pros: Handles any distribution, better for abrupt changes
+Cons: Computationally intensive, requires careful tuning
+For this specific application, I recommend the Particle Filter approach because:
+
+Financial markets often exhibit sudden regime changes
+Parameter distributions are often non-Gaussian
+Modern computing power makes the computational cost acceptable
+Robust Equilibrium Price Modeling
+Here's an implementation using statsmodels for STL decomposition:
+
+import pandas as pd
+from statsmodels.tsa.seasonal import STL
+
+def calculate_robust_equilibrium(prices, period=252):
+    """
+    Calculate robust equilibrium price using STL decomposition
+    
+    Args:
+        prices: pd.Series of price data
+        period: Number of periods for seasonal component
+    
+    Returns:
+        pd.Series of equilibrium prices
+    """
+    stl = STL(prices, period=period)
+    result = stl.fit()
+    
+    # Equilibrium price is trend + seasonal
+    p_eq = result.trend + result.seasonal
+    return p_eq
