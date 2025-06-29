@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>kinētikós entropḗ</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Updated Plotly.js library -->
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    
+    <!-- D3.js for advanced interactions -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    
+    <!-- Math.js dependency for matrix operations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.1/math.min.js"></script>
+    
+    <style>
+        /* Custom styles for a modern, 2025-inspired UI */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* slate-900 */
+            background-image: radial-gradient(circle at 1px 1px, #334155 1px, transparent 0);
+            background-size: 2rem 2rem;
+            color: #d1d5db; /* gray-300 */
+        }
+        
+        .glass-panel {
+            background-color: rgba(23, 37, 60, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .input-field {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            color: #f1f5f9;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px #312e81;
+        }
+
+        #message-box {
+            position: fixed; top: 20px; left: 50%;
+            transform: translateX(-50%);
+            background-color: #c2410c; color: white;
+            padding: 1rem 2rem; border-radius: 0.5rem;
+            border: 1px solid #fdba74;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.2);
+            z-index: 1000; display: none; opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        .preset-btn {
+            background-color: #334155;
+            border: 1px solid #475569;
+        }
+        .preset-btn:hover {
+             background-color: #475569;
+             border-color: #64748b;
+        }
+        
+        .gauge-bar-bg { background-color: #374151; }
+        .gauge-bar { background: linear-gradient(to right, #34d399, #fde047, #ef4444); }
+        .regime-score-bar { background-color: #4f46e5; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="message-box"></div>
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-slate-200 to-indigo-400 mb-2">
+                kinētikós entropḗ
+            </h1>
+            <p class="text-lg text-slate-400">A State-Space Analysis of Market Dynamics</p>
+        </header>
+
+        <!-- Controls Panel -->
+        <div class="glass-panel p-6 rounded-xl shadow-2xl shadow-black/30 mb-8">
+             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-11 gap-x-6 gap-y-4 items-end">
+                <div class="col-span-2 md:col-span-1 lg:col-span-2">
+                    <label for="coin-id" class="block text-sm font-medium text-slate-300 mb-1">Asset ID</label>
+                    <input type="text" id="coin-id" value="bitcoin" class="input-field w-full rounded-md shadow-sm p-2 text-sm">
+                </div>
+                <div class="col-span-2 md:col-span-1 lg:col-span-2">
+                    <label for="start-date" class="block text-sm font-medium text-slate-300 mb-1">Start Date</label>
+                    <input type="date" id="start-date" class="input-field w-full rounded-md shadow-sm p-2 text-sm">
+                </div>
+                <div class="col-span-2 md:col-span-1 lg:col-span-2">
+                    <label for="end-date" class="block text-sm font-medium text-slate-300 mb-1">End Date</label>
+                    <input type="date" id="end-date" class="input-field w-full rounded-md shadow-sm p-2 text-sm">
+                </div>
+                <div class="lg:col-span-1">
+                    <label for="sg-window" class="block text-sm font-medium text-slate-300 mb-1">SG Win</label>
+                    <input type="number" id="sg-window" value="31" step="2" class="input-field w-full rounded-md shadow-sm p-2 text-sm">
+                </div>
+                <div class="lg:col-span-1">
+                    <label for="sg-poly" class="block text-sm font-medium text-slate-300 mb-1">SG Poly</label>
+                    <input type="number" id="sg-poly" value="2" class="input-field w-full rounded-md shadow-sm p-2 text-sm">
+                </div>
+                <div class="lg:col-span-1">
+                    <label for="reg-window" class="block text-sm font-medium text-slate-300 mb-1">Regr. Win</label>
+                    <input type="number" id="reg-window" value="50" class="input-field w-full rounded-md shadow-sm p-2 text-sm">
+                </div>
+                 <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                    <div >
+                        <label for="eq-window" class="block text-sm font-medium text-slate-300 mb-1">Eq. Win</label>
+                        <input type="number" id="eq-window" value="50" class="input-field w-full rounded-md shadow-sm p-2 text-sm">
+                    </div>
+                     <div>
+                        <label for="entropy-window" class="block text-sm font-medium text-slate-300 mb-1">Entr. Win</label>
+                        <input type="number" id="entropy-window" value="50" class="input-field w-full rounded-md shadow-sm p-2 text-sm">
+                    </div>
+                 </div>
+                 <div class="col-span-2 md:col-span-3 lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+                    <div>
+                        <label for="entropy-bins" class="block text-sm font-medium text-slate-300 mb-1">Entr. Bins</label>
+                        <input type="number" id="entropy-bins" value="10" class="input-field w-full rounded-md shadow-sm p-2 text-sm">
+                    </div>
+                    <div>
+                        <label for="temp-window" class="block text-sm font-medium text-slate-300 mb-1">Temp. Win</label>
+                        <input type="number" id="temp-window" value="50" class="input-field w-full rounded-md shadow-sm p-2 text-sm">
+                    </div>
+                </div>
+                <div class="col-span-2 md:col-span-3 lg:col-span-2 flex justify-end">
+                    <button id="run-analysis" class="w-full lg:w-auto bg-gradient-to-br from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-2 px-6 rounded-md shadow-lg hover:shadow-indigo-500/50 transition-all duration-300 transform hover:-translate-y-px disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:transform-none">
+                        Analyze
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- State-Space Dashboard -->
+        <div class="glass-panel p-6 rounded-xl shadow-xl shadow-black/30 mb-8">
+            <h2 class="text-2xl font-bold text-slate-100 mb-4">State-Space Dashboard</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Gauges -->
+                <div id="gauges-container" class="md:col-span-1 space-y-4">
+                    <p class="text-slate-400 text-center">Run analysis to view dashboard.</p>
+                </div>
+                <!-- Radar Chart -->
+                <div class="md:col-span-1">
+                    <div id="radar-chart" style="height: 250px;"></div>
+                </div>
+                <!-- Regime Scores -->
+                <div id="regime-scores-container" class="md:col-span-1 space-y-3">
+                     <p class="text-slate-400 text-center">Run analysis to view scores.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Analyst & Interpretation Guides -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="glass-panel p-6 rounded-xl shadow-xl shadow-black/30">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-2xl font-bold text-slate-100">AI Analyst</h2>
+                    <button id="run-ai-analysis" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Get Deeper Insight
+                    </button>
+                </div>
+                <div id="ai-output" class="text-slate-300 leading-relaxed prose prose-invert max-w-none mb-4">Run analysis to enable AI interpretation.</div>
+                
+                <!-- **NEW**: TL;DR AI Section -->
+                <div id="tldr-section" class="hidden mt-4 pt-4 border-t border-slate-700">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-slate-200">The Bottom Line (TL;DR)</h3>
+                         <button id="run-tldr-ai" class="bg-indigo-700 hover:bg-indigo-600 text-white font-semibold py-1 px-3 rounded-md shadow-md text-sm transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">Simplify</button>
+                    </div>
+                    <div id="tldr-output" class="text-slate-300 mt-2"></div>
+                </div>
+            </div>
+             <div class="glass-panel p-6 rounded-xl shadow-xl shadow-black/30">
+                <h2 class="text-2xl font-bold text-slate-100 mb-3">Parameter Presets</h2>
+                <p class="text-slate-300 leading-relaxed mb-4">
+                    Choose a preset to quickly configure the indicator for a specific trading style.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button id="preset-short" class="flex-1 preset-btn text-white font-semibold py-2 px-4 rounded-md shadow-md transition duration-300">Short-Term</button>
+                    <button id="preset-swing" class="flex-1 preset-btn text-white font-semibold py-2 px-4 rounded-md shadow-md transition duration-300">Swing Trader</button>
+                    <button id="preset-long" class="flex-1 preset-btn text-white font-semibold py-2 px-4 rounded-md shadow-md transition duration-300">Long-Term</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chart Area -->
+        <main class="mt-8 grid grid-cols-1 lg:grid-cols-5 gap-8">
+            <div class="lg:col-span-3 glass-panel rounded-xl shadow-2xl shadow-black/30 p-4">
+                <h2 class="plot-title">4D State-Space Trajectory</h2>
+                <div id="plot3d" style="height: 60vh; min-height: 400px;"></div>
+            </div>
+            <div class="lg:col-span-2 glass-panel rounded-xl shadow-2xl shadow-black/30 p-4">
+                <h2 class="plot-title">Price History</h2>
+                <div id="plot2d" style="height: 60vh; min-height: 400px;"></div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- Full, unabridged JS code ---
+        const runButton = document.getElementById('run-analysis');
+        const aiRunButton = document.getElementById('run-ai-analysis');
+        const tldrRunButton = document.getElementById('run-tldr-ai');
+        const aiOutput = document.getElementById('ai-output');
+        const tldrOutput = document.getElementById('tldr-output');
+        const tldrSection = document.getElementById('tldr-section');
+        const coinIdInput = document.getElementById('coin-id');
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+        const sgWindowInput = document.getElementById('sg-window');
+        const sgPolyInput = document.getElementById('sg-poly');
+        const regWindowInput = document.getElementById('reg-window');
+        const eqWindowInput = document.getElementById('eq-window');
+        const entropyWindowInput = document.getElementById('entropy-window');
+        const entropyBinsInput = document.getElementById('entropy-bins');
+        const tempWindowInput = document.getElementById('temp-window');
+        const messageBox = document.getElementById('message-box');
+        const gaugesContainer = document.getElementById('gauges-container');
+        const regimeScoresContainer = document.getElementById('regime-scores-container');
+        
+        const presetShortBtn = document.getElementById('preset-short');
+        const presetSwingBtn = document.getElementById('preset-swing');
+        const presetLongBtn = document.getElementById('preset-long');
+
+        let messageTimeout;
+        let currentValidData = []; 
+        let regimeClassifier;
+
+        function showMessage(msg, duration = 3000) {
+            clearTimeout(messageTimeout); messageBox.textContent = msg;
+            messageBox.style.display = 'block'; setTimeout(() => messageBox.style.opacity = 1, 10);
+            messageTimeout = setTimeout(() => {
+                messageBox.style.opacity = 0; setTimeout(() => messageBox.style.display = 'none', 300);
+            }, duration);
+        }
+        
+        async function getAIAnalysis() {
+            if (currentValidData.length === 0) { showMessage("Please run a successful analysis first."); return; }
+            aiRunButton.disabled = true; aiOutput.innerHTML = '<p>Analyzing the state-space... please wait.</p>';
+            tldrSection.classList.add('hidden'); tldrOutput.innerHTML = '';
+            const latestState = currentValidData[currentValidData.length - 1];
+            const prompt = `
+                As a financial market analyst, interpret the following market state data derived from an econophysics model.
+                The data represents the most recent state of an asset.
+                - Potential (P): ${latestState.potential.toExponential(2)}
+                - Momentum (M): ${latestState.momentum.toExponential(2)}
+                - Entropy (E): ${latestState.entropy.toFixed(3)}
+                - Temperature (Θ): ${latestState.temperature.toExponential(2)}
+                Based on these four values, provide a concise, one-paragraph analysis of the current market regime. What is the market likely doing, and what is the potential outlook (e.g., trending, consolidating, reversal risk, high volatility warning)?
+            `;
+            try {
+                 const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                 const payload = { contents: chatHistory }; const apiKey = "";
+                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                 if (!response.ok) throw new Error(`AI API error: ${response.statusText}`);
+                 const result = await response.json();
+                 if (result.candidates && result.candidates[0].content.parts) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    aiOutput.innerHTML = `<p>${text.replace(/\n/g, '<br>')}</p>`;
+                    tldrSection.classList.remove('hidden'); tldrRunButton.disabled = false;
+                 } else { throw new Error("Invalid response structure from AI API."); }
+            } catch (error) {
+                console.error("AI Analysis Error:", error);
+                aiOutput.innerHTML = `<p class="text-red-400">Analysis failed: ${error.message}</p>`;
+            } finally {
+                aiRunButton.disabled = false;
+            }
+        }
+
+        async function getSimplifiedAIAnalysis() {
+            if (aiOutput.textContent.includes('...')) { showMessage("Please generate the main analysis first."); return; }
+            tldrRunButton.disabled = true; tldrOutput.innerHTML = '<p>Simplifying... please wait.</p>';
+            const latestState = currentValidData[currentValidData.length - 1];
+            const expertAnalysis = aiOutput.innerText;
+
+            const prompt = `
+                You are an expert financial analyst who is brilliant at simplifying complex topics.
+                Your task is to take a set of market data and an expert's detailed analysis, and then provide a very simple, easy-to-understand "bottom line" for a beginner.
+                
+                Here is the raw data:
+                - Potential (Tension): ${latestState.potential.toExponential(2)}
+                - Momentum (Trend Energy): ${latestState.momentum.toExponential(2)}
+                - Entropy (Disorder): ${latestState.entropy.toFixed(3)}
+                - Temperature (Fragility): ${latestState.temperature.toExponential(2)}
+                
+                Here is the expert's analysis:
+                "${expertAnalysis}"
+
+                Based on ALL of this information, provide a response in two parts:
+                1.  **Bottom Line:** A single, clear sentence summarizing the most important takeaway.
+                2.  **What it Means:** A 2-3 sentence explanation in simple terms, avoiding jargon. Tell the user if the situation is generally bullish, bearish, or neutral, and what to watch out for.
+            `;
+             try {
+                 const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+                 const payload = { contents: chatHistory }; const apiKey = "";
+                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                 if (!response.ok) throw new Error(`AI API error: ${response.statusText}`);
+                 const result = await response.json();
+                 if (result.candidates && result.candidates[0].content.parts) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    tldrOutput.innerHTML = text.replace(/\n/g, '<br>').replace('**Bottom Line:**', '<strong class="text-indigo-400">Bottom Line:</strong>').replace('**What it Means:**', '<br><strong class="text-indigo-400 mt-2 block">What it Means:</strong>');
+                 } else { throw new Error("Invalid response structure from AI API."); }
+            } catch (error) {
+                console.error("TL;DR AI Analysis Error:", error);
+                tldrOutput.innerHTML = `<p class="text-red-400">Simplification failed: ${error.message}</p>`;
+            } finally {
+                tldrRunButton.disabled = false;
+            }
+        }
+        
+        function generateMockData(from, to) {
+            const data = []; const numPoints = 300;
+            const step = (to * 1000 - from * 1000) / numPoints;
+            let price = 65000; let trend = 1;
+            for (let i = 0; i < numPoints; i++) {
+                const time = from * 1000 + i * step;
+                price += trend * (Math.random() * 100) + (Math.random() - 0.5) * 500;
+                if (Math.random() < 0.05) trend *= -1;
+                if (price < 40000) price = 40000; if (price > 120000) price = 120000;
+                data.push({ timestamp: time, price: price, volume: Math.random() * 1e9 + 1e8 });
+            }
+            return data;
+        }
+
+        async function fetchData(coinId, from, to) {
+            const url = `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart/range?vs_currency=usd&from=${from}&to=${to}`;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`CoinGecko API error: ${response.statusText}`);
+                const data = await response.json();
+                if (!data.prices || data.prices.length === 0) throw new Error("API returned no price data.");
+                return data.prices.map((p, i) => ({
+                    timestamp: p[0], price: p[1],
+                    volume: data.total_volumes[i] ? data.total_volumes[i][1] : 0
+                }));
+            } catch (error) {
+                 showMessage(`Failed to fetch live data: ${error.message}. Displaying with mock data.`);
+                 console.error(error);
+                 return generateMockData(from, to);
+            }
+        }
+        
+        function savitzkyGolay(data, { windowSize, polynomialOrder }) {
+            if (!Number.isInteger(windowSize) || windowSize % 2 === 0 || windowSize <= 0) return data.map(d => ({ ...d, smoothed_price: null, price_velocity: null, price_acceleration: null }));
+            if (!Number.isInteger(polynomialOrder) || polynomialOrder < 0 || polynomialOrder >= windowSize) return data.map(d => ({ ...d, smoothed_price: null, price_velocity: null, price_acceleration: null }));
+            const halfWindow = Math.floor(windowSize / 2); const result = [];
+            for (let i = 0; i < data.length; i++) {
+                if (i < halfWindow || i >= data.length - halfWindow) {
+                    result.push({ ...data[i], smoothed_price: null, price_velocity: null, price_acceleration: null }); continue;
+                }
+                const window = data.slice(i - halfWindow, i + halfWindow + 1);
+                const centerTimestampInSeconds = data[i].timestamp / 1000.0;
+                const t = window.map(p => (p.timestamp / 1000.0) - centerTimestampInSeconds);
+                const y = window.map(p => p.price);
+                const A_data = [];
+                for (let j = 0; j < windowSize; j++) {
+                    const row = [];
+                    for (let p = 0; p <= polynomialOrder; p++) { row.push(Math.pow(t[j], p)); }
+                    A_data.push(row);
+                }
+                const A = math.matrix(A_data);
+                try {
+                    const c = math.lusolve(math.multiply(math.transpose(A), A), math.multiply(math.transpose(A), y)).toArray().flat();
+                    result.push({ ...data[i], smoothed_price: c[0], price_velocity: c[1], price_acceleration: polynomialOrder >= 2 ? 2 * c[2] : 0 });
+                } catch (error) {
+                    result.push({ ...data[i], smoothed_price: null, price_velocity: null, price_acceleration: null });
+                }
+            }
+            return result;
+        }
+
+        function calculateSMA(arr, startIndex, endIndex, key) {
+             let sum = 0; let count = 0;
+             for (let i = startIndex; i < endIndex; i++) {
+                 if (arr[i] && typeof arr[i][key] === 'number' && isFinite(arr[i][key])) { sum += arr[i][key]; count++; }
+             }
+             return count > 0 ? sum / count : 0;
+        }
+        
+        function estimateMarketParameters(data, { regressionWindow, equilibriumWindow }) {
+            const minDataLength = Math.max(regressionWindow, equilibriumWindow);
+            return data.map((point, i) => {
+                if (i < minDataLength - 1 || point.price_acceleration === null) return { ...point, k: null, F: null, m: null };
+                const p_eq = calculateSMA(data, i - equilibriumWindow + 1, i + 1, 'smoothed_price');
+                const avg_vol = calculateSMA(data, i - regressionWindow + 1, i + 1, 'volume');
+                const avg_price = calculateSMA(data, i - regressionWindow + 1, i + 1, 'smoothed_price');
+                const m = avg_price > 0 ? avg_vol / avg_price : 0;
+                if (m < 1e-9) return { ...point, k: null, F: null, m };
+                const y_data = []; const x_data = [];
+                for (let j = 0; j < regressionWindow; j++) {
+                    const wp = data[i - j];
+                    if (wp && wp.price_acceleration !== null && wp.smoothed_price !== null) {
+                        y_data.push([m * wp.price_acceleration]); x_data.push([1, wp.smoothed_price - p_eq]);
+                    }
+                }
+                if (x_data.length < 2) return { ...point, k: null, F: null, m };
+                try {
+                    const X = math.matrix(x_data); const Y = math.matrix(y_data);
+                    const beta = math.lusolve(math.multiply(math.transpose(X), X), math.multiply(math.transpose(X), Y)).toArray().flat();
+                    return { ...point, k: -beta[1], F: beta[0], p_eq, m };
+                } catch (error) { return { ...point, k: null, F: null, m }; }
+            });
+        }
+
+        function calculateRollingLagrangianEntropy(series, { entropyWindow, numBins }) {
+            if (!series || series.length < entropyWindow) return new Array(series.length).fill(null);
+            const log = Math.log2; let globalMin = Infinity; let globalMax = -Infinity;
+            series.forEach(value => { if (value !== null) { globalMin = Math.min(globalMin, value); globalMax = Math.max(globalMax, value); } });
+            if (globalMin === globalMax) return new Array(series.length).fill(0);
+            const binWidth = (globalMax - globalMin) / numBins;
+            if (binWidth <= 0) return new Array(series.length).fill(0);
+            const discretizeValue = v => v === null ? null : Math.floor(Math.max(0, Math.min(numBins - 1, (v - globalMin) / binWidth)));
+            const calculateEntropyFromCounts = (counts, size) => { let e = 0; for (const c of counts.values()) { if (c > 0) { const p = c / size; e -= p * log(p); } } return e; };
+            const results = new Array(series.length).fill(null);
+            const counts = new Map(Array.from({ length: numBins }, (_, i) => [i, 0]));
+            let validPoints = 0;
+            for (let i = 0; i < entropyWindow; i++) { const bin = discretizeValue(series[i]); if (bin !== null) { counts.set(bin, counts.get(bin) + 1); validPoints++; } }
+            if (validPoints > 0) results[entropyWindow - 1] = calculateEntropyFromCounts(counts, validPoints);
+            for (let i = entropyWindow; i < series.length; i++) {
+                const oldBin = discretizeValue(series[i - entropyWindow]); const newBin = discretizeValue(series[i]);
+                if (oldBin !== null && counts.get(oldBin) > 0) { counts.set(oldBin, counts.get(oldBin) - 1); validPoints--; }
+                if (newBin !== null) { counts.set(newBin, counts.get(newBin) + 1); validPoints++; }
+                if (validPoints > 0) results[i] = calculateEntropyFromCounts(counts, validPoints);
+            }
+            return results;
+        }
+
+        function calculateTemperature(data, { temperatureWindow }) {
+            const results = data.map(d => ({ ...d, temperature: null }));
+            const epsilon = 1e-10;
+            for (let i = temperatureWindow - 1; i < data.length; i++) {
+                const deltas = [];
+                for (let j = 0; j < temperatureWindow - 1; j++) {
+                    const curr = data[i - j]; const prev = data[i - j - 1];
+                    if (curr && prev && curr.entropy !== null && prev.entropy !== null && curr.volume !== null && prev.volume !== null) {
+                        deltas.push({ x: curr.entropy - prev.entropy, y: curr.volume - prev.volume });
+                    }
+                }
+                if (deltas.length < 2) continue;
+                let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+                deltas.forEach(p => { sumX += p.x; sumY += p.y; sumXY += p.x * p.y; sumX2 += p.x * p.x; });
+                const denom = deltas.length * sumX2 - sumX * sumX;
+                const slope = Math.abs(denom) > epsilon ? (deltas.length * sumXY - sumX * sumY) / denom : 0;
+                results[i].temperature = Math.abs(slope) > epsilon ? 1 / Math.abs(slope) : Infinity;
+            }
+            return results;
+        }
+
+        function calculateStateVector(data, options) {
+            const smoothedData = savitzkyGolay(data, options);
+            const parameterData = estimateMarketParameters(smoothedData, options);
+            const velocitySeries = parameterData.map(d => d.price_velocity);
+            const entropySeries = calculateRollingLagrangianEntropy(velocitySeries, options);
+            let entropyData = parameterData.map((d, i) => ({ ...d, entropy: entropySeries[i] }));
+            const finalData = calculateTemperature(entropyData, options);
+            return finalData.map(d => {
+                let momentum = null, potential = null;
+                if (d.price_velocity !== null && d.m !== null) momentum = 0.5 * d.m * Math.pow(d.price_velocity, 2);
+                if (d.k !== null && d.F !== null && d.smoothed_price !== null && d.p_eq !== null) potential = 0.5 * d.k * Math.pow(d.smoothed_price - d.p_eq, 2) - d.F * d.smoothed_price;
+                return { ...d, potential, momentum };
+            });
+        }
+        
+        class RegimeClassifier {
+            constructor(historicalData) {
+                this.historicalData = historicalData; 
+                this.sortedValues = {}; 
+                this._calculatePercentiles();
+                
+                this.regimeLogic = {
+                    'Fragile Topping / Reversal Risk': [
+                        (s) => this.getPercentileRank(s.temperature, 'temperature') > 75,
+                        (s) => this.getPercentileRank(s.entropy, 'entropy') > 75,
+                        (s) => this.getPercentileRank(s.momentum, 'momentum') < 25,
+                    ],
+                    'Chaotic Indecision': [
+                        (s) => this.getPercentileRank(s.temperature, 'temperature') > 75,
+                        (s) => this.getPercentileRank(s.entropy, 'entropy') > 75,
+                    ],
+                    'Stable Bull Trend': [
+                        (s) => this.getPercentileRank(s.entropy, 'entropy') < 25,
+                        (s) => this.getPercentileRank(s.temperature, 'temperature') < 25,
+                        (s) => this.getPercentileRank(s.momentum, 'momentum') > 75,
+                        (s) => s.price_velocity > 0,
+                    ],
+                    'Stable Bear Trend': [
+                        (s) => this.getPercentileRank(s.entropy, 'entropy') < 25,
+                        (s) => this.getPercentileRank(s.temperature, 'temperature') < 25,
+                        (s) => this.getPercentileRank(s.momentum, 'momentum') > 75,
+                        (s) => s.price_velocity <= 0,
+                    ],
+                    'Coiling Spring (High Tension)': [
+                        (s) => this.getPercentileRank(s.potential, 'potential') > 75,
+                        (s) => this.getPercentileRank(s.momentum, 'momentum') < 25,
+                        (s) => this.getPercentileRank(s.temperature, 'temperature') < 50,
+                    ],
+                    'Low Volatility / Orderly': [
+                         (s) => this.getPercentileRank(s.entropy, 'entropy') < 25,
+                         (s) => this.getPercentileRank(s.temperature, 'temperature') < 25,
+                    ],
+                };
+            }
+
+            _calculatePercentiles() {
+                const keys = ['potential', 'momentum', 'entropy', 'temperature'];
+                keys.forEach(key => {
+                    this.sortedValues[key] = this.historicalData.map(d => d[key]).filter(v => v !== null && isFinite(v)).sort((a, b) => a - b);
+                });
+            }
+            
+            getPercentileRank(value, key) {
+                if (!this.sortedValues[key] || this.sortedValues[key].length === 0 || value === null) return 0;
+                const arr = this.sortedValues[key];
+                let low = 0, high = arr.length;
+                while (low < high) {
+                    const mid = Math.floor(low + (high - low) / 2);
+                    if (arr[mid] < value) { low = mid + 1; } else { high = mid; }
+                }
+                return (low / arr.length) * 100;
+            }
+            
+            classify(latestState) {
+                let scores = {};
+                for (const [regime, conditions] of Object.entries(this.regimeLogic)) {
+                    let metConditions = 0;
+                    conditions.forEach(condition => { if (condition(latestState)) metConditions++; });
+                    scores[regime] = (100 * metConditions) / conditions.length;
+                }
+                return scores;
+            }
+        }
+        
+        function renderVisualizations(stateVectorData) {
+            currentValidData = stateVectorData.filter(d => d.momentum !== null && d.potential !== null && d.entropy !== null && d.temperature !== null && isFinite(d.temperature));
+            aiRunButton.disabled = currentValidData.length === 0;
+            if (currentValidData.length === 0) {
+                showMessage("Not enough data to display. Try adjusting window sizes or a larger date range.");
+                Plotly.purge('plot3d'); Plotly.purge('plot2d');
+                gaugesContainer.innerHTML = '<p class="text-slate-400 text-center">N/A</p>'; 
+                regimeScoresContainer.innerHTML = '<p class="text-slate-400 text-center">N/A</p>'; 
+                Plotly.purge('radar-chart');
+                return;
+            }
+            const latestState = currentValidData[currentValidData.length - 1];
+            regimeClassifier = new RegimeClassifier(currentValidData);
+            const classificationScores = regimeClassifier.classify(latestState);
+            renderDashboard(latestState, regimeClassifier, classificationScores);
+            const timestamps = currentValidData.map(d => new Date(d.timestamp));
+            const potential = currentValidData.map(d => d.potential);
+            const momentum = currentValidData.map(d => d.momentum);
+            const entropy = currentValidData.map(d => d.entropy);
+            const temperature = currentValidData.map(d => d.temperature);
+            const sortedTemps = [...temperature].sort((a, b) => a - b);
+            const percentileIndex = Math.min(Math.floor(sortedTemps.length * 0.99), sortedTemps.length - 1);
+            const maxColorTemp = sortedTemps[percentileIndex];
+            const normalizedTemp = temperature.map(t => {
+                const cappedTemp = Math.min(t, maxColorTemp);
+                return maxColorTemp > 0 ? cappedTemp / maxColorTemp : 0;
+            });
+            const trace3d = {
+                x: potential, y: momentum, z: entropy, mode: 'lines+markers', type: 'scatter3d',
+                marker: { size: 4, color: normalizedTemp, colorscale: 'Viridis', showscale: true, colorbar: { title: 'Temp (Θ)', x: 0, thickness: 15 } },
+                line: { width: 4, color: normalizedTemp, colorscale: 'Viridis' }, hoverinfo: 'text',
+                text: currentValidData.map((d, i) => `Date: ${timestamps[i].toLocaleDateString()}<br><b>Potential: ${d.potential.toExponential(2)}</b><br><b>Momentum: ${d.momentum.toExponential(2)}</b><br><b>Entropy: ${d.entropy.toFixed(3)}</b><br><b>Temp: ${d.temperature.toExponential(2)}</b><br>k: ${d.k ? d.k.toExponential(2) : 'N/A'}, F: ${d.F ? d.F.toExponential(2) : 'N/A'}`)
+            };
+            const layout3d = { scene: { xaxis: { title: 'Potential (P)', color: '#9ca3af', gridcolor: '#374151' }, yaxis: { title: 'Momentum (M)', color: '#9ca3af', gridcolor: '#374151' }, zaxis: { title: 'Entropy (E)', color: '#9ca3af', gridcolor: '#374151' } }, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)', font: { color: '#e5e7eb' }, margin: { l: 0, r: 0, b: 0, t: 0 }};
+            Plotly.newPlot('plot3d', [trace3d], layout3d, {responsive: true});
+            const trace2d = { x: stateVectorData.map(d=>new Date(d.timestamp)), y: stateVectorData.map(d=>d.price), mode: 'lines', type: 'scatter', line: { color: '#818cf8' } };
+            const layout2d = { yaxis: { title: 'Price (USD)',color: '#9ca3af', gridcolor: '#334155' }, xaxis: { color: '#9ca3af', gridcolor: '#334155' }, paper_bgcolor: 'rgba(0,0,0,0)', plot_bgcolor: 'rgba(0,0,0,0)', font: { color: '#e5e7eb' }, margin: { l: 50, r: 20, b: 40, t: 20 } };
+            Plotly.newPlot('plot2d', [trace2d], layout2d, {responsive: true});
+        }
+
+        function renderDashboard(latestState, classifier, classificationScores) {
+            gaugesContainer.innerHTML = '';
+            const gauges = [
+                { label: 'Potential (Tension)', key: 'potential'}, { label: 'Momentum (Trend Energy)', key: 'momentum'},
+                { label: 'Entropy (Disorder)', key: 'entropy'}, { label: 'Temperature (Fragility)', key: 'temperature'},
+            ];
+            gauges.forEach(g => {
+                const percentile = classifier.getPercentileRank(latestState[g.key], g.key);
+                gaugesContainer.innerHTML += `
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm font-medium text-slate-300">${g.label}</span>
+                            <span class="text-xs font-bold text-white">${percentile.toFixed(0)}th Pctl</span>
+                        </div>
+                        <div class="w-full gauge-bar-bg rounded-full h-2.5"><div class="gauge-bar h-2.5 rounded-full" style="width: ${percentile}%"></div></div>
+                    </div>`;
+            });
+            
+            regimeScoresContainer.innerHTML = '';
+            for (const [regime, score] of Object.entries(classificationScores).sort(([,a],[,b]) => b-a)) {
+                 regimeScoresContainer.innerHTML += `
+                    <div>
+                         <div class="flex justify-between mb-1">
+                            <span class="text-base font-medium text-slate-300">${regime}</span>
+                            <span class="text-sm font-medium ${score > 50 ? 'text-indigo-400' : 'text-slate-400'}">${score.toFixed(0)}%</span>
+                        </div>
+                        <div class="w-full gauge-bar-bg rounded-full h-2.5"><div class="regime-score-bar rounded-full h-2.5" style="width: ${score}%"></div></div>
+                    </div>`;
+            }
+
+            const radarData = [{
+                type: 'scatterpolar',
+                r: [
+                    classifier.getPercentileRank(latestState.potential, 'potential') / 100,
+                    classifier.getPercentileRank(latestState.momentum, 'momentum') / 100,
+                    classifier.getPercentileRank(latestState.entropy, 'entropy') / 100,
+                    classifier.getPercentileRank(latestState.temperature, 'temperature') / 100,
+                ],
+                theta: ['Potential', 'Momentum', 'Entropy', 'Temperature'],
+                fill: 'toself', fillcolor: 'rgba(79, 70, 229, 0.5)',
+                marker: { color: '#a5b4fc' }, line: { color: '#6366f1' }
+            }];
+            const radarLayout = {
+                polar: { radialaxis: { visible: true, range: [0, 1] }, angularaxis: { tickfont: { size: 12 } } },
+                paper_bgcolor: 'rgba(0,0,0,0)', font: { color: '#e5e7eb' }, showlegend: false,
+                margin: { t: 40, b: 40, l: 40, r: 40 }
+            };
+            Plotly.newPlot('radar-chart', radarData, radarLayout, {responsive: true});
+        }
+        
+        async function runAnalysis() {
+            runButton.textContent = 'Analyzing...'; runButton.disabled = true;
+            aiOutput.innerHTML = 'Click the button to get an AI-powered interpretation of the latest market state.';
+            regimeScoresContainer.innerHTML = '<p class="text-center">Calculating...</p>';
+            gaugesContainer.innerHTML = ''; Plotly.purge('radar-chart');
+            tldrSection.classList.add('hidden');
+            try {
+                const coinId = coinIdInput.value;
+                const from = new Date(startDateInput.value).getTime() / 1000;
+                const to = new Date(endDateInput.value).getTime() / 1000;
+                const options = {
+                    windowSize: parseInt(sgWindowInput.value, 10),
+                    polynomialOrder: parseInt(sgPolyInput.value, 10),
+                    regressionWindow: parseInt(regWindowInput.value, 10),
+                    equilibriumWindow: parseInt(eqWindowInput.value, 10),
+                    entropyWindow: parseInt(entropyWindowInput.value, 10),
+                    numBins: parseInt(entropyBinsInput.value, 10),
+                    temperatureWindow: parseInt(tempWindowInput.value, 10)
+                };
+                if (!coinId || isNaN(from) || isNaN(to)) {
+                    showMessage("Please select a valid asset and date range.");
+                    runButton.textContent = 'Analyze'; runButton.disabled = false; return;
+                }
+                const rawData = await fetchData(coinId, from, to);
+                const minLength = Math.max(options.windowSize, options.regressionWindow, options.equilibriumWindow, options.entropyWindow, options.temperatureWindow);
+                if (rawData && rawData.length > minLength) {
+                    const stateVectorData = calculateStateVector(rawData, options);
+                    renderVisualizations(stateVectorData);
+                } else {
+                     showMessage("Could not retrieve sufficient data for the selected asset/range and window sizes.");
+                     Plotly.purge('plot3d'); Plotly.purge('plot2d');
+                     regimeScoresContainer.innerHTML = '<p class="text-center">N/A</p>';
+                }
+            } catch (error) {
+                console.error("An error occurred during analysis:", error);
+                showMessage(`Analysis Failed: ${error.message}`);
+                 regimeScoresContainer.innerHTML = '<p class="text-center text-red-400">Error</p>';
+            } finally {
+                runButton.textContent = 'Analyze'; runButton.disabled = false;
+            }
+        }
+        
+        function applyPreset(settings) {
+            sgWindowInput.value = settings.sgWindow;
+            sgPolyInput.value = settings.sgPoly;
+            regWindowInput.value = settings.regWindow;
+            eqWindowInput.value = settings.eqWindow;
+            entropyWindowInput.value = settings.entropyWindow;
+            entropyBinsInput.value = settings.entropyBins;
+            tempWindowInput.value = settings.tempWindow;
+            runAnalysis();
+        }
+        
+        function initialize() {
+            const today = new Date();
+            const ninetyDaysAgo = new Date();
+            ninetyDaysAgo.setDate(today.getDate() - 90);
+            endDateInput.value = today.toISOString().split('T')[0];
+            startDateInput.value = ninetyDaysAgo.toISOString().split('T')[0];
+            runButton.addEventListener('click', runAnalysis);
+            aiRunButton.addEventListener('click', getAIAnalysis);
+            tldrRunButton.addEventListener('click', getSimplifiedAIAnalysis);
+            aiRunButton.disabled = true;
+            tldrSection.classList.add('hidden');
+            presetShortBtn.addEventListener('click', () => applyPreset({ sgWindow: 15, sgPoly: 2, regWindow: 20, eqWindow: 20, entropyWindow: 20, entropyBins: 10, tempWindow: 20 }));
+            presetSwingBtn.addEventListener('click', () => applyPreset({ sgWindow: 31, sgPoly: 2, regWindow: 50, eqWindow: 50, entropyWindow: 50, entropyBins: 10, tempWindow: 50 }));
+            presetLongBtn.addEventListener('click', () => applyPreset({ sgWindow: 91, sgPoly: 2, regWindow: 100, eqWindow: 200, entropyWindow: 100, entropyBins: 15, tempWindow: 100 }));
+            runAnalysis();
+        }
+
+        document.addEventListener('DOMContentLoaded', initialize);
+    </script>
+</body>
+</html>
