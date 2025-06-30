@@ -1,0 +1,584 @@
+﻿Technical Mandate: Architectural Framework for the Kinētikós Entropḗ v2.0 Causal Engine
+
+
+
+
+Foreword: The Imperative of Causal Integrity in Financial Modeling
+
+
+This report presents the formal technical specifications required to architect the version 2.0 "Causal Engine" of the Kinētikós Entropḗ framework. The mandate is to provide definitive, academically rigorous solutions to two critical methodological flaws identified in the v1.0 engine that introduce look-ahead bias. Look-ahead bias, which occurs when an analytical model relies on information that would not have been available at the time of a decision, is a cardinal flaw in quantitative finance.1 Its presence invalidates the results of any backtest, creating an illusion of performance that cannot be replicated in a live environment.3
+The objective of this report is therefore to establish absolute causal integrity within the framework's core computational chain. This is achieved by systematically replacing non-causal components with methodologically sound alternatives, justified by first-principles reasoning and supported by primary academic literature. The following sections provide the complete mathematical derivations, comparative analyses, and production-ready algorithms necessary to re-architect the system's derivative estimation and entropy calculation modules. The successful implementation of these blueprints will ensure that the Kinētikós Entropḗ v2.0 engine is a robust and intellectually honest instrument, suitable for rigorous historical backtesting and real-time market analysis.
+________________
+
+
+Part I: Causal Time-Series Differentiation
+
+
+The calculation of price velocity, p_dot, in the v1.0 engine utilizes a symmetric Savitzky-Golay filter. This filter, by its design, uses data points from both the past and the future to compute the value at a given time t. This section details the methodology for replacing this non-causal filter with a strictly backward-looking, or one-sided, asymmetric Savitzky-Golay filter.
+
+
+1.1 Foundational Proof: The Asymmetric Savitzky-Golay Filter
+
+
+The theoretical underpinning of the Savitzky-Golay (SG) filter is its formulation as a local polynomial regression solved via the method of least squares.4 This distinguishes it fundamentally from simpler smoothing techniques. While a moving average filter can be understood as fitting a 0th-order polynomial (a constant) to a window of data, the SG filter fits a higher-order polynomial, allowing it to better capture the local structure of the signal.6 The output of the filter—be it the smoothed value or a derivative—is simply the evaluation of this locally-fitted polynomial at a specific point within the window.8
+The seminal 1964 paper by Abraham Savitzky and Marcel J. E. Golay, which introduced this method to the scientific community, focused on symmetric filters where the polynomial is evaluated at the center of the window.4 This approach is ideal for post-hoc signal analysis but is non-causal. For real-time applications, the polynomial must be evaluated at the most recent point of the data window, which necessitates an asymmetric formulation that uses only past and present data.11
+
+
+1.1.1 Mathematical Derivation for a Causal (One-Sided) Window
+
+
+The objective is to derive the set of convolution coefficients, or weights, that, when applied to a window of past data, yield the value of a least-squares fitted polynomial and its derivatives at the final point of that window. This derivation follows the standard procedure for solving a linear least-squares problem, as detailed in authoritative texts such as Numerical Recipes by Press et al..12
+Step 1: Define the Data Window and Polynomial Model
+Consider a window of w data points from a time series, y. For a causal filter, this window consists of the current data point and w-1 previous data points. We can define a local coordinate system for this window with time indices i ranging from -(w-1) to 0, where i=0 represents the most recent data point. The data points within this window are denoted as $y_i$.
+We wish to fit a polynomial of order p (where p < w) to these w data points. The polynomial model is:
+
+
+P(i)=k=0∑p​ak​ik=a0​+a1​i+a2​i2+⋯+ap​ip
+
+
+The coefficients $a_0, a_1, \dots, a_p$ are the parameters we need to determine.
+Step 2: Formulate the Least-Squares Problem
+The method of least squares seeks to find the vector of coefficients c = [a_0, a_1,..., a_p]^T that minimizes the sum of the squared residuals, E, between the observed data y_i and the values predicted by the polynomial P(i) over the entire window.5
+E=i=−(w−1)∑0​[yi​−P(i)]2=i=−(w−1)∑0​(yi​−k=0∑p​ak​ik)2
+Step 3: Matrix Formulation of the Problem
+This system of equations can be expressed more compactly in matrix form. Let y be the w x 1 vector of observed data points, A be the w x (p+1) design matrix, c be the (p+1) x 1 vector of polynomial coefficients, and ε be the w x 1 vector of residuals. The model is y = Ac + ε.
+The design matrix A is a Vandermonde matrix whose elements $A_{ij}$ are given by $t_i^j$, where $t_i$ are the time indices and j is the polynomial power. For our causal window, where i runs from -(w-1) to 0 and j runs from 0 to p, the design matrix is:
+A=​11⋮11​−(w−1)−(w−2)⋮−10​(−(w−1))2(−(w−2))2⋮10​……⋱……​(−(w−1))p(−(w−2))p⋮(−1)p0​​
+The j-th column of A corresponds to the j-th power of the time index i.
+Step 4: Solving the Normal Equations
+The least-squares solution for the coefficient vector c is found by solving the normal equations, which are derived by setting the gradient of the error E with respect to c to zero.5
+(ATA)c=ATy
+
+
+The solution for c is therefore:
+
+
+c=(ATA)−1ATy
+
+
+This equation provides the values of the polynomial coefficients (a_0, a_1, etc.) as a linear combination of the data points y. The matrix $H = (A^T A)^{-1} A^T$ is a (p+1) x w matrix whose rows contain the filter coefficients (weights) required to calculate each polynomial coefficient.
+Step 5: Extracting Filter Coefficients for 0th and 1st Derivatives
+The purpose of the filter is to evaluate the fitted polynomial and its derivatives at the most recent point, i=0.
+* 0th Derivative (Smoothed Value): The value of the fitted polynomial at i=0 is $P(0) = a_0$. Therefore, the filter coefficients for the smoothed value are given by the first row of the matrix H.
+* 1st Derivative (Velocity): The first derivative of the polynomial with respect to the time index i is $P'(i) = a_1 + 2a_2 i + 3a_3 i^2 + \dots$. Evaluating this at i=0 yields $P'(0) = a_1$. Therefore, the filter coefficients for the first derivative are given by the second row of the matrix H.
+It is critical to note that this derivative is with respect to the integer time index i. To obtain the derivative with respect to actual time, this result must be divided by the sampling interval, Δt.14 If the data is sampled at unit time intervals (e.g., daily), then
+Δt = 1.
+This derivation provides a complete and general method for computing the exact coefficients for a one-sided, causal Savitzky-Golay filter for any desired window size w, polynomial order p, and derivative order. The process involves constructing the design matrix A for the specific window configuration, solving the normal equations to find the coefficient matrix H, and selecting the appropriate row of H for the desired derivative. This method is extensible to higher-order derivatives; for instance, the second derivative at i=0 is $2a_2$, so its coefficients are found in the third row of H, scaled by 2. This extensibility is a powerful feature for potential future enhancements to the Kinētikós Entropḗ framework.16
+
+
+1.2 Justification: A Rigorous Comparative Analysis
+
+
+The estimation of derivatives from noisy, non-stationary data, such as a financial price series, is a notoriously difficult, ill-posed problem.17 The core challenge lies in the fact that the differentiation operator inherently acts as a high-pass filter, amplifying high-frequency noise that can obscure the underlying signal.18 Therefore, any practical method must simultaneously perform smoothing (low-pass filtering) and differentiation. The selection of a method requires a careful evaluation of the trade-offs between noise suppression, phase lag, and accuracy.
+
+
+1.2.1 Method 1: Causal Savitzky-Golay (SG) Filter (Recommended)
+
+
+* Noise Suppression: The SG filter provides effective noise suppression through its least-squares fitting mechanism, which is a form of averaging. The degree of smoothing is a function of two tunable parameters: the window size w and the polynomial order p. Increasing w or decreasing p results in more aggressive smoothing.16 This allows for fine-grained control over the filter's response.
+* Phase Lag: As a Finite Impulse Response (FIR) filter, the SG filter exhibits a well-defined and constant group delay. For a causal (one-sided) filter, the lag is a direct consequence of the window size, but it crucially avoids the long-tailed, signal-dependent phase distortion characteristic of recursive filters like the Exponential Moving Average (EMA).20 This minimal and predictable lag is paramount for real-time applications where timeliness is critical.
+* Accuracy and Feature Preservation: This is the standout advantage of the SG filter. By fitting a higher-order polynomial (e.g., quadratic or cubic), it can accurately model local curvature in the signal. This allows it to preserve the shape, amplitude, and width of important signal features, such as peaks and troughs, far more effectively than methods based on linear or constant fits.7 For financial data, this means the filter can better track periods of accelerating or decelerating momentum, leading to a more accurate estimate of the instantaneous velocity (
+p_dot).
+
+
+1.2.2 Method 2: EMA-Smoothed First-Order Difference (Alternative 1)
+
+
+   * Noise Suppression: This method involves a two-stage process: first smoothing the data with an EMA, then applying a first-difference operator (y_t - y_{t-1}). While the EMA is a low-pass filter, the differencing operator is a high-pass filter.18 This means that any high-frequency noise not completely removed by the EMA will be amplified in the final derivative estimate. To achieve adequate noise control, the EMA must be applied with a very long lookback period, leading to aggressive smoothing.
+   * Phase Lag: The EMA is an Infinite Impulse Response (IIR) filter, which is known to introduce significant phase lag.21 The lag increases with the degree of smoothing. This causes the derivative estimate to be systematically "late," which can be fatal for a trading system that relies on timely signals. As noted in the literature, the moving average is "slow to respond to real shifts in data, often lagging behind when the trend changes direction".23
+   * Accuracy and Feature Preservation: The heavy smoothing required to manage noise inevitably leads to poor accuracy. The EMA will significantly blunt sharp movements and distort the signal's true shape, resulting in an underestimation of momentum during strong trends and a delayed reaction to reversals.23
+
+
+1.2.3 Method 3: Rolling Linear Regression (Alternative 2)
+
+
+   * Equivalence: A rolling linear regression is mathematically identical to a causal Savitzky-Golay filter with a polynomial order of p=1.4 The slope of the fitted line over the rolling window serves as the estimate for the first derivative.
+   * Noise Suppression & Phase Lag: Its properties are identical to those of a 1st-order SG filter. It provides better noise handling than a simple two-point difference due to the least-squares fit over a window. Its phase lag is determined by the window size.
+   * Accuracy and Feature Preservation: This method is fundamentally limited by its assumption that the underlying signal is locally linear. While an improvement over the EMA approach, it will systematically produce biased derivative estimates in any regime where the price exhibits curvature (i.e., acceleration or deceleration). Since such regimes are common and important in financial markets, a 1st-order fit is suboptimal.
+
+
+1.2.4 Definitive Recommendation
+
+
+The causal Savitzky-Golay filter with a polynomial order p >= 2 is unequivocally the superior method for this application.
+The choice is justified by a clear progression in sophistication. Simple differencing is too noisy. Adding an EMA introduces unacceptable phase lag and signal distortion. A rolling linear regression (equivalent to SG with p=1) improves upon this by using a more robust least-squares fit but is constrained by its assumption of local linearity. The causal SG filter with a quadratic (p=2) or cubic (p=3) polynomial directly addresses this final limitation. It retains the robust least-squares framework while providing the necessary flexibility to model the local curvature inherent in financial price dynamics. This results in the most accurate and responsive estimate of the instantaneous velocity (p_dot) among the evaluated causal methods, achieving the best possible trade-off between noise suppression and the preservation of signal fidelity.
+
+
+Method
+	Core Principle
+	Noise Suppression
+	Phase Lag
+	Feature Preservation
+	Computational Complexity
+	Causal SG (p≥2)
+	Local Polynomial Fit (p-th order)
+	Good to Excellent (Tunable)
+	Minimal & Deterministic (FIR)
+	Excellent (Preserves curvature)
+	Moderate (Matrix ops, but pre-computable)
+	EMA-Smoothed Difference
+	IIR Smoothing + Differencing
+	Fair to Good (Requires heavy smoothing)
+	High & Signal-Dependent (IIR)
+	Poor (Blunts peaks, distorts signal)
+	Low
+	Rolling Linear Regression (SG p=1)
+	Local Linear Fit (1st order)
+	Good (Tunable window)
+	Minimal & Deterministic (FIR)
+	Fair (Fails on curvature)
+	Low to Moderate
+	
+
+1.3 Reference Implementation: Production-Ready Causal SG Filter
+
+
+The following TypeScript algorithm provides a production-ready implementation for calculating the smoothed value (0th derivative) and the first derivative for the most recent point in a time series using a one-sided Savitzky-Golay filter. The implementation is self-contained and directly follows the mathematical derivation from Section 1.1. It pre-computes the filter coefficients for efficiency in a real-time loop.
+
+
+TypeScript
+
+
+
+
+/**
+* A collection of basic matrix utility functions.
+* In a production environment, a dedicated linear algebra library would be more robust.
+*/
+const MatrixUtils = {
+   /** Transposes a matrix. */
+   transpose(matrix: number): number {
+       if (!matrix.length) return;
+       return matrix.map((_, colIndex) => matrix.map(row => row[colIndex]));
+   },
+
+   /** Multiplies two matrices. */
+   multiply(a: number, b: number): number {
+       const aNumRows = a.length;
+       const aNumCols = a.length;
+       const bNumCols = b.length;
+       const result = new Array(aNumRows).fill(0).map(() => new Array(bNumCols).fill(0));
+
+       for (let r = 0; r < aNumRows; ++r) {
+           for (let c = 0; c < bNumCols; ++c) {
+               for (let i = 0; i < aNumCols; ++i) {
+                   result[r][c] += a[r][i] * b[i][c];
+               }
+           }
+       }
+       return result;
+   },
+   
+   /** Inverts a square matrix using Gaussian elimination. Simplified for this context. */
+   invert(matrix: number): number | null {
+       const n = matrix.length;
+       const identity = Array(n).fill(0).map((_, i) => Array(n).fill(0).map((__, j) => i === j? 1 : 0));
+       const augmented = matrix.map((row, i) => [...row,...identity[i]]);
+
+       for (let i = 0; i < n; i++) {
+           let pivot = i;
+           while (pivot < n && augmented[pivot][i] === 0) {
+               pivot++;
+           }
+           if (pivot === n) return null; // No unique solution
+           [augmented[i], augmented[pivot]] = [augmented[pivot], augmented[i]];
+
+           const div = augmented[i][i];
+           for (let j = i; j < 2 * n; j++) {
+               augmented[i][j] /= div;
+           }
+
+           for (let k = 0; k < n; k++) {
+               if (i!== k) {
+                   const mult = augmented[k][i];
+                   for (let j = i; j < 2 * n; j++) {
+                       augmented[k][j] -= mult * augmented[i][j];
+                   }
+               }
+           }
+       }
+       return augmented.map(row => row.slice(n));
+   }
+};
+
+/**
+* Cache for pre-computed Savitzky-Golay coefficient matrices (H).
+* Key is a string: `${windowSize}-${polynomialOrder}`
+*/
+const sgCoeffsCache: Map<string, number> = new Map();
+
+/**
+* Computes the Savitzky-Golay coefficient matrix H = (A^T * A)^-1 * A^T.
+* The rows of H contain the filter weights for each polynomial coefficient (a0, a1,...).
+* @param windowSize The number of past data points (w).
+* @param polynomialOrder The order of the polynomial to fit (p).
+* @returns The (p+1) x w coefficient matrix H, or null if not solvable.
+*/
+function getCausalSgCoeffs(windowSize: number, polynomialOrder: number): number | null {
+   const cacheKey = `${windowSize}-${polynomialOrder}`;
+   if (sgCoeffsCache.has(cacheKey)) {
+       return sgCoeffsCache.get(cacheKey)!;
+   }
+
+   if (polynomialOrder >= windowSize) {
+       // The problem is not over-determined, cannot perform least-squares fit.
+       return null;
+   }
+
+   // Step 1: Create the design matrix A (Vandermonde matrix)
+   const A: number =;
+   for (let i = 0; i < windowSize; i++) {
+       const timeIndex = -(windowSize - 1) + i;
+       const row: number =;
+       for (let j = 0; j <= polynomialOrder; j++) {
+           row.push(Math.pow(timeIndex, j));
+       }
+       A.push(row);
+   }
+
+   // Step 2: Calculate H = (A^T * A)^-1 * A^T
+   const AT = MatrixUtils.transpose(A);
+   const ATA = MatrixUtils.multiply(AT, A);
+   const ATA_inv = MatrixUtils.invert(ATA);
+
+   if (!ATA_inv) {
+       return null; // Matrix is singular, cannot be inverted.
+   }
+
+   const H = MatrixUtils.multiply(ATA_inv, AT);
+   sgCoeffsCache.set(cacheKey, H);
+   return H;
+}
+
+/**
+* Applies a one-sided (causal) Savitzky-Golay filter to the most recent
+* segment of a time series to calculate the smoothed value and the first derivative.
+* @param data The full time series data array.
+* @param windowSize The size of the filter window (w).
+* @param polynomialOrder The order of the fitting polynomial (p).
+* @param deltaT The sampling interval (time between data points), defaults to 1.
+* @returns An object with the smoothed value and the first derivative, or null if inputs are invalid.
+*/
+export function calculateCausalSgDerivative(
+   data: number,
+   windowSize: number,
+   polynomialOrder: number,
+   deltaT: number = 1
+): { smoothedValue: number; derivative: number } | null {
+   if (data.length < windowSize) {
+       // Not enough data points to apply the filter.
+       return null;
+   }
+
+   // Get the pre-computed or newly computed coefficient matrix H.
+   const H = getCausalSgCoeffs(windowSize, polynomialOrder);
+   if (!H) {
+       // Coefficients could not be computed for the given parameters.
+       return null;
+   }
+
+   // Extract the most recent data segment for filtering.
+   const windowData = data.slice(-windowSize);
+
+   // The coefficients for the smoothed value (a0) are the first row of H.
+   const smoothingCoeffs = H;
+   // The coefficients for the first derivative (a1) are the second row of H.
+   const derivativeCoeffs = H;
+
+   let smoothedValue = 0;
+   let derivativeTerm = 0;
+
+   for (let i = 0; i < windowSize; i++) {
+       smoothedValue += smoothingCoeffs[i] * windowData[i];
+       if (derivativeCoeffs) { // Ensure polynomialOrder >= 1
+           derivativeTerm += derivativeCoeffs[i] * windowData[i];
+       }
+   }
+
+   // The derivative must be scaled by the sampling interval.
+   const derivative = derivativeTerm / deltaT;
+
+   return { smoothedValue, derivative };
+}
+
+________________
+
+
+Part II: Causal and Dynamic Entropy Calculation
+
+
+The v1.0 engine's entropy calculation is contaminated by look-ahead bias through its use of global minimum and maximum values for histogram binning. This provides the calculation at time t with information about the entire future range of the data series. This section provides the statistical foundation and algorithmic blueprint for a fully causal entropy calculation using dynamic, data-driven binning based on a rolling window.
+
+
+2.1 Foundational Proof: Dynamic Binning for Non-Stationary Distributions
+
+
+
+
+2.1.1 The Look-Ahead Bias of Global Normalization
+
+
+To construct a histogram, a data series must be partitioned into a set of discrete bins. This typically requires knowledge of the data's range (minimum and maximum values) to define the boundaries of these bins. In the v1.0 engine, using the global min and max of the entire Lagrangian time series to set these boundaries for a calculation at an arbitrary time t is a severe form of look-ahead bias.1 The
+min or max value for the entire series may occur long after time t, yet this future information is used to structure the analysis at time t. This invalidates any conclusions drawn from backtesting, as the model appears to have foreknowledge of future market volatility.2
+The only methodologically sound approach is to ensure strict causality. All parameters required for the entropy calculation at time t—including the minimum, maximum, and measure of dispersion—must be derived exclusively from data available up to and including time t. This is achieved by using a rolling window of the N most recent data points.26
+
+
+2.1.2 The Statistical Imperative for Data-Driven Binning
+
+
+The choice of bin width for a histogram involves a fundamental trade-off between bias and variance.27
+   * High Bias (Too Few Bins): If the bins are too wide, the resulting histogram is over-smoothed, and important features of the underlying probability distribution (such as multiple modes or sharp peaks) are obscured.
+   * High Variance (Too Many Bins): If the bins are too narrow, the histogram becomes noisy, with bin counts being highly sensitive to the specific data sample. This highlights random sampling fluctuations rather than the true underlying distribution shape.
+Simple rules that prescribe a fixed number of bins, such as Sturges' formula, are naive because they fail to adapt to the characteristics of the data, particularly its dispersion.28 This is especially problematic for non-stationary time series like financial data, where volatility (and thus the spread of the data's distribution) can change dramatically over time. A fixed binning rule would produce histograms whose statistical meaning shifts with the market regime. Therefore, a
+dynamic, data-driven rule that adapts the bin width based on the statistical properties of the data within the current rolling window is essential for a robust and consistent entropy measure.
+
+
+2.1.3 The Freedman-Diaconis Rule: Formulation and Justification
+
+
+The seminal work in data-driven binning is the Freedman-Diaconis rule, proposed in their 1981 paper, "On the histogram as a density estimator: L2 theory".29 The rule provides an optimal bin width,
+h, by seeking to minimize the Integrated Mean Squared Error (IMSE), which is the integral of the expected squared difference between the histogram's density estimate, $f_h(x)$, and the true underlying probability density function, $f(x)$.29
+IMSE=∫E[(fh​(x)−f(x))2]dx
+
+
+Freedman and Diaconis demonstrated that, for a given sample of size n, the bin width h that asymptotically minimizes this error is given by:
+
+
+h=n1/32×IQR(x)​
+
+
+where IQR(x) is the Interquartile Range of the data sample x (defined as the difference between the 75th percentile, Q3, and the 25th percentile, Q1), and n is the number of observations in the sample.30
+
+
+2.2 Justification: Freedman-Diaconis vs. Alternatives for Financial Data
+
+
+The choice of a binning rule is fundamentally a choice of which statistic to use to measure the data's dispersion. The unique characteristics of financial data make this choice critical.
+
+
+2.2.1 The Nature of Financial Returns
+
+
+Financial asset returns are well-documented to exhibit several "stylized facts" that deviate significantly from a normal distribution. They are typically:
+   * Leptokurtic: Exhibiting "fat tails," meaning extreme events (large positive or negative returns) are far more common than a normal distribution would predict.
+   * Skewed: Often exhibiting negative skew, where large negative returns are more common than large positive ones.
+   * Volatility Clustering: Periods of high volatility tend to be followed by more high volatility, and vice versa. This means the dispersion of the return distribution is non-stationary.
+
+
+2.2.2 Freedman-Diaconis Rule (Recommended)
+
+
+   * Core Strength: The Freedman-Diaconis rule's primary advantage is its robustness.33 It uses the Interquartile Range (IQR) as its measure of dispersion. The IQR is a rank-based statistic, meaning it is calculated based on the ordering of the data (percentiles) rather than the magnitude of all data points. As it measures the spread of the central 50% of the data, it is inherently resistant to the influence of outliers in the tails of the distribution.28 This makes it exceptionally well-suited for analyzing the fat-tailed, outlier-prone distributions characteristic of financial data.27
+
+
+2.2.3 Scott's Rule (Alternative 1)
+
+
+   * Formulation: $h = \frac{3.49 \times \sigma}{n^{1/3}}$, where σ is the sample standard deviation.30
+   * Weakness: Scott's rule relies on the standard deviation, a statistic that is notoriously sensitive to outliers.35 In a financial time series, a single large market move can dramatically inflate the standard deviation, causing Scott's rule to prescribe an excessively wide bin width. This would lead to an over-smoothed histogram that masks the true underlying structure of the data, defeating the purpose of the analysis.35
+
+
+2.2.4 Sturges' Formula (Alternative 2)
+
+
+   * Formulation: $k = \lceil \log_2(n) + 1 \rceil$, where k is the number of bins.30
+   * Weakness: This rule is overly simplistic and theoretically flawed for this application. First, it depends only on the sample size n, completely ignoring the dispersion of the data. Second, its derivation implicitly assumes that the data follows a normal (Gaussian) distribution.28 Given that financial data is fundamentally non-normal, Sturges' formula is inappropriate and known to perform poorly, typically underestimating the required number of bins for large or skewed datasets.28
+
+
+2.2.5 Definitive Recommendation
+
+
+The Freedman-Diaconis rule is the superior and most theoretically sound choice for the Kinētikós Entropḗ framework. The decision is grounded in a first-principles approach: the statistical tools used must match the known characteristics of the data being analyzed. Financial data is non-normal and rich with outliers; therefore, a robust measure of dispersion is required. The Freedman-Diaconis rule, by its use of the IQR, is explicitly designed for such conditions. In contrast, Scott's rule relies on a non-robust statistic (standard deviation), and Sturges' formula relies on a false assumption (normality).
+
+
+Rule
+	Formula
+	Basis of Dispersion
+	Robust to Outliers?
+	Underlying Assumption
+	Freedman-Diaconis
+	$h = 2 \cdot \text{IQR} / n^{1/3}$
+	Interquartile Range (IQR)
+	Yes
+	None (Robust)
+	Scott's Rule
+	$h = 3.49 \cdot \sigma / n^{1/3}$
+	Standard Deviation ($\sigma$)
+	No
+	Assumes data is reasonably close to normal
+	Sturges' Formula
+	$k = 1 + \log_2(n)$
+	None (Sample size only)
+	No
+	Assumes data is normally distributed
+	
+
+2.3 Reference Implementation: The Master Causal Entropy Algorithm
+
+
+The following TypeScript algorithm synthesizes the principles of causal, rolling-window analysis and dynamic binning via the Freedman-Diaconis rule. It provides a complete, step-by-step process for taking the most recent data point and its historical window, and from that, calculating its correct bin assignment without any knowledge of future data. This function provides the necessary inputs (binIndex, numBins, windowSize) for the main engine to update its histogram and compute the final Shannon entropy value.
+
+
+TypeScript
+
+
+
+
+/**
+* Calculates the value at a given percentile in a sorted numeric array.
+* Uses linear interpolation for positions between indices.
+* @param sortedData A pre-sorted array of numbers.
+* @param percentile A number between 0 and 100.
+* @returns The value at the specified percentile.
+*/
+function getPercentile(sortedData: number, percentile: number): number {
+   if (sortedData.length === 0 |
+| percentile < 0 |
+| percentile > 100) {
+       return NaN;
+   }
+   if (sortedData.length === 1) {
+       return sortedData;
+   }
+   
+   const index = (percentile / 100) * (sortedData.length - 1);
+   const lowerIndex = Math.floor(index);
+   const upperIndex = Math.ceil(index);
+
+   if (lowerIndex === upperIndex) {
+       return sortedData[lowerIndex];
+   }
+
+   const lowerValue = sortedData[lowerIndex];
+   const upperValue = sortedData[upperIndex];
+   const weight = index - lowerIndex;
+
+   return lowerValue * (1 - weight) + upperValue * weight;
+}
+
+/**
+* A comprehensive, causal algorithm for determining the histogram bin assignment
+* for a new data point based on a rolling window of historical data.
+* This function calculates all necessary parameters causally and applies the
+* Freedman-Diaconis rule for robust, data-driven binning.
+* 
+* @param latestValue The most recent data point to be binned.
+* @param historicalData An array of historical data points, ordered from oldest to newest.
+* @param windowSize The number of recent data points (N) to use for the rolling window.
+* @returns An object containing the bin index for the latest value, the total number of bins,
+*          the window size, and the calculated bin width, or null if calculation is not possible.
+*/
+export function getCausalBinAssignment(
+   latestValue: number,
+   historicalData: number,
+   windowSize: number
+): { binIndex: number; numBins: number; windowSize: number; binWidth: number } | null {
+   // Step 1: Define the rolling window using only past data.
+   if (historicalData.length < windowSize) {
+       // Not enough historical data to form a full window.
+       return null;
+   }
+   const window = historicalData.slice(-windowSize);
+
+   // Step 2: Calculate rolling statistics from the window.
+   const rollingMin = Math.min(...window);
+   const rollingMax = Math.max(...window);
+   const dataRange = rollingMax - rollingMin;
+
+   // For IQR calculation, the data must be sorted.
+   const sortedWindow = [...window].sort((a, b) => a - b);
+   const q1 = getPercentile(sortedWindow, 25);
+   const q3 = getPercentile(sortedWindow, 75);
+   const iqr = q3 - q1;
+
+   // Step 3: Apply the Freedman-Diaconis rule to get the optimal bin width.
+   let binWidth: number;
+
+   // Guard against zero dispersion, which would lead to division by zero or infinite bins.
+   if (iqr > 0) {
+       binWidth = (2 * iqr) / Math.pow(window.length, 1 / 3);
+   } else if (dataRange > 0) {
+       // Fallback for zero IQR but non-zero range: use a fraction of the range.
+       // This handles cases where the central 50% of data is identical.
+       // Using Scott's rule as a fallback is another valid strategy.
+       const stdDev = Math.sqrt(window.reduce((acc, val) => acc + Math.pow(val - (window.reduce((s, v) => s + v, 0) / window.length), 2), 0) / window.length);
+       binWidth = (3.49 * stdDev) / Math.pow(window.length, 1/3);
+   } else {
+       // If both IQR and range are zero, all points are identical. Only one bin is needed.
+       binWidth = 1; // or any non-zero value
+   }
+   
+   if (binWidth <= 0) {
+       // All data in the window is identical. Treat as a single bin.
+       return { binIndex: 0, numBins: 1, windowSize: window.length, binWidth: dataRange |
+| 1 };
+   }
+
+   // Step 4: Determine the total number of bins for the window's range.
+   const numBins = Math.max(1, Math.ceil(dataRange / binWidth));
+
+   // Step 5: Assign the latestValue to its corresponding bin.
+   // The value is first clamped to the window's range to handle new extremes.
+   const clampedValue = Math.max(rollingMin, Math.min(latestValue, rollingMax));
+   
+   // Calculate the bin index.
+   let binIndex = Math.floor((clampedValue - rollingMin) / binWidth);
+
+   // Edge case: if the value is exactly the maximum, it should fall into the last bin.
+   if (binIndex >= numBins) {
+       binIndex = numBins - 1;
+   }
+
+   // Step 6: Return the results needed for the entropy calculation.
+   // The calling function will use these to update its frequency histogram and compute Shannon Entropy.
+   return { binIndex, numBins, windowSize: window.length, binWidth };
+}
+
+
+
+Conclusion and Recommendations
+
+
+This report has provided a complete technical framework for re-architecting the Kinētikós Entropḗ engine to ensure absolute causal integrity. The identified sources of look-ahead bias in the v1.0 engine have been addressed with methodologically sound and academically validated solutions.
+The key recommendations are as follows:
+   1. For Causal Time-Series Differentiation: The symmetric Savitzky-Golay filter must be replaced with the one-sided, asymmetric Savitzky-Golay filter detailed in Part I. Using a polynomial order of 2 or 3 is recommended to accurately model the local curvature of financial price series. This method provides the optimal balance of noise suppression, minimal phase lag, and accuracy in tracking instantaneous price velocity (p_dot), and is demonstrably superior to alternatives like EMA-smoothed differencing or simple rolling linear regression.
+   2. For Causal and Dynamic Entropy Calculation: The global min/max normalization for histogram binning must be replaced with the causal master algorithm detailed in Part II. This algorithm employs a rolling window to ensure causality and utilizes the Freedman-Diaconis rule to dynamically determine bin widths. This rule's reliance on the Interquartile Range makes it robust to the outliers and non-normal distributions characteristic of financial data, providing a statistically consistent and reliable basis for the entropy (Θ) calculation.
+By implementing these two core architectural changes, the Kinētikós Entropḗ v2.0 engine will be elevated to a professional-grade analytical instrument. Its outputs will be free from the distortions of look-ahead bias, establishing the necessary foundation of intellectual honesty and methodological rigor required for formal backtesting and deployment in real-time market analysis.
+Works cited
+   1. Look-Ahead Bias - Definition and Practical Example - Corporate Finance Institute, accessed June 30, 2025, https://corporatefinanceinstitute.com/resources/career-map/sell-side/capital-markets/look-ahead-bias/
+   2. Lookahead Bias in Data Analysis: How to Spot and Mitigate it - FasterCapital, accessed June 30, 2025, https://fastercapital.com/content/Lookahead-Bias-in-Data-Analysis--How-to-Spot-and-Mitigate-it.html
+   3. Mitigating Look-Ahead Bias in Financial Models and Trading - Accounting Insights, accessed June 30, 2025, https://accountinginsights.org/mitigating-look-ahead-bias-in-financial-models-and-trading/
+   4. Savitzky–Golay filter - Wikipedia, accessed June 30, 2025, https://en.wikipedia.org/wiki/Savitzky%E2%80%93Golay_filter
+   5. What Is a Savitzky-Golay Filter? [Lecture Notes], accessed June 30, 2025, http://andrewd.ces.clemson.edu/courses/cpsc881/papers/Sch11_whatIsSG.pdf
+   6. What is a Savitzky Golay filter and how can I use to to remove noise from my signal? Is it better than adjacent averaging? | ResearchGate, accessed June 30, 2025, https://www.researchgate.net/post/What_is_a_Savitzky_Golay_filter_and_how_can_I_use_to_to_remove_noise_from_my_signal_Is_it_better_than_adjacent_averaging
+   7. Methodology and Application of Savitzky-Golay Moving Average Polynomial Smoother - Research India Publications, accessed June 30, 2025, https://www.ripublication.com/gjpam16/gjpamv12n4_35.pdf
+   8. Introduction to the Savitzky-Golay Filter: A Comprehensive Guide (Using Python) - Medium, accessed June 30, 2025, https://medium.com/pythoneers/introduction-to-the-savitzky-golay-filter-a-comprehensive-guide-using-python-b2dd07a8e2ce
+   9. Savitzky, A. and Golay, M.J.E. (1964) Smoothing and Differentiation of Data by Simplified Least-Squares Procedures. Analytical Chemistry, 36, 1627-1639. - References, accessed June 30, 2025, https://www.scirp.org/reference/referencespapers?referenceid=1462554
+   10. Smoothing and Differentiation of Data by Simplified Least Squares Procedures. | Analytical Chemistry - ACS Publications, accessed June 30, 2025, https://pubs.acs.org/doi/10.1021/ac60214a047
+   11. Savitzky-Golay Smoothing Filters, accessed June 30, 2025, https://pubs.aip.org/aip/cip/article-pdf/4/6/669/11455238/669_1_online.pdf
+   12. 14.8 Savitzky-Golay Smoothing Filters - IATE, accessed June 30, 2025, https://iate.oac.uncor.edu/~mario/materia/nr/numrec/f14-8.pdf
+   13. Savitzky Golay Filter - DSPRelated.com, accessed June 30, 2025, https://www.dsprelated.com/blogimages/JosefHoffmann/sav_golay_Filter.pdf
+   14. how to use Savitzky-Golay smooth coefficient to calculate derivatives - Stack Overflow, accessed June 30, 2025, https://stackoverflow.com/questions/3571222/how-to-use-savitzky-golay-smooth-coefficient-to-calculate-derivatives
+   15. savgol_filter — SciPy v1.16.0 Manual, accessed June 30, 2025, https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.savgol_filter.html
+   16. Savitzky-Golay Smoothing and Differentiation Filter - Eigenvector Research, accessed June 30, 2025, https://eigenvector.com/wp-content/uploads/2020/01/SavitzkyGolay.pdf
+   17. Numerical differentiation of noisy data: A unifying multi-objective optimization framework, accessed June 30, 2025, https://pmc.ncbi.nlm.nih.gov/articles/PMC7899139/
+   18. Smooth first derivative of noisy input signal - c++ - Stack Overflow, accessed June 30, 2025, https://stackoverflow.com/questions/35861696/smooth-first-derivative-of-noisy-input-signal
+   19. Understanding PID Control, Part 3: Expanding Beyond a Simple Derivative - MathWorks, accessed June 30, 2025, https://www.mathworks.com/videos/understanding-pid-control-part-3-expanding-beyond-a-simple-derivative-1531120808026.html
+   20. Savitzky–Golay filter vs. IIR or FIR linear filter - Signal Processing Stack Exchange, accessed June 30, 2025, https://dsp.stackexchange.com/questions/52219/savitzky-golay-filter-vs-iir-or-fir-linear-filter
+   21. Real time smoothing using Savitzky-Golay method or any similar method with low phase lag, accessed June 30, 2025, https://dsp.stackexchange.com/questions/95894/real-time-smoothing-using-savitzky-golay-method-or-any-similar-method-with-low-p
+   22. Moving Average and Savitzki-Golay Smoothing Filters Using Mathcad - CiteSeerX, accessed June 30, 2025, https://citeseerx.ist.psu.edu/document?repid=rep1&type=pdf&doi=0a5cdada74aa76c4b0eb9385787b3d10c4660990
+   23. Stop using Moving Average to smooth your Time Series | BIP xTech - Medium, accessed June 30, 2025, https://medium.com/bip-xtech/stop-using-moving-average-to-smooth-your-time-series-2179af9ed59b
+   24. Rolling Regression | LOST, accessed June 30, 2025, https://lost-stats.github.io/Time_Series/Rolling_Regression.html
+   25. Understanding Time Series Rolling Linear Regression | by UATeam - Medium, accessed June 30, 2025, https://medium.com/@aleksej.gudkov/understanding-time-series-rolling-linear-regression-404e171d31e5
+   26. What is a rolling window in time series analysis? - Milvus, accessed June 30, 2025, https://milvus.io/ai-quick-reference/what-is-a-rolling-window-in-time-series-analysis
+   27. Unlock Top Histogram Bin Insights for A Stats, accessed June 30, 2025, https://www.numberanalytics.com/blog/guide-histogram-bin-insights-stats
+   28. Optimal number of bins for a histogram | by Maxime Markov - Medium, accessed June 30, 2025, https://medium.com/@maxmarkovvision/optimal-number-of-bins-for-histograms-3d7c48086fde
+   29. Freedman–Diaconis rule - Wikipedia, accessed June 30, 2025, https://en.wikipedia.org/wiki/Freedman%E2%80%93Diaconis_rule
+   30. HISTBINS - Number of Histogram Bins - Help center - NumXL, accessed June 30, 2025, https://support.numxl.com/hc/en-us/articles/216034163-HISTBINS-Number-of-Histogram-Bins
+   31. freedman_bin_width — Astropy v7.1.0, accessed June 30, 2025, https://docs.astropy.org/en/stable/api/astropy.stats.freedman_bin_width.html
+   32. How to Determine Bin Width for a Histogram ( R and Python) | by Nkugwa Mark William, accessed June 30, 2025, https://nkugwamarkwilliam.medium.com/how-to-determine-bin-width-for-a-histogram-r-and-pyth-653598ab0d1c
+   33. The Ultimate Guide to Histogram Techniques - Number Analytics, accessed June 30, 2025, https://www.numberanalytics.com/blog/ultimate-histogram-guide
+   34. The Ultimate Guide to Histogram Bins in Stats - Number Analytics, accessed June 30, 2025, https://www.numberanalytics.com/blog/ultimate-histogram-bin-guide-stats
+   35. Nice bucket challenge. Overview of data binning techniques | by ..., accessed June 30, 2025, https://robertsoczewica.medium.com/nice-bucket-challenge-5b511c00f1b3
+   36. Scott's rule - Wikipedia, accessed June 30, 2025, https://en.wikipedia.org/wiki/Scott%27s_rule
+   37. Sturge's Rule; A Method for Selecting the Number of Bins in a Histogram, accessed June 30, 2025, https://accendoreliability.com/sturges-rule-method-selecting-number-bins-histogram/

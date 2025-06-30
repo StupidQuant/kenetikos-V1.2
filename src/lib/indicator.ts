@@ -28,57 +28,212 @@ export type IndicatorOptions = {
     regressionWindow: number;
     equilibriumWindow: number;
     entropyWindow: number;
-    numBins: number;
+    numBins: number; // This will be superseded by Freedman-Diaconis but kept for legacy/control
     temperatureWindow: number;
 };
 
-// --- CORE CALCULATION FUNCTIONS ---
 
-function savitzkyGolay(data: MarketDataPoint[], { windowSize, polynomialOrder }: { windowSize: number; polynomialOrder: number; }) {
-    if (!Number.isInteger(windowSize) || windowSize % 2 === 0 || windowSize <= 0) {
-      return data.map(() => ({ smoothed_price: null, price_velocity: null, price_acceleration: null }));
-    }
-    if (!Number.isInteger(polynomialOrder) || polynomialOrder < 0 || polynomialOrder >= windowSize) {
-      return data.map(() => ({ smoothed_price: null, price_velocity: null, price_acceleration: null }));
+// --- CAUSAL ENGINE V2.0 IMPLEMENTATION ---
+
+const sgCoeffsCache: Map<string, number[][] | null> = new Map();
+
+/**
+ * Computes the Savitzky-Golay coefficient matrix H = (A^T * A)^-1 * A^T.
+ * The rows of H contain the filter weights for each polynomial coefficient (a0, a1,...).
+ * @param windowSize The number of past data points (w).
+ * @param polynomialOrder The order of the polynomial to fit (p).
+ * @returns The (p+1) x w coefficient matrix H, or null if not solvable.
+ */
+function getCausalSgCoeffs(windowSize: number, polynomialOrder: number): number[][] | null {
+   const cacheKey = `${windowSize}-${polynomialOrder}`;
+   if (sgCoeffsCache.has(cacheKey)) {
+       return sgCoeffsCache.get(cacheKey)!;
+   }
+
+   if (polynomialOrder >= windowSize) {
+       return null;
+   }
+
+   const A: number[][] = [];
+   for (let i = 0; i < windowSize; i++) {
+       const timeIndex = -(windowSize - 1) + i;
+       const row: number[] = [];
+       for (let j = 0; j <= polynomialOrder; j++) {
+           row.push(Math.pow(timeIndex, j));
+       }
+       A.push(row);
+   }
+
+   try {
+       const matA = math.matrix(A);
+       const AT = math.transpose(matA);
+       const ATA = math.multiply(AT, matA);
+       const ATA_inv = math.inv(ATA);
+       const H = math.multiply(ATA_inv, AT);
+       
+       const coeffs = H.toArray() as number[][];
+       sgCoeffsCache.set(cacheKey, coeffs);
+       return coeffs;
+   } catch(e) {
+       console.error("Failed to compute SG coefficients", e);
+       sgCoeffsCache.set(cacheKey, null);
+       return null;
+   }
+}
+
+
+/**
+ * Applies a one-sided (causal) Savitzky-Golay filter to a series of data.
+ * @param data An array of MarketDataPoint objects.
+ * @param windowSize The size of the filter window.
+ * @param polynomialOrder The order of the fitting polynomial.
+ * @returns An array of objects with smoothed_price, price_velocity, and price_acceleration.
+ */
+function savitzkyGolayCausal(data: MarketDataPoint[], { windowSize, polynomialOrder }: { windowSize: number, polynomialOrder: number }) {
+    const results: { smoothed_price: number | null, price_velocity: number | null, price_acceleration: number | null }[] = [];
+    const deltaT = 1; // Assuming unit time steps for simplicity. Could be made dynamic.
+
+    const H = getCausalSgCoeffs(windowSize, polynomialOrder);
+    if (!H) {
+        // If coeffs can't be computed, return nulls for all points.
+        return data.map(() => ({ smoothed_price: null, price_velocity: null, price_acceleration: null }));
     }
 
-    const halfWindow = Math.floor(windowSize / 2);
-    const result: { smoothed_price: number | null, price_velocity: number | null, price_acceleration: number | null }[] = [];
+    const smoothingCoeffs = H[0] || [];
+    const derivativeCoeffs = H[1] || [];
+    const accelerationCoeffs = H[2] || [];
 
     for (let i = 0; i < data.length; i++) {
-        if (i < halfWindow || i >= data.length - halfWindow) {
-            result.push({ smoothed_price: null, price_velocity: null, price_acceleration: null });
+        if (i < windowSize - 1) {
+            results.push({ smoothed_price: null, price_velocity: null, price_acceleration: null });
             continue;
         }
 
-        const windowSlice = data.slice(i - halfWindow, i + halfWindow + 1);
-        const centerTimestampInSeconds = data[i].timestamp / 1000.0;
-        const t = windowSlice.map(p => (p.timestamp / 1000.0) - centerTimestampInSeconds);
-        const y = windowSlice.map(p => p.price);
+        const windowData = data.slice(i - windowSize + 1, i + 1).map(d => d.price);
+        
+        let smoothedValue = 0;
+        let derivativeTerm = 0;
+        let accelerationTerm = 0;
 
-        const A_data: number[][] = [];
         for (let j = 0; j < windowSize; j++) {
-            const row: number[] = [];
-            for (let p = 0; p <= polynomialOrder; p++) {
-                row.push(Math.pow(t[j], p));
+            smoothedValue += smoothingCoeffs[j] * windowData[j];
+            if (derivativeCoeffs.length > 0) {
+                derivativeTerm += derivativeCoeffs[j] * windowData[j];
             }
-            A_data.push(row);
+            if (accelerationCoeffs.length > 0) {
+                accelerationTerm += accelerationCoeffs[j] * windowData[j];
+            }
         }
         
-        try {
-            const A = math.matrix(A_data);
-            const c = math.lusolve(math.multiply(math.transpose(A), A), math.multiply(math.transpose(A), y)).toArray().flat();
-            result.push({
-                smoothed_price: c[0] ?? null,
-                price_velocity: c[1] ?? null,
-                price_acceleration: polynomialOrder >= 2 ? (2 * (c[2] ?? 0)) : 0
-            });
-        } catch (error) {
-            result.push({ smoothed_price: null, price_velocity: null, price_acceleration: null });
-        }
+        // The derivative must be scaled by the sampling interval.
+        const derivative = derivativeTerm / deltaT;
+        // Second derivative scaling is 2!/deltaT^2.
+        const acceleration = 2 * accelerationTerm / (deltaT * deltaT);
+        
+        results.push({
+            smoothed_price: smoothedValue,
+            price_velocity: derivative,
+            price_acceleration: polynomialOrder >= 2 ? acceleration : null,
+        });
     }
-    return result;
+
+    return results;
 }
+
+/**
+ * Calculates the value at a given percentile in a sorted numeric array.
+ * @param sortedData A pre-sorted array of numbers.
+ * @param percentile A number between 0 and 100.
+ * @returns The value at the specified percentile.
+ */
+function getPercentile(sortedData: number[], percentile: number): number {
+   if (sortedData.length === 0 || percentile < 0 || percentile > 100) return NaN;
+   if (sortedData.length === 1) return sortedData[0];
+   const index = (percentile / 100) * (sortedData.length - 1);
+   const lowerIndex = Math.floor(index);
+   const upperIndex = Math.ceil(index);
+   if (lowerIndex === upperIndex) return sortedData[lowerIndex];
+   const lowerValue = sortedData[lowerIndex];
+   const upperValue = sortedData[upperIndex];
+   const weight = index - lowerIndex;
+   return lowerValue * (1 - weight) + upperValue * weight;
+}
+
+
+/**
+ * CAUSAL IMPLEMENTATION of rolling Shannon Entropy using the Freedman-Diaconis rule.
+ * @param series The input time series (e.g., price_velocity).
+ * @param entropyWindow The size of the rolling window.
+ * @returns An array of entropy values.
+ */
+function calculateCausalRollingEntropy(series: (number | null)[], { entropyWindow }: { entropyWindow: number }) {
+    if (!series || series.length < entropyWindow) {
+        return new Array(series.length).fill(null);
+    }
+    const log = Math.log2;
+    const results: (number | null)[] = new Array(series.length).fill(null);
+
+    for (let i = entropyWindow - 1; i < series.length; i++) {
+        const windowData = series.slice(i - entropyWindow + 1, i + 1).filter(v => v !== null && isFinite(v)) as number[];
+        
+        if (windowData.length < 2) {
+            results[i] = 0; // Not enough data or no variance, entropy is 0.
+            continue;
+        }
+
+        const sortedWindow = [...windowData].sort((a, b) => a - b);
+        const q1 = getPercentile(sortedWindow, 25);
+        const q3 = getPercentile(sortedWindow, 75);
+        const iqr = q3 - q1;
+        const n = windowData.length;
+
+        let binWidth: number;
+        if (iqr > 0) {
+            binWidth = (2 * iqr) / Math.pow(n, 1 / 3);
+        } else {
+            const dataRange = sortedWindow[n - 1] - sortedWindow[0];
+            if (dataRange > 0) {
+                // Fallback for zero IQR but non-zero range (e.g., using Scott's rule as inspiration)
+                const stdDev = math.std(windowData) as number;
+                binWidth = (3.49 * stdDev) / Math.pow(n, 1/3);
+            } else {
+                 // All points are identical, so entropy is 0.
+                results[i] = 0;
+                continue;
+            }
+        }
+        
+        if (binWidth <= 0) {
+            results[i] = 0;
+            continue;
+        }
+
+        const windowMin = sortedWindow[0];
+        const numBins = Math.max(1, Math.ceil((sortedWindow[n - 1] - windowMin) / binWidth));
+        const counts = new Array(numBins).fill(0);
+        
+        for (const value of windowData) {
+            let binIndex = Math.floor((value - windowMin) / binWidth);
+            if (binIndex >= numBins) {
+                binIndex = numBins - 1;
+            }
+            counts[binIndex]++;
+        }
+
+        let entropy = 0;
+        for (const count of counts) {
+            if (count > 0) {
+                const probability = count / n;
+                entropy -= probability * log(probability);
+            }
+        }
+        results[i] = entropy;
+    }
+    return results;
+}
+
+
+// --- LEGACY/UNCHANGED FUNCTIONS (ASSUMED CAUSAL) ---
 
 function calculateSMA(data: any[], startIndex: number, endIndex: number, key: string): number {
     let sum = 0;
@@ -133,96 +288,6 @@ function estimateMarketParameters(data: any[], { regressionWindow, equilibriumWi
     });
 }
 
-function calculateRollingLagrangianEntropy(series: (number | null)[], { entropyWindow, numBins }: { entropyWindow: number, numBins: number }) {
-    if (!series || series.length < entropyWindow) {
-        return new Array(series.length).fill(null);
-    }
-    const log = Math.log2;
-    let globalMin = Infinity;
-    let globalMax = -Infinity;
-    series.forEach(value => {
-        if (value !== null && isFinite(value)) {
-            globalMin = Math.min(globalMin, value);
-            globalMax = Math.max(globalMax, value);
-        }
-    });
-
-    if (!isFinite(globalMin) || !isFinite(globalMax) || globalMin === globalMax) {
-        return series.map(v => (v !== null && isFinite(v) ? 0 : null));
-    }
-
-    const binWidth = (globalMax - globalMin) / numBins;
-    if (binWidth <= 1e-9) {
-        return series.map(v => v !== null && isFinite(v) ? 0 : null);
-    }
-
-    const discretizeValue = (v: number | null) => {
-        if (v === null || !isFinite(v)) return null;
-        const clampedValue = Math.max(globalMin, Math.min(v, globalMax));
-        if (clampedValue === globalMax) return numBins - 1;
-        return Math.floor((clampedValue - globalMin) / binWidth);
-    };
-
-    const calculateEntropyFromCounts = (counts: Map<number, number>, size: number) => {
-        if (size === 0) return null;
-        let e = 0;
-        for (const count of counts.values()) {
-            if (count > 0) {
-                const p = count / size;
-                e -= p * log(p);
-            }
-        }
-        return e;
-    };
-
-    const results: (number | null)[] = new Array(series.length).fill(null);
-    const counts = new Map<number, number>();
-    for (let i = 0; i < numBins; i++) {
-        counts.set(i, 0);
-    }
-
-    let validPointsInWindow = 0;
-    
-    // Initialize first window
-    for (let i = 0; i < entropyWindow; i++) {
-        const bin = discretizeValue(series[i]);
-        if (bin !== null) {
-            counts.set(bin, (counts.get(bin) || 0) + 1);
-            validPointsInWindow++;
-        }
-    }
-    
-    if (validPointsInWindow > 0) {
-        results[entropyWindow - 1] = calculateEntropyFromCounts(counts, validPointsInWindow);
-    }
-
-    // Slide window across the rest of the series
-    for (let i = entropyWindow; i < series.length; i++) {
-        const oldBin = discretizeValue(series[i - entropyWindow]);
-        if (oldBin !== null) {
-            const currentCount = counts.get(oldBin);
-            if (currentCount && currentCount > 0) {
-                counts.set(oldBin, currentCount - 1);
-                validPointsInWindow--;
-            }
-        }
-
-        const newBin = discretizeValue(series[i]);
-        if (newBin !== null) {
-            counts.set(newBin, (counts.get(newBin) || 0) + 1);
-            validPointsInWindow++;
-        }
-
-        if (validPointsInWindow > 0) {
-            results[i] = calculateEntropyFromCounts(counts, validPointsInWindow);
-        } else {
-            results[i] = null;
-        }
-    }
-
-    return results;
-}
-
 function calculateTemperature(data: any[], { temperatureWindow }: { temperatureWindow: number; }) {
     const results = data.map(d => ({ ...d, temperature: null }));
     const epsilon = 1e-10;
@@ -268,19 +333,27 @@ function calculateTemperature(data: any[], { temperatureWindow }: { temperatureW
     return results;
 }
 
+
+// --- MASTER CALCULATION PIPELINE ---
+
 export function calculateStateVector(data: MarketDataPoint[], options: IndicatorOptions): StateVectorDataPoint[] {
-    const smoothedData = savitzkyGolay(data, {windowSize: options.sgWindow, polynomialOrder: options.sgPolyOrder});
+    // Phase 1: Causal Smoothing and Derivative Estimation
+    const smoothedData = savitzkyGolayCausal(data, {windowSize: options.sgWindow, polynomialOrder: options.sgPolyOrder});
     const dataWithDerivatives = data.map((d, i) => ({ ...d, ...smoothedData[i] }));
     
+    // Phase 2: Estimate Market Parameters (k, F, m, p_eq)
     const parameterData = estimateMarketParameters(dataWithDerivatives, {regressionWindow: options.regressionWindow, equilibriumWindow: options.equilibriumWindow});
     
+    // Phase 3: Causal Entropy Calculation
     const velocitySeries = parameterData.map(d => d.price_velocity);
-    const entropySeries = calculateRollingLagrangianEntropy(velocitySeries, { entropyWindow: options.entropyWindow, numBins: options.numBins });
+    const entropySeries = calculateCausalRollingEntropy(velocitySeries, { entropyWindow: options.entropyWindow });
     
     let entropyData = parameterData.map((d, i) => ({ ...d, entropy: entropySeries[i] }));
     
+    // Phase 4: Temperature Calculation
     let finalData = calculateTemperature(entropyData, { temperatureWindow: options.temperatureWindow });
     
+    // Final Phase: Calculate Potential and Momentum
     return finalData.map(d => {
         let momentum: number | null = null, potential: number | null = null;
         if (d.price_velocity !== null && isFinite(d.price_velocity) && d.m !== null && isFinite(d.m)) {
@@ -293,7 +366,12 @@ export function calculateStateVector(data: MarketDataPoint[], options: Indicator
     });
 }
 
+// --- REGIME CLASSIFIER (CAUSAL VERSION) ---
+
 export class RegimeClassifier {
+    // Note: To be fully causal, this classifier should also use a ROLLING window for percentile ranks.
+    // For now, we keep the original logic but acknowledge it's for historical analysis.
+    // A fully causal implementation is a separate step.
     private historicalData: StateVectorDataPoint[];
     private sortedValues: Record<string, number[]>;
     public regimeLogic: Record<string, ((s: StateVectorDataPoint) => boolean)[]>;
