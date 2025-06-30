@@ -108,20 +108,18 @@ f
 gaps, jumps, and periods of extreme, erratic volatility, especially during crises or major 
 news events. Functions describing such behavior can have a dense set of 
 discontinuities, rendering them non-integrable in the Riemann sense.5 
-The choice to build our framework upon the Lebesgue integral is a foundational 
-design decision. It ensures that the model remains robust and well-defined precisely 
-during the most interesting and challenging market conditions—those characterized 
-by jumps, gaps, and high volatility. A model built on the simpler Riemann integral 
-would be mathematically fragile, potentially failing during a market crisis when it is 
-needed most. The Riemann integral approximates the area under a curve by 
-partitioning the domain (the x-axis, or time) into a series of narrow vertical rectangles 
-and summing their areas.5 This method fails if the function's value fluctuates too wildly 
-within the intervals, as the sum may not converge to a single, well-defined value.5 For 
-example, the Dirichlet function—which is 1 for rational numbers and 0 for 
-irrationals—is not Riemann integrable, as any interval contains both types of numbers, 
-making it impossible to define the rectangle height.5 Financial price series, with their 
-sudden jumps, can exhibit similar "pathological" behavior from a Riemann 
-perspective. 
+The choice to build our framework upon the Lebesgue integral is a foundational design 
+decision. It ensures that the model remains robust and well-defined precisely during the most 
+interesting and challenging market conditions—those characterized by jumps, gaps, and high 
+volatility. A model built on the simpler Riemann integral would be mathematically fragile, 
+potentially failing during a market crisis when it is needed most. The Riemann integral 
+approximates the area under a curve by partitioning the domain (the x-axis, or time) into a 
+series of narrow vertical rectangles and summing their areas.5 This method fails if the 
+function's value fluctuates too wildly within the intervals, as the sum may not converge to a 
+single, well-defined value.5 For example, the Dirichlet function—which is 1 for rational 
+numbers and 0 for irrationals—is not Riemann integrable, as any interval contains both types 
+of numbers, making it impossible to define the rectangle height.5 Financial price series, with 
+their sudden jumps, can exhibit similar "pathological" behavior from a Riemann perspective. 
 The Lebesgue integral, developed by Henri Lebesgue in the early 20th century, 
 overcomes this limitation by fundamentally changing the approach to integration. 
 Instead of partitioning the domain (x-axis), it partitions the range (the y-axis, or price 

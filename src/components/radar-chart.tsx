@@ -36,17 +36,17 @@ export function RadarChart({ scores, isLoading }: RadarChartProps) {
   const radarData = [{
     type: 'scatterpolar',
     r: [
-      scores.potential / 100,
-      scores.momentum / 100,
-      scores.entropy / 100,
-      scores.temperature / 100,
-      scores.potential / 100, // Close the loop
+      scores.potential,
+      scores.momentum,
+      scores.entropy,
+      scores.temperature,
+      scores.potential, // Close the loop
     ],
     theta: ['Potential', 'Momentum', 'Entropy', 'Temperature', 'Potential'],
     fill: 'toself',
-    fillcolor: 'rgba(79, 70, 229, 0.4)',
-    marker: { color: '#a5b4fc', size: 6 },
-    line: { color: '#6366f1', width: 2 },
+    fillcolor: 'hsla(var(--primary) / 0.4)',
+    marker: { color: 'hsl(var(--primary))', size: 8 },
+    line: { color: 'hsl(var(--primary))', width: 2 },
   }] as Plotly.Data[];
 
   const radarLayout: Partial<Plotly.Layout> = {
@@ -54,21 +54,24 @@ export function RadarChart({ scores, isLoading }: RadarChartProps) {
     polar: {
       radialaxis: {
         visible: true,
-        range: [0, 1],
+        range: [0, 100], // Scale from 0 to 100 for percentiles
         showline: false,
         showticklabels: false,
-        gridcolor: '#374151',
+        gridcolor: 'hsl(var(--border) / 0.5)',
       },
       angularaxis: {
-        tickfont: { size: 12, color: '#e5e7eb' },
-        gridcolor: '#374151',
-        linecolor: '#475569'
+        tickfont: { size: 12, color: 'hsl(var(--foreground))' },
+        gridcolor: 'hsl(var(--border) / 0.5)',
+        linecolor: 'hsl(var(--border))'
       },
-      bgcolor: 'rgba(0,0,0,0)',
+      bgcolor: 'transparent',
     },
-    paper_bgcolor: 'rgba(0,0,0,0)',
+    paper_bgcolor: 'transparent',
     showlegend: false,
     margin: { t: 40, b: 40, l: 40, r: 40 },
+    font: {
+      family: 'var(--font-body)',
+    }
   };
 
   return (
