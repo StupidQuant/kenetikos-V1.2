@@ -6,6 +6,67 @@
 import * as math from 'mathjs';
 
 /**
+ * Custom error class for non-positive-definite matrices, thrown by the
+ * custom Cholesky decomposition function.
+ */
+export class NonPositiveDefiniteMatrixError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'NonPositiveDefiniteMatrixError';
+  }
+}
+
+/**
+ * Computes the Cholesky decomposition of a symmetric, positive-definite matrix A,
+ * such that A = LL^T, where L is a lower-triangular matrix.
+ *
+ * This implementation is based on the Cholesky-Banachiewicz algorithm as described
+ * in "Numerical Recipes in C" by Press et al., Section 2.9.
+ *
+ * @param A A square, symmetric, positive-definite matrix represented as a 2D array.
+ * @returns The lower-triangular matrix L.
+ * @throws {Error} if the matrix is not square.
+ * @throws {NonPositiveDefiniteMatrixError} if the matrix is not positive-definite.
+ */
+export function cholesky(A: number[][]): number[][] {
+  const n = A.length;
+  if (n === 0 || A.some(row => row.length !== n)) {
+    throw new Error('Input matrix must be square.');
+  }
+
+  const L = Array.from({ length: n }, () => Array(n).fill(0));
+
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j <= i; j++) {
+      let sum = 0;
+      for (let k = 0; k < j; k++) {
+        sum += L[i][k] * L[j][k];
+      }
+
+      if (i === j) {
+        const diagonalValue = A[i][i] - sum;
+        if (diagonalValue <= 0) {
+          throw new NonPositiveDefiniteMatrixError(
+            `Matrix is not positive-definite. Failed at diagonal [${i}][${i}].`
+          );
+        }
+        L[i][j] = Math.sqrt(diagonalValue);
+      } else {
+        if (L[j][j] === 0) {
+            throw new NonPositiveDefiniteMatrixError(
+                'Division by zero encountered during decomposition; matrix is not positive-definite.'
+            );
+        }
+        L[i][j] = (1.0 / L[j][j]) * (A[i][j] - sum);
+      }
+    }
+  }
+
+  return L;
+}
+
+
+/**
  * A class to generate samples from a Multivariate Normal (Gaussian) distribution.
  * It uses the Cholesky decomposition method for efficient and stable sampling.
  */
@@ -22,10 +83,10 @@ export class MvNormal {
         this.mean = math.matrix(mean);
         this.stateDim = mean.length;
         
-        // The Cholesky decomposition of the covariance matrix is used to transform
-        // standard normal samples into samples from the target distribution.
-        // Q = L * L^T. A sample x is then mu + L * z, where z ~ N(0, I).
-        this.choleskyL = math.cholesky(cov).L;
+        // This now calls our new, robust, self-contained cholesky function.
+        // The result is a native array, which we convert to a math.Matrix.
+        const L = cholesky(cov);
+        this.choleskyL = math.matrix(L);
     }
 
     /**
@@ -33,33 +94,25 @@ export class MvNormal {
      * @returns A single sample vector (array of numbers).
      */
     public sample(): number[] {
-        // 1. Generate a vector of independent standard normal random variables.
         const z: number[] = [];
         for (let i = 0; i < this.stateDim; i++) {
-            // Using the Box-Muller transform for generating standard normal samples.
-            // This is a common and robust method.
             const u1 = Math.random();
             const u2 = Math.random();
             const rand_std_normal = Math.sqrt(-2.0 * Math.log(u1)) * Math.sin(2.0 * Math.PI * u2);
             z.push(rand_std_normal);
         }
 
-        // 2. Transform the standard normal sample using the Cholesky factor and mean.
-        // sample = mean + L * z
         const transformed_z = math.multiply(this.choleskyL, z);
         const finalSample = math.add(this.mean, transformed_z);
 
-        return finalSample.toArray() as number[];
+        const result = finalSample.toArray();
+        return Array.isArray(result) ? (result as number[]) : [result as number];
     }
 }
 
 /**
  * Calculates the probability density function (PDF) of a normal distribution
  * at a given point.
- * @param x The point at which to evaluate the PDF.
- * @param mean The mean of the distribution.
- * @param stdDev The standard deviation of the distribution.
- * @returns The probability density at point x.
  */
 export function normalPdf(x: number, mean: number, stdDev: number): number {
     if (stdDev <= 0) return 0;
