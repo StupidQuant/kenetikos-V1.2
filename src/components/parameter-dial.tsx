@@ -58,7 +58,7 @@ export function ParameterDial({ name, value, icon: Icon, color, isLoading }: Par
             </RadialBarChart>
           </ResponsiveContainer>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-2xl font-bold" style={{ color }}>
+            <span className="text-xl font-bold" style={{ color }}>
               {value.toFixed(1)}
             </span>
           </div>
