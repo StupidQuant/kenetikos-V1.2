@@ -21,7 +21,7 @@ export function ParameterDial({ name, value, icon: Icon, color, isLoading }: Par
     return (
       <Card className="bg-glass">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">{name}</CardTitle>
+          <CardTitle className="font-headline text-sm font-medium">{name}</CardTitle>
           <Skeleton className="h-4 w-4" />
         </CardHeader>
         <CardContent>
@@ -34,7 +34,7 @@ export function ParameterDial({ name, value, icon: Icon, color, isLoading }: Par
   return (
     <Card className="bg-glass">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">{name}</CardTitle>
+        <CardTitle className="font-headline text-sm font-medium">{name}</CardTitle>
         <Icon className="h-4 w-4 text-muted-foreground" style={{ color }} />
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center p-2 pt-0">
@@ -49,7 +49,7 @@ export function ParameterDial({ name, value, icon: Icon, color, isLoading }: Par
               barSize={10}
             >
               <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
-              <RadialBar background dataKey="value" cornerRadius={10} />
+              <RadialBar dataKey="value" cornerRadius={10} />
             </RadialBarChart>
           </ResponsiveContainer>
           <div className="absolute inset-0 flex items-center justify-center">
