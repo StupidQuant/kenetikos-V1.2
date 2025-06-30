@@ -106,7 +106,7 @@ export function StateSpaceChart({ trajectory, isLoading }: StateSpaceChartProps)
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)',
     font: { color: '#e5e7eb', family: 'var(--font-body)' },
-    margin: { l: 20, r: 20, b: 20, t: 20 },
+    margin: { l: 40, r: 40, b: 40, t: 40 },
   };
 
   return (
