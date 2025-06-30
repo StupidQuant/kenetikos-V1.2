@@ -81,10 +81,11 @@ export default function KinetikosEntropePage() {
   const [isLoadingData, setIsLoadingData] = React.useState(true);
   const [isCalculating, setIsCalculating] = React.useState(false);
   const [isAnalysisLoading, setIsAnalysisLoading] = React.useState(false);
-  const [isMounted, setIsMounted] = React.useState(false);
 
   React.useEffect(() => {
-    setIsMounted(true);
+    // This effect runs once on mount to set the initial date range.
+    // It prevents hydration errors by ensuring the server and client
+    // initially render the same empty date range.
     setControlState(prevState => ({
       ...prevState,
       dateRange: {
@@ -95,7 +96,7 @@ export default function KinetikosEntropePage() {
   }, []);
 
   React.useEffect(() => {
-    if (!isMounted || !controlState.dateRange.from || !controlState.dateRange.to) {
+    if (!controlState.dateRange.from || !controlState.dateRange.to) {
       return;
     }
 
@@ -132,7 +133,7 @@ export default function KinetikosEntropePage() {
     };
 
     fetchMarketData();
-  }, [isMounted, controlState.asset, controlState.dateRange, toast]);
+  }, [controlState.asset, controlState.dateRange, toast]);
 
   React.useEffect(() => {
     if (rawMarketData.length === 0) {
@@ -164,7 +165,13 @@ export default function KinetikosEntropePage() {
         );
 
         if (validData.length === 0) {
-          throw new Error("Calculation resulted in no valid data. Try adjusting parameters or date range.");
+          toast({
+            variant: 'destructive',
+            title: 'Calculation Error',
+            description: "No valid data was produced. Try adjusting parameters or using a larger date range.",
+          });
+          setCalculatedParams(null);
+          return;
         }
         
         const classifier = new RegimeClassifier(validData);
@@ -172,10 +179,10 @@ export default function KinetikosEntropePage() {
         const regimeScores = classifier.classify(latestState);
         
         const realParams: CalculatedParameters = {
-          potential: classifier.getPercentileRank(latestState.potential, 'potential'),
-          momentum: classifier.getPercentileRank(latestState.momentum, 'momentum'),
-          entropy: classifier.getPercentileRank(latestState.entropy, 'entropy'),
-          temperature: classifier.getPercentileRank(latestState.temperature, 'temperature'),
+          potential: classifier.getPercentileRank('potential', latestState.potential),
+          momentum: classifier.getPercentileRank('momentum', latestState.momentum),
+          entropy: classifier.getPercentileRank('entropy', latestState.entropy),
+          temperature: classifier.getPercentileRank('temperature', latestState.temperature),
           regimeScores: regimeScores,
           trajectory: validData.map(d => [d.potential!, d.momentum!, d.entropy!, d.temperature!]),
         };
@@ -241,7 +248,7 @@ export default function KinetikosEntropePage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground isolate">
-      <div className="fixed inset-0 -z-10 h-full w-full bg-[radial-gradient(#2d3748_1px,transparent_1px)] [background-size:16px_16px]" />
+      <div className="fixed inset-0 -z-10 h-full w-full bg-background bg-[radial-gradient(hsl(var(--border)/0.1)_1px,transparent_1px)] [background-size:16px_16px]" />
       
       <Header />
       

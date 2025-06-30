@@ -70,6 +70,6 @@
 
 @layer utilities {
   .bg-glass {
-    @apply border bg-card/50 backdrop-blur-lg;
+    @apply border border-white/10 bg-card/60 backdrop-blur-lg;
   }
 }
