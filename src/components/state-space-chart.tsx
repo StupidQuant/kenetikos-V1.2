@@ -84,12 +84,12 @@ export function StateSpaceChart({ trajectory, isLoading }: StateSpaceChartProps)
       colorscale: viridisColorscale,
       showscale: true,
       colorbar: {
-        title: { text: 'Temp (Θ)', font: { size: 24, color: '#e5e7eb' } },
+        title: { text: 'Temp (Θ)', font: { size: 16 } },
         x: 0.05,
         thickness: 15,
         len: 0.75,
         bgcolor: 'rgba(0,0,0,0)',
-        tickfont: { size: 18, color: '#9ca3af' },
+        tickfont: { size: 12 },
         outlinewidth: 0,
         bordercolor: '#374151'
       },
@@ -111,9 +111,9 @@ export function StateSpaceChart({ trajectory, isLoading }: StateSpaceChartProps)
   const layout: Partial<Plotly.Layout> = {
     autosize: true,
     scene: {
-      xaxis: { title: { text: 'Potential (P)', font: { size: 24, color: '#e5e7eb' } }, color: '#9ca3af', gridcolor: '#374151', tickfont: { size: 18 } },
-      yaxis: { title: { text: 'Momentum (M)', font: { size: 24, color: '#e5e7eb' } }, color: '#9ca3af', gridcolor: '#374151', tickfont: { size: 18 } },
-      zaxis: { title: { text: 'Entropy (E)', font: { size: 24, color: '#e5e7eb' } }, color: '#9ca3af', gridcolor: '#374151', tickfont: { size: 18 } },
+      xaxis: { title: { text: 'Potential (P)', font: { size: 24 } }, color: '#9ca3af', gridcolor: '#374151', tickfont: { size: 14 } },
+      yaxis: { title: { text: 'Momentum (M)', font: { size: 24 } }, color: '#9ca3af', gridcolor: '#374151', tickfont: { size: 14 } },
+      zaxis: { title: { text: 'Entropy (E)', font: { size: 24 } }, color: '#9ca3af', gridcolor: '#374151', tickfont: { size: 14 } },
       camera: {
         eye: {x: 1.5, y: 1.5, z: 1.5}
       }
@@ -123,7 +123,6 @@ export function StateSpaceChart({ trajectory, isLoading }: StateSpaceChartProps)
     font: {
       color: '#e5e7eb',
       family: 'var(--font-headline)',
-      size: 18,
     },
     margin: { l: 40, r: 40, b: 40, t: 40 },
   };
