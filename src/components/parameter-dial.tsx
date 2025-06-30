@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -49,7 +50,11 @@ export function ParameterDial({ name, value, icon: Icon, color, isLoading }: Par
               barSize={10}
             >
               <PolarAngleAxis type="number" domain={[0, 100]} angleAxisId={0} tick={false} />
-              <RadialBar dataKey="value" cornerRadius={10} />
+              <RadialBar
+                dataKey="value"
+                cornerRadius={10}
+                background={{ fill: '#1e293b' }}
+              />
             </RadialBarChart>
           </ResponsiveContainer>
           <div className="absolute inset-0 flex items-center justify-center">
