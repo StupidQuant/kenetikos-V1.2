@@ -12,11 +12,11 @@ interface MarketRegimesProps {
 }
 
 const regimeColors: Record<string, string> = {
-  'Fragile Topping / Reversal Risk': 'hsl(var(--destructive))',
-  'Chaotic Indecision': 'hsl(30, 90%, 60%)',
-  'Stable Bull Trend': 'hsl(var(--primary))',
-  'Stable Bear Trend': 'hsl(var(--primary))',
-  'Coiling Spring (High Tension)': 'hsl(var(--accent))',
+  'Fragile Topping / Reversal Risk': 'hsl(0, 72%, 51%)', // A more vibrant red
+  'Chaotic Indecision': 'hsl(40, 90%, 60%)', // Orange/Yellow
+  'Stable Bull Trend': 'hsl(var(--chart-2))', // Teal/Green
+  'Stable Bear Trend': 'hsl(var(--chart-2))',
+  'Coiling Spring (High Tension)': 'hsl(var(--chart-1))', // Blue
   'Low Volatility / Orderly': 'hsl(200, 80%, 60%)',
 };
 
@@ -36,7 +36,7 @@ export function MarketRegimes({ scores, isLoading }: MarketRegimesProps) {
     : [];
 
   return (
-    <Card className="bg-glass">
+    <Card>
       <CardHeader>
         <CardTitle>Market Regime Classification</CardTitle>
         <CardDescription>Quantifies resemblance to recognized market archetypes (0-100).</CardDescription>

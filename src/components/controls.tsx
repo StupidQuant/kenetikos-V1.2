@@ -43,7 +43,7 @@ export function Controls({ state, onStateChange, isLoading }: ControlsProps) {
   }
 
   return (
-    <Card className="bg-glass sticky top-4">
+    <Card className="sticky top-4">
       <CardHeader>
         <CardTitle>Configuration</CardTitle>
       </CardHeader>

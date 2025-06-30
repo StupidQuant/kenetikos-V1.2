@@ -16,7 +16,7 @@ interface AnalysisProps {
 
 export function Analysis({ result, isLoading, isGenerateDisabled, onGenerate }: AnalysisProps) {
   return (
-    <Card className="bg-glass h-full flex flex-col">
+    <Card className="h-full flex flex-col">
       <CardHeader>
         <CardTitle>AI Market Analysis</CardTitle>
         <CardDescription>Generative analysis of the current market regime.</CardDescription>
@@ -47,7 +47,7 @@ export function Analysis({ result, isLoading, isGenerateDisabled, onGenerate }: 
         )}
       </CardContent>
       <CardFooter>
-        <Button onClick={onGenerate} disabled={isGenerateDisabled || isLoading} className="w-full">
+        <Button onClick={onGenerate} disabled={isGenerateDisabled || isLoading} className="w-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90 text-primary-foreground">
           {isLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (

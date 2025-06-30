@@ -39,7 +39,7 @@
     --popover: 222 47% 11%;
     --popover-foreground: 0 0% 98%;
     --primary: 239 85% 66%; /* Indigo */
-    --primary-foreground: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
     --secondary: 222 47% 20%;
     --secondary-foreground: 0 0% 98%;
     --muted: 222 47% 20%;
@@ -51,10 +51,10 @@
     --border: 222 47% 25%;
     --input: 222 47% 20%;
     --ring: 239 85% 66%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
+    --chart-1: 220 85% 65%; /* Potential: Blue */
+    --chart-2: 160 70% 50%; /* Momentum: Teal/Green */
+    --chart-3: 40 90% 60%;  /* Temperature: Orange/Yellow */
+    --chart-4: 280 80% 65%; /* Entropy: Purple */
     --chart-5: 340 75% 55%;
   }
 }
@@ -65,11 +65,5 @@
   }
   body {
     @apply bg-background text-foreground;
-  }
-}
-
-@layer utilities {
-  .bg-glass {
-    @apply border border-white/10 bg-card/60 backdrop-blur-lg;
   }
 }

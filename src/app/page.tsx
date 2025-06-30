@@ -21,6 +21,7 @@ import { MarketRegimes } from '@/components/market-regimes';
 import { Analysis } from '@/components/analysis';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RadarChart } from '@/components/radar-chart';
+import { Card } from '@/components/ui/card';
 
 import { TrendingUp, Gauge, Shuffle, Thermometer } from 'lucide-react';
 
@@ -232,10 +233,10 @@ export default function KinetikosEntropePage() {
   const isLoading = isLoadingData || isCalculating;
 
   const parameterDials = [
-    { name: 'Potential', value: calculatedParams?.potential, icon: TrendingUp, color: 'hsl(var(--primary))' },
-    { name: 'Momentum', value: calculatedParams?.momentum, icon: Gauge, color: 'hsl(var(--accent))' },
-    { name: 'Entropy', value: calculatedParams?.entropy, icon: Shuffle, color: 'hsl(280, 80%, 60%)' },
-    { name: 'Temperature', value: calculatedParams?.temperature, icon: Thermometer, color: 'hsl(30, 90%, 60%)' },
+    { name: 'Potential', value: calculatedParams?.potential, icon: TrendingUp, color: 'hsl(var(--chart-1))' },
+    { name: 'Momentum', value: calculatedParams?.momentum, icon: Gauge, color: 'hsl(var(--chart-2))' },
+    { name: 'Entropy', value: calculatedParams?.entropy, icon: Shuffle, color: 'hsl(var(--chart-4))' },
+    { name: 'Temperature', value: calculatedParams?.temperature, icon: Thermometer, color: 'hsl(var(--chart-3))' },
   ];
   
   const radarScores = calculatedParams ? {
@@ -246,9 +247,7 @@ export default function KinetikosEntropePage() {
   } : undefined;
 
   return (
-    <div className="min-h-screen bg-background text-foreground isolate">
-      <div className="fixed inset-0 -z-10 h-full w-full bg-background bg-[radial-gradient(hsl(var(--border)/0.1)_1px,transparent_1px)] [background-size:16px_16px]" />
-      
+    <div className="min-h-screen bg-background text-foreground">
       <Header />
       
       <div className="container mx-auto px-4 py-8">
@@ -277,14 +276,14 @@ export default function KinetikosEntropePage() {
 
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
               
-              <div className="xl:col-span-2 bg-glass rounded-xl p-4 min-h-[400px]">
+              <Card className="xl:col-span-2 p-4 min-h-[400px]">
                 <StateSpaceChart trajectory={calculatedParams?.trajectory} isLoading={isLoading} />
-              </div>
+              </Card>
 
               <div className="xl:col-span-1 flex flex-col gap-6">
-                <div className="bg-glass rounded-xl p-4">
+                <Card className="p-4">
                   <RadarChart scores={radarScores} isLoading={isLoading} />
-                </div>
+                </Card>
                 <Analysis
                   result={analysisResult}
                   isLoading={isAnalysisLoading}
