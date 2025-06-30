@@ -96,9 +96,9 @@ export function StateSpaceChart({ trajectory, isLoading }: StateSpaceChartProps)
   const layout: Partial<Plotly.Layout> = {
     autosize: true,
     scene: {
-      xaxis: { title: 'Potential (P)', color: '#9ca3af', gridcolor: '#374151', titlefont: {size: 12}, tickfont: {size: 10} },
-      yaxis: { title: 'Momentum (M)', color: '#9ca3af', gridcolor: '#374151', titlefont: {size: 12}, tickfont: {size: 10} },
-      zaxis: { title: 'Entropy (E)', color: '#9ca3af', gridcolor: '#374151', titlefont: {size: 12}, tickfont: {size: 10} },
+      xaxis: { title: 'Potential (P)', color: '#9ca3af', gridcolor: '#374151' },
+      yaxis: { title: 'Momentum (M)', color: '#9ca3af', gridcolor: '#374151' },
+      zaxis: { title: 'Entropy (E)', color: '#9ca3af', gridcolor: '#374151' },
       camera: {
         eye: {x: 1.5, y: 1.5, z: 1.5}
       }
@@ -106,7 +106,7 @@ export function StateSpaceChart({ trajectory, isLoading }: StateSpaceChartProps)
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)',
     font: { color: '#e5e7eb', family: 'var(--font-body)' },
-    margin: { l: 0, r: 0, b: 0, t: 0 },
+    margin: { l: 20, r: 20, b: 20, t: 20 },
   };
 
   return (
