@@ -91,7 +91,7 @@ function calculateSMA(data: any[], startIndex: number, endIndex: number, key: st
 function estimateMarketParameters(data: any[], { regressionWindow, equilibriumWindow }: { regressionWindow: number; equilibriumWindow: number; }) {
     const minDataLength = Math.max(regressionWindow, equilibriumWindow);
     return data.map((point, i) => {
-        if (i < minDataLength - 1 || point.price_acceleration === null) {
+        if (i < minDataLength - 1 || point.price_acceleration === null || !isFinite(point.price_acceleration)) {
             return { ...point, k: null, F: null, m: null, p_eq: null };
         }
 
@@ -108,7 +108,7 @@ function estimateMarketParameters(data: any[], { regressionWindow, equilibriumWi
         const x_data: number[][] = [];
         for (let j = 0; j < regressionWindow; j++) {
             const wp = data[i - j];
-            if (wp && wp.price_acceleration !== null && wp.smoothed_price !== null) {
+            if (wp && wp.price_acceleration !== null && isFinite(wp.price_acceleration) && wp.smoothed_price !== null && isFinite(wp.smoothed_price)) {
                 y_data.push([m * wp.price_acceleration]);
                 x_data.push([1, wp.smoothed_price - p_eq]);
             }
@@ -136,8 +136,12 @@ function calculateRollingLagrangianEntropy(series: (number | null)[], { entropyW
     const validSeries = series.filter(v => v !== null && isFinite(v));
     if (validSeries.length === 0) return new Array(series.length).fill(null);
     
-    const globalMin = Math.min(...validSeries);
-    const globalMax = Math.max(...validSeries);
+    let globalMin = Infinity;
+    let globalMax = -Infinity;
+    for(const v of validSeries) {
+      if(v < globalMin) globalMin = v;
+      if(v > globalMax) globalMax = v;
+    }
     
     if (globalMin === globalMax) {
         return series.map(v => v !== null && isFinite(v) ? 0 : null);
@@ -174,35 +178,30 @@ function calculateRollingLagrangianEntropy(series: (number | null)[], { entropyW
     }
 
     let validPointsInWindow = 0;
-    for (let i = 0; i < entropyWindow; i++) {
-        const bin = discretizeValue(series[i]);
-        if (bin !== null) {
-            counts.set(bin, (counts.get(bin) || 0) + 1);
-            validPointsInWindow++;
-        }
-    }
-    
-    if (validPointsInWindow > 0) {
-        results[entropyWindow - 1] = calculateEntropyFromCounts(counts, validPointsInWindow);
-    }
-
-    for (let i = entropyWindow; i < series.length; i++) {
-        const oldBin = discretizeValue(series[i - entropyWindow]);
-        if (oldBin !== null) {
-            const currentCount = counts.get(oldBin) || 0;
-            if (currentCount > 0) {
-              counts.set(oldBin, currentCount - 1);
-              validPointsInWindow--;
-            }
-        }
-        
+    for (let i = 0; i < series.length; i++) {
+        // Add new point to window
         const newBin = discretizeValue(series[i]);
         if (newBin !== null) {
             counts.set(newBin, (counts.get(newBin) || 0) + 1);
             validPointsInWindow++;
         }
+
+        // Remove old point from window
+        if (i >= entropyWindow) {
+            const oldBin = discretizeValue(series[i - entropyWindow]);
+            if (oldBin !== null) {
+                const currentCount = counts.get(oldBin) || 0;
+                if (currentCount > 0) {
+                    counts.set(oldBin, currentCount - 1);
+                    validPointsInWindow--;
+                }
+            }
+        }
         
-        results[i] = calculateEntropyFromCounts(counts, validPointsInWindow);
+        // Calculate entropy if window is full
+        if (i >= entropyWindow - 1) {
+            results[i] = calculateEntropyFromCounts(counts, validPointsInWindow);
+        }
     }
     return results;
 }
@@ -216,14 +215,18 @@ function calculateTemperature(data: any[], { temperatureWindow }: { temperatureW
         for (let j = 0; j < temperatureWindow; j++) {
             const currIdx = i - j;
             const prevIdx = i - j - 1;
-
-            if (currIdx >= data.length || prevIdx < 0) continue;
+            if (currIdx < 0 || prevIdx < 0) continue;
 
             const curr = data[currIdx];
             const prev = data[prevIdx];
             
-            if (curr && prev && curr.entropy !== null && prev.entropy !== null && curr.volume !== null && prev.volume !== null && isFinite(curr.entropy) && isFinite(prev.entropy)) {
-                deltas.push({ x: curr.entropy - prev.entropy, y: curr.volume - prev.volume });
+            if (curr && prev && curr.entropy !== null && isFinite(curr.entropy) && prev.entropy !== null && isFinite(prev.entropy) && curr.volume !== null && prev.volume !== null) {
+                const dE = curr.entropy - prev.entropy;
+                const dV = curr.volume - prev.volume;
+                // Only consider points where there was some change to avoid noise
+                if (Math.abs(dE) > epsilon || Math.abs(dV) > epsilon) {
+                  deltas.push({ x: dE, y: dV }); // x: dEntropy, y: dVolume
+                }
             }
         }
 
@@ -239,17 +242,18 @@ function calculateTemperature(data: any[], { temperatureWindow }: { temperatureW
 
         const denom = deltas.length * sumX2 - sumX * sumX;
         
-        if (Math.abs(denom) < epsilon) {
+        // According to Base_info_V1.md: Temperature is proportional to d(Volume)/d(Entropy)
+        // This is the slope (beta) of the regression of dV on dE.
+        if (Math.abs(denom) > epsilon) {
+            const slope = (deltas.length * sumXY - sumX * sumY) / denom;
+            results[i].temperature = slope;
+        } else {
             results[i].temperature = null;
-            continue;
         }
-        
-        const slope = (deltas.length * sumXY - sumX * sumY) / denom;
-        
-        results[i].temperature = Math.abs(slope) > epsilon ? 1 / Math.abs(slope) : null;
     }
     return results;
 }
+
 
 export function calculateStateVector(data: MarketDataPoint[], options: IndicatorOptions): StateVectorDataPoint[] {
     const smoothedData = savitzkyGolay(data, {windowSize: options.sgWindow, polynomialOrder: options.sgPolyOrder});
@@ -265,11 +269,11 @@ export function calculateStateVector(data: MarketDataPoint[], options: Indicator
     let finalData = calculateTemperature(entropyData, { temperatureWindow: options.temperatureWindow });
     
     return finalData.map(d => {
-        let momentum = null, potential = null;
-        if (d.price_velocity !== null && d.m !== null) {
+        let momentum: number | null = null, potential: number | null = null;
+        if (d.price_velocity !== null && isFinite(d.price_velocity) && d.m !== null && isFinite(d.m)) {
             momentum = 0.5 * d.m * Math.pow(d.price_velocity, 2);
         }
-        if (d.k !== null && d.F !== null && d.smoothed_price !== null && d.p_eq !== null) {
+        if (d.k !== null && isFinite(d.k) && d.F !== null && isFinite(d.F) && d.smoothed_price !== null && isFinite(d.smoothed_price) && d.p_eq !== null && isFinite(d.p_eq)) {
             potential = 0.5 * d.k * Math.pow(d.smoothed_price - d.p_eq, 2) - d.F * d.smoothed_price;
         }
         return { ...d, potential, momentum };
@@ -341,7 +345,6 @@ export class RegimeClassifier {
         const arr = this.sortedValues[key];
         let low = 0, high = arr.length;
         
-        // Custom binary search to find insertion point
         while (low < high) {
             const mid = Math.floor(low + (high - low) / 2);
             if (arr[mid] < value) {
