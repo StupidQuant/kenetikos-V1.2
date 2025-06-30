@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -54,10 +55,11 @@ export function RadarChart({ scores, isLoading }: RadarChartProps) {
     polar: {
       radialaxis: {
         visible: true,
-        range: [0, 100], // Scale from 0 to 100 for percentiles
+        range: [0, 100],
         showline: false,
-        showticklabels: false,
+        showticklabels: true,
         gridcolor: 'hsl(var(--border) / 0.5)',
+        tickfont: { size: 8, color: 'hsl(var(--muted-foreground))' },
       },
       angularaxis: {
         tickfont: { size: 12, color: 'hsl(var(--foreground))' },
@@ -68,7 +70,7 @@ export function RadarChart({ scores, isLoading }: RadarChartProps) {
     },
     paper_bgcolor: 'transparent',
     showlegend: false,
-    margin: { t: 40, b: 40, l: 40, r: 40 },
+    margin: { t: 50, b: 50, l: 50, r: 50 },
     font: {
       family: 'var(--font-body)',
     }

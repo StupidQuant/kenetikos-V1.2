@@ -133,29 +133,26 @@ function calculateRollingLagrangianEntropy(series: (number | null)[], { entropyW
     if (!series || series.length < entropyWindow) return new Array(series.length).fill(null);
 
     const log = Math.log2;
-    let globalMin: number | null = null;
-    let globalMax: number | null = null;
-
-    for (const v of series) {
-        if (v !== null && isFinite(v)) {
-            if (globalMin === null || v < globalMin) globalMin = v;
-            if (globalMax === null || v > globalMax) globalMax = v;
-        }
-    }
+    const validSeries = series.filter(v => v !== null && isFinite(v));
+    if (validSeries.length === 0) return new Array(series.length).fill(null);
     
-    if (globalMin === null || globalMax === null || globalMin === globalMax) {
+    const globalMin = Math.min(...validSeries);
+    const globalMax = Math.max(...validSeries);
+    
+    if (globalMin === globalMax) {
         return series.map(v => v !== null && isFinite(v) ? 0 : null);
     }
     
     const binWidth = (globalMax - globalMin) / numBins;
-    if (binWidth <= 0) {
+    if (binWidth <= 1e-9) {
         return series.map(v => v !== null && isFinite(v) ? 0 : null);
     }
 
     const discretizeValue = (v: number | null) => {
-        if (v === null || !isFinite(v) || globalMin === null || globalMax === null) return null;
+        if (v === null || !isFinite(v)) return null;
         if (v >= globalMax) return numBins - 1;
-        return Math.floor(Math.max(0, (v - globalMin) / binWidth));
+        if (v <= globalMin) return 0;
+        return Math.floor((v - globalMin) / binWidth);
     };
     
     const calculateEntropyFromCounts = (counts: Map<number, number>, size: number) => {
@@ -205,9 +202,7 @@ function calculateRollingLagrangianEntropy(series: (number | null)[], { entropyW
             validPointsInWindow++;
         }
         
-        if (validPointsInWindow > 0) {
-            results[i] = calculateEntropyFromCounts(counts, validPointsInWindow);
-        }
+        results[i] = calculateEntropyFromCounts(counts, validPointsInWindow);
     }
     return results;
 }
@@ -218,7 +213,7 @@ function calculateTemperature(data: any[], { temperatureWindow }: { temperatureW
 
     for (let i = temperatureWindow; i < data.length; i++) {
         const deltas = [];
-        for (let j = 0; j < temperatureWindow - 1; j++) {
+        for (let j = 0; j < temperatureWindow; j++) {
             const currIdx = i - j;
             const prevIdx = i - j - 1;
 
@@ -251,11 +246,7 @@ function calculateTemperature(data: any[], { temperatureWindow }: { temperatureW
         
         const slope = (deltas.length * sumXY - sumX * sumY) / denom;
         
-        if (Math.abs(slope) < epsilon) {
-            results[i].temperature = null;
-        } else {
-            results[i].temperature = 1 / Math.abs(slope);
-        }
+        results[i].temperature = Math.abs(slope) > epsilon ? 1 / Math.abs(slope) : null;
     }
     return results;
 }
@@ -350,10 +341,14 @@ export class RegimeClassifier {
         const arr = this.sortedValues[key];
         let low = 0, high = arr.length;
         
+        // Custom binary search to find insertion point
         while (low < high) {
             const mid = Math.floor(low + (high - low) / 2);
-            if (arr[mid] < value) low = mid + 1;
-            else high = mid;
+            if (arr[mid] < value) {
+                low = mid + 1;
+            } else {
+                high = mid;
+            }
         }
         return (low / arr.length) * 100;
     }
