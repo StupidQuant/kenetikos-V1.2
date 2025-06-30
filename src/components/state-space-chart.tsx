@@ -1,12 +1,14 @@
+
 'use client';
 
 import * as React from 'react';
 import Plot from 'react-plotly.js';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CardDescription, CardTitle } from './ui/card';
+import type { StateVectorDataPoint } from '@/lib/indicator';
 
 interface StateSpaceChartProps {
-  trajectory?: [number, number, number, number][]; // [potential, momentum, entropy, temperature]
+  trajectory?: StateVectorDataPoint[];
   isLoading: boolean;
 }
 
@@ -39,23 +41,22 @@ export function StateSpaceChart({ trajectory, isLoading }: StateSpaceChartProps)
     );
   }
 
-  // This logic is a direct translation of your original, working `renderVisualizations` function
-  const potential = trajectory.map(d => d[0]);
-  const momentum = trajectory.map(d => d[1]);
-  const entropy = trajectory.map(d => d[2]);
-  const temperature = trajectory.map(d => d[3]);
+  const potential = trajectory.map(d => d.potential);
+  const momentum = trajectory.map(d => d.momentum);
+  const entropy = trajectory.map(d => d.entropy);
+  const temperature = trajectory.map(d => d.temperature);
 
-  // Normalize temperature for color scaling, capping at the 99th percentile to avoid outlier distortion
-  const sortedTemps = [...temperature].sort((a, b) => a - b);
-  const percentileIndex = Math.min(Math.floor(sortedTemps.length * 0.99), sortedTemps.length - 1);
-  const maxColorTemp = sortedTemps[percentileIndex];
+  const sortedTemps = [...temperature].filter(t => t !== null && isFinite(t)).sort((a, b) => a - b);
+  const percentileIndex = sortedTemps.length > 0 ? Math.min(Math.floor(sortedTemps.length * 0.99), sortedTemps.length - 1) : 0;
+  const maxColorTemp = sortedTemps.length > 0 ? sortedTemps[percentileIndex] : 1;
   
   const normalizedTemp = temperature.map(t => {
+      if(t === null || !isFinite(t)) return 0;
       const cappedTemp = Math.min(t, maxColorTemp);
       return maxColorTemp > 0 ? cappedTemp / maxColorTemp : 0;
   });
 
-  const trace = {
+  const trace: Partial<Plotly.PlotData> = {
     x: potential,
     y: momentum,
     z: entropy,
@@ -64,11 +65,11 @@ export function StateSpaceChart({ trajectory, isLoading }: StateSpaceChartProps)
     marker: {
       size: 4,
       color: normalizedTemp,
-      colorscale: 'Viridis', // A perceptually uniform and visually appealing colorscale
+      colorscale: 'Viridis',
       showscale: true,
       colorbar: {
         title: 'Temp (Θ)',
-        x: 0, // Position colorbar to the left
+        x: 0,
         thickness: 15,
         len: 0.75,
         bgcolor: 'rgba(0,0,0,0)',
@@ -85,14 +86,14 @@ export function StateSpaceChart({ trajectory, isLoading }: StateSpaceChartProps)
     },
     hoverinfo: 'text',
     text: trajectory.map((d) => 
-        `<b>Potential: ${d[0].toExponential(2)}</b><br>` +
-        `<b>Momentum: ${d[1].toExponential(2)}</b><br>` +
-        `<b>Entropy: ${d[2].toFixed(3)}</b><br>` +
-        `<b>Temp: ${d[3].toExponential(2)}</b>`
+        `<b>P: ${d.potential?.toExponential(2) ?? 'N/A'}</b><br>` +
+        `<b>M: ${d.momentum?.toExponential(2) ?? 'N/A'}</b><br>` +
+        `<b>E: ${d.entropy?.toFixed(3) ?? 'N/A'}</b><br>` +
+        `<b>Θ: ${d.temperature?.toExponential(2) ?? 'N/A'}</b>`
     ),
   };
 
-  const layout = {
+  const layout: Partial<Plotly.Layout> = {
     autosize: true,
     scene: {
       xaxis: { title: 'Potential (P)', color: '#9ca3af', gridcolor: '#374151', titlefont: {size: 10} },
@@ -104,7 +105,7 @@ export function StateSpaceChart({ trajectory, isLoading }: StateSpaceChartProps)
     },
     paper_bgcolor: 'rgba(0,0,0,0)',
     plot_bgcolor: 'rgba(0,0,0,0)',
-    font: { color: '#e5e7eb' },
+    font: { color: '#e5e7eb', family: 'var(--font-body)' },
     margin: { l: 0, r: 0, b: 0, t: 0 },
   };
 

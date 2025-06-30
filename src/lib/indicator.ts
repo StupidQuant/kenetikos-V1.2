@@ -35,8 +35,12 @@ export type IndicatorOptions = {
 // --- CORE CALCULATION FUNCTIONS ---
 
 function savitzkyGolay(data: MarketDataPoint[], { windowSize, polynomialOrder }: { windowSize: number; polynomialOrder: number; }) {
-    if (!Number.isInteger(windowSize) || windowSize % 2 === 0 || windowSize <= 0) return data.map(() => ({ smoothed_price: null, price_velocity: null, price_acceleration: null }));
-    if (!Number.isInteger(polynomialOrder) || polynomialOrder < 0 || polynomialOrder >= windowSize) return data.map(() => ({ smoothed_price: null, price_velocity: null, price_acceleration: null }));
+    if (!Number.isInteger(windowSize) || windowSize % 2 === 0 || windowSize <= 0) {
+      return data.map(() => ({ smoothed_price: null, price_velocity: null, price_acceleration: null }));
+    }
+    if (!Number.isInteger(polynomialOrder) || polynomialOrder < 0 || polynomialOrder >= windowSize) {
+      return data.map(() => ({ smoothed_price: null, price_velocity: null, price_acceleration: null }));
+    }
 
     const halfWindow = Math.floor(windowSize / 2);
     const result: { smoothed_price: number | null, price_velocity: number | null, price_acceleration: number | null }[] = [];
@@ -47,10 +51,10 @@ function savitzkyGolay(data: MarketDataPoint[], { windowSize, polynomialOrder }:
             continue;
         }
 
-        const window = data.slice(i - halfWindow, i + halfWindow + 1);
+        const windowSlice = data.slice(i - halfWindow, i + halfWindow + 1);
         const centerTimestampInSeconds = data[i].timestamp / 1000.0;
-        const t = window.map(p => (p.timestamp / 1000.0) - centerTimestampInSeconds);
-        const y = window.map(p => p.price);
+        const t = windowSlice.map(p => (p.timestamp / 1000.0) - centerTimestampInSeconds);
+        const y = windowSlice.map(p => p.price);
 
         const A_data: number[][] = [];
         for (let j = 0; j < windowSize; j++) {
@@ -60,14 +64,14 @@ function savitzkyGolay(data: MarketDataPoint[], { windowSize, polynomialOrder }:
             }
             A_data.push(row);
         }
-        const A = math.matrix(A_data);
-
+        
         try {
+            const A = math.matrix(A_data);
             const c = math.lusolve(math.multiply(math.transpose(A), A), math.multiply(math.transpose(A), y)).toArray().flat();
             result.push({
                 smoothed_price: c[0] ?? null,
                 price_velocity: c[1] ?? null,
-                price_acceleration: polynomialOrder >= 2 ? 2 * c[2] : 0
+                price_acceleration: polynomialOrder >= 2 ? (2 * (c[2] ?? 0)) : 0
             });
         } catch (error) {
             result.push({ smoothed_price: null, price_velocity: null, price_acceleration: null });
@@ -194,7 +198,6 @@ function calculateRollingLagrangianEntropy(series: (number | null)[], { entropyW
 
     // Slide window across the rest of the series
     for (let i = entropyWindow; i < series.length; i++) {
-        // Remove old point
         const oldBin = discretizeValue(series[i - entropyWindow]);
         if (oldBin !== null) {
             const currentCount = counts.get(oldBin);
@@ -204,7 +207,6 @@ function calculateRollingLagrangianEntropy(series: (number | null)[], { entropyW
             }
         }
 
-        // Add new point
         const newBin = discretizeValue(series[i]);
         if (newBin !== null) {
             counts.set(newBin, (counts.get(newBin) || 0) + 1);
@@ -220,7 +222,6 @@ function calculateRollingLagrangianEntropy(series: (number | null)[], { entropyW
 
     return results;
 }
-
 
 function calculateTemperature(data: any[], { temperatureWindow }: { temperatureWindow: number; }) {
     const results = data.map(d => ({ ...d, temperature: null }));
@@ -240,7 +241,7 @@ function calculateTemperature(data: any[], { temperatureWindow }: { temperatureW
                 const dE = curr.entropy - prev.entropy;
                 const dV = curr.volume - prev.volume;
                 if (Math.abs(dE) > epsilon || Math.abs(dV) > epsilon) {
-                  deltas.push({ x: dE, y: dV }); // x: dEntropy, y: dVolume
+                  deltas.push({ x: dE, y: dV });
                 }
             }
         }
@@ -258,13 +259,10 @@ function calculateTemperature(data: any[], { temperatureWindow }: { temperatureW
         const denom = deltas.length * sumX2 - sumX * sumX;
         
         if (Math.abs(denom) > epsilon) {
-            // Per documentation, Temperature is proportional to d(Volume)/d(Entropy).
-            // This is the slope (beta) of the regression of dV on dE.
             const slope = (deltas.length * sumXY - sumX * sumY) / denom;
-            results[i].temperature = slope;
+            results[i].temperature = Math.abs(slope) > epsilon ? 1 / Math.abs(slope) : null;
         } else {
-            // If ΔE has no variance, there is no relationship to measure.
-            results[i].temperature = 0;
+            results[i].temperature = null;
         }
     }
     return results;

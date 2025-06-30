@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -10,6 +11,7 @@ import {
   calculateStateVector, 
   RegimeClassifier,
   type IndicatorOptions,
+  type StateVectorDataPoint
 } from '@/lib/indicator';
 
 import { Header } from '@/components/header';
@@ -18,7 +20,7 @@ import { ParameterDial } from '@/components/parameter-dial';
 import { MarketRegimes } from '@/components/market-regimes';
 import { Analysis } from '@/components/analysis';
 import { Skeleton } from '@/components/ui/skeleton';
-import { RadarChart } from '@/components/radar-chart'; // Import the new RadarChart
+import { RadarChart } from '@/components/radar-chart';
 
 import { TrendingUp, Gauge, Shuffle, Thermometer } from 'lucide-react';
 
@@ -28,14 +30,14 @@ const StateSpaceChart = dynamic(() =>
     ssr: false,
     loading: () => (
       <div className="h-full w-full flex flex-col">
-            <div className="px-2">
-                <p className="text-lg font-semibold">4D State-Space Trajectory</p>
-                <p className="text-sm text-muted-foreground">Potential (x), Momentum (y), Entropy (z), Temperature (color)</p>
-            </div>
-            <div className="flex-1 flex items-center justify-center">
-                <Skeleton className="h-full w-full" />
-            </div>
+        <div className="px-2">
+            <p className="text-lg font-semibold">4D State-Space Trajectory</p>
+            <p className="text-sm text-muted-foreground">Potential (x), Momentum (y), Entropy (z), Temperature (color)</p>
         </div>
+        <div className="flex-1 flex items-center justify-center">
+            <Skeleton className="h-full w-full" />
+        </div>
+      </div>
     )
   }
 );
@@ -52,7 +54,7 @@ export type CalculatedParameters = {
   entropy: number;
   temperature: number;
   regimeScores: Record<string, number>;
-  trajectory: [number, number, number, number][];
+  trajectory: StateVectorDataPoint[];
 };
 
 export type AnalysisResult = {
@@ -83,9 +85,6 @@ export default function KinetikosEntropePage() {
   const [isAnalysisLoading, setIsAnalysisLoading] = React.useState(false);
 
   React.useEffect(() => {
-    // This effect runs once on mount to set the initial date range.
-    // It prevents hydration errors by ensuring the server and client
-    // initially render the same empty date range.
     setControlState(prevState => ({
       ...prevState,
       dateRange: {
@@ -184,7 +183,7 @@ export default function KinetikosEntropePage() {
           entropy: classifier.getPercentileRank('entropy', latestState.entropy),
           temperature: classifier.getPercentileRank('temperature', latestState.temperature),
           regimeScores: regimeScores,
-          trajectory: validData.map(d => [d.potential!, d.momentum!, d.entropy!, d.temperature!]),
+          trajectory: validData,
         };
 
         setCalculatedParams(realParams);
