@@ -5,6 +5,8 @@
  */
 
 import * as math from 'mathjs';
+import { ParticleFilter, ParticleFilterOptions } from './particle-filter';
+import { StateVectorDataPoint, MarketDataPoint, IndicatorOptions } from './indicator'; // Re-using types from the original indicator
 
 // --- TYPE DEFINITIONS ---
 export type CausalDerivative = {
@@ -219,4 +221,86 @@ export function getCausalBinAssignment(
    }
 
    return { binIndex, numBins, windowSize, binWidth };
+}
+
+// --- V2.0 CAUSAL STATE VECTOR ORCHESTRATOR ---
+
+/**
+ * Calculates the full state vector using the new Causal Engine components.
+ * This function orchestrates the causal derivative calculations and the
+ * Particle Filter for k(t) and F(t) estimation.
+ *
+ * @param data The raw market data time series.
+ * @param options The indicator and filter configuration options.
+ * @returns An array of StateVectorDataPoint with causal estimates.
+ */
+export function calculateCausalStateVector(
+    data: MarketDataPoint[],
+    options: IndicatorOptions & { pfOptions: Omit<ParticleFilterOptions, 'initialStateMean' | 'initialStateCov'> }
+): StateVectorDataPoint[] {
+    const results: StateVectorDataPoint[] = data.map(d => ({...d, p_eq: null, k: null, F: null, m: null, potential: null, momentum: null, entropy: null, temperature: null, smoothed_price: null, price_velocity: null, price_acceleration: null}));
+
+    // Placeholder for initialization - a proper implementation would use OLS on an initial window
+    const initial_k = 1e-5;
+    const initial_F = 0;
+    
+    const pfOptions: ParticleFilterOptions = {
+        ...options.pfOptions,
+        initialStateMean: [Math.log(initial_k), initial_F],
+        initialStateCov: [[1, 0], [0, 100000]], // High uncertainty in F
+    };
+    const pf = new ParticleFilter(pfOptions);
+
+    let priceHistory: number[] = [];
+
+    for (let i = 0; i < results.length; i++) {
+        priceHistory.push(results[i].price);
+        
+        // Ensure we have enough data for SG filter
+        if (priceHistory.length < options.sgWindow) {
+            continue;
+        }
+
+        // 1. Causal Derivative Calculation
+        const derivative = calculateCausalSgDerivative(priceHistory, options.sgWindow, options.sgPolyOrder);
+        if (derivative) {
+            results[i].smoothed_price = derivative.smoothedValue;
+            results[i].price_velocity = derivative.derivative;
+            // Note: Causal acceleration would require a 2nd derivative from SG filter, omitted for now.
+            // For the PF, we can use a finite difference of the velocity as a proxy.
+            if (i > 0 && results[i-1].price_velocity !== null) {
+                results[i].price_acceleration = results[i].price_velocity! - results[i-1].price_velocity!;
+            }
+        }
+        
+        // 2. Causal Parameter Estimation using Particle Filter
+        const p_eq = priceHistory.slice(-options.equilibriumWindow).reduce((a, b) => a + b, 0) / options.equilibriumWindow;
+        results[i].p_eq = p_eq;
+        
+        const m = (results[i].volume / results[i].price) || 1;
+        results[i].m = m;
+        
+        if (results[i].price_acceleration !== null) {
+            pf.predict();
+            
+            const measurement = m * results[i].price_acceleration!;
+            pf.update(measurement, results[i].price, p_eq);
+            
+            const [k_est, F_est] = pf.getEstimate();
+            results[i].k = k_est;
+            results[i].F = F_est;
+        }
+
+        // 3. Causal Entropy Calculation (to be fully integrated)
+        // ... this would involve collecting a history of a derived quantity (e.g., Lagrangian)
+        // and using getCausalBinAssignment at each step.
+
+        // 4. Final State Variable Calculation
+        if (results[i].k !== null && results[i].F !== null && results[i].smoothed_price !== null && results[i].price_velocity !== null) {
+             results[i].potential = 0.5 * results[i].k! * Math.pow(results[i].smoothed_price! - results[i].p_eq!, 2) - results[i].F! * results[i].smoothed_price!;
+             results[i].momentum = 0.5 * results[i].m! * Math.pow(results[i].price_velocity!, 2);
+        }
+    }
+
+    return results;
 }
