@@ -92,7 +92,7 @@ function estimateMarketParameters(data: any[], { regressionWindow, equilibriumWi
     const minDataLength = Math.max(regressionWindow, equilibriumWindow);
     return data.map((point, i) => {
         if (i < minDataLength - 1 || point.price_acceleration === null) {
-            return { ...point, k: null, F: null, m: null };
+            return { ...point, k: null, F: null, m: null, p_eq: null };
         }
 
         const p_eq = calculateSMA(data, i - equilibriumWindow + 1, i + 1, 'smoothed_price');
@@ -140,7 +140,8 @@ function calculateRollingLagrangianEntropy(series: (number | null)[], { entropyW
         }
     });
 
-    if (globalMin === globalMax || !isFinite(globalMin)) return new Array(series.length).fill(0);
+    if (!isFinite(globalMin)) return new Array(series.length).fill(null);
+    if (globalMin === globalMax) return new Array(series.length).fill(0);
     const binWidth = (globalMax - globalMin) / numBins;
     if (binWidth <= 0) return new Array(series.length).fill(0);
 
@@ -185,6 +186,8 @@ function calculateRollingLagrangianEntropy(series: (number | null)[], { entropyW
         }
         if (validPoints > 0) {
             results[i] = calculateEntropyFromCounts(counts, validPoints);
+        } else {
+            results[i] = null;
         }
     }
     return results;
@@ -200,7 +203,7 @@ function calculateTemperature(data: any[], { temperatureWindow }: { temperatureW
         for (let j = 1; j < windowSlice.length; j++) {
             const curr = windowSlice[j];
             const prev = windowSlice[j - 1];
-            if (curr && prev && curr.entropy !== null && prev.entropy !== null && curr.volume !== null && prev.volume !== null) {
+            if (curr && prev && curr.entropy !== null && prev.entropy !== null && curr.volume !== null && prev.volume !== null && isFinite(curr.entropy) && isFinite(prev.entropy)) {
                 deltas.push({ x: curr.entropy - prev.entropy, y: curr.volume - prev.volume });
             }
         }
@@ -210,16 +213,21 @@ function calculateTemperature(data: any[], { temperatureWindow }: { temperatureW
         deltas.forEach(p => { sumX += p.x; sumY += p.y; sumXY += p.x * p.y; sumX2 += p.x * p.x; });
 
         const denom = deltas.length * sumX2 - sumX * sumX;
-        const slope = Math.abs(denom) > epsilon ? (deltas.length * sumXY - sumX * sumY) / denom : 0;
-        results[i].temperature = Math.abs(slope) > epsilon ? 1 / Math.abs(slope) : Infinity;
+        if(Math.abs(denom) < epsilon) {
+            results[i].temperature = null;
+            continue;
+        }
+        
+        const slope = (deltas.length * sumXY - sumX * sumY) / denom;
+        results[i].temperature = Math.abs(slope) > epsilon ? 1 / Math.abs(slope) : null;
     }
     return results;
 }
 
 export function calculateStateVector(data: MarketDataPoint[], options: IndicatorOptions): StateVectorDataPoint[] {
-    const smoothedData = savitzkyGolay(data, options);
+    const smoothedData = savitzkyGolay(data, {windowSize: options.sgWindow, polynomialOrder: options.sgPolyOrder});
     const dataWithDerivatives = data.map((d, i) => ({ ...d, ...smoothedData[i] }));
-    const parameterData = estimateMarketParameters(dataWithDerivatives, options);
+    const parameterData = estimateMarketParameters(dataWithDerivatives, {regressionWindow: options.regressionWindow, equilibriumWindow: options.equilibriumWindow});
     const velocitySeries = parameterData.map(d => d.price_velocity);
     const entropySeries = calculateRollingLagrangianEntropy(velocitySeries, { entropyWindow: options.entropyWindow, numBins: options.numBins });
     let entropyData = parameterData.map((d, i) => ({ ...d, entropy: entropySeries[i] }));
